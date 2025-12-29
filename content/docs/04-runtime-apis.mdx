@@ -1,0 +1,167 @@
+---
+title: Runtime APIs
+description: Use built-in runtime APIs inside actions to perform side effects such as logging and outbound HTTP requests.
+---
+
+## Overview
+
+Titan provides a small, intentional set of **runtime APIs** that are available inside **actions**.  
+These APIs allow actions to perform controlled side effects while preserving Titan’s performance, determinism, and Rust-backed execution model.
+
+Runtime APIs are exposed through the global `t` object.
+
+> Runtime APIs are **not available in routes**.  
+> They are designed exclusively for use inside actions.
+
+---
+
+## `t.log()` — Structured logging
+
+`t.log()` is Titan’s built-in logging API.  
+It allows actions to emit logs that are collected and handled by the native Rust server.
+
+```js
+t.log("User login started")
+````
+
+### Logging structured data
+
+`t.log()` accepts any serializable JavaScript value.
+
+```js title="app/actions/login.js"
+t.log({
+  action: "login",
+  userId: req.params.id,
+})
+```
+
+* Objects are logged as structured data
+* Logs are serialized safely
+* No `console.log` dependency
+
+### Why `t.log` exists
+
+* Logs are routed through Rust (not stdout hacks)
+* Consistent formatting across environments
+* Safe to use in production
+* Zero Node.js dependency
+
+Use `t.log()` instead of `console.log()` in all actions.
+
+---
+
+## `t.fetch()` — Outbound HTTP requests
+
+`t.fetch()` allows actions to make outbound HTTP requests.
+It follows a familiar `fetch`-style API while executing through Titan’s Rust networking layer.
+
+```js
+const res = t.fetch("https://api.example.com/users")
+```
+
+### Basic usage
+
+```js
+export default function example(req) {
+  const res = t.fetch("https://api.example.com/data")
+  return res
+}
+```
+
+* Executes via Rust-native HTTP client
+* No Node.js networking stack
+* Predictable performance
+
+---
+
+### Sending a JSON request
+
+```js title="app/actions/login.js"
+t.fetch("https://api.example.com/login", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: {
+    email: req.body.email,
+  },
+})
+```
+
+* Objects passed as `body` are serialized automatically
+* Headers are optional
+* No manual JSON handling required
+
+---
+
+### Reading the response
+
+`t.fetch()` returns a parsed response object.
+
+```js
+const res = t.fetch("https://api.example.com/user/1")
+
+return {
+  status: res.status,
+  data: res.body,
+}
+```
+
+* `res.status` → HTTP status code
+* `res.body` → parsed response body
+* Errors propagate naturally to the caller
+
+---
+
+## Error behavior
+
+If a request fails:
+
+* Network errors throw immediately
+* Non-2xx responses are still returned
+* You control how failures are handled
+
+```js
+const res = t.fetch(url)
+
+if (res.status !== 200) {
+  throw new Error("Upstream service failed")
+}
+```
+
+---
+
+## Where Runtime APIs can be used
+
+| Location   | Allowed |
+| ---------- | ------- |
+| Routes     | ❌ No    |
+| Actions    | ✅ Yes   |
+| Build time | ❌ No    |
+
+Runtime APIs execute **only at request time**.
+
+---
+
+## Design philosophy
+
+Titan’s runtime APIs are:
+
+* Minimal by design
+* Explicitly scoped
+* Rust-backed
+* Production-safe
+
+There is no hidden magic and no implicit globals beyond `t`.
+
+---
+
+## Mental model
+
+> Routes define structure
+> Actions define behavior
+> Runtime APIs perform side effects
+> Rust executes everything
+
+This keeps Titan applications predictable, fast, and maintainable.
+

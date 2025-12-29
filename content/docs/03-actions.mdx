@@ -1,0 +1,203 @@
+---
+title: Actions
+description: Execute request-aware business logic in JavaScript, compiled and embedded into Titan’s native Rust server.
+---
+
+import { File, Folder, Files } from 'fumadocs-ui/components/files';
+
+
+## What is an Action?
+
+An **action** is a JavaScript function that executes when a route is matched.  
+Actions receive the full request context and are responsible for all **dynamic behavior** in a Titan application.
+
+Routes define *what* endpoint exists.  
+Actions define *what happens* when that endpoint is called.
+
+```js title="app/actions/hello.js"
+export default function hello(req) {
+  return { ok: true }
+}
+````
+
+---
+
+## When to use an Action
+
+Use an action whenever you need:
+
+* Access to request data (`params`, `query`, `body`, `headers`)
+* Conditional logic or validation
+* Database or external service calls
+* Dynamic response generation
+
+Static responses should use `reply()` instead.
+
+---
+
+## Connecting a Route to an Action
+
+Routes reference actions by name.
+
+```js title="app.js"
+t.get("/user/:id<number>").action("getUser")
+```
+
+Titan automatically resolves this to:
+`
+app/actions/getUser.js
+`
+
+No imports or wiring are required.
+
+---
+
+## Action file structure
+
+Actions live in the `app/actions` directory.
+
+<Files>
+  <Folder name="app" defaultOpen>
+    <File name="app.js" />
+    <Folder name="actions" defaultOpen>
+      <File name="getUser.js" />
+      <File name="login.js" />
+      <File name="search.js" />
+    </Folder>
+  </Folder>
+</Files>
+
+
+Each file exports a single function.
+
+---
+
+## Accessing route parameters (`req.params`)
+
+Typed route parameters are validated before the action runs.
+
+```js title="app/actions/getUser.js"
+export function getUser(req) {
+  return {
+    userId: req.params.id,
+  }
+}
+```
+
+* `req.params.id` is guaranteed to match the declared type
+* Invalid parameters never reach the action
+
+---
+
+## Reading query parameters (`req.query`)
+
+Query strings are parsed automatically.
+
+```js title="app/actions/search.js"
+export function search(req) {
+  return {
+    q: req.query.q,
+  }
+}
+```
+
+Request:
+
+```
+GET /search?q=titan
+```
+
+Result:
+
+```json
+{ "q": "titan" }
+```
+
+---
+
+## Reading request bodies (`req.body`)
+
+Titan parses request bodies based on content type.
+
+```js title="app/actions/login.js"
+export function login(req) {
+  return {
+    email: req.body.email,
+  }
+}
+```
+
+* JSON bodies are parsed automatically
+* Invalid payloads are rejected before execution
+
+---
+
+## Returning responses
+
+Actions return plain JavaScript values.
+
+```js title="app/actions/example.js"
+export function example(req) {
+  return {
+    success: true,
+  }
+}
+```
+
+Titan automatically:
+
+* Serializes objects to JSON
+* Sets appropriate response headers
+* Sends the response from native Rust
+
+---
+
+## Returning HTTP errors
+
+Throwing an error signals a failed request.
+
+```js
+export function protectedAction(req) {
+  if (!req.headers.authorization) {
+    throw new Error("Unauthorized")
+  }
+
+  return { ok: true }
+}
+```
+
+Titan converts errors into proper HTTP responses or log on the terminal.
+
+---
+
+## Synchronous and deterministic execution
+
+Actions execute synchronously inside Titan’s embedded JavaScript engine.
+
+* No Node.js runtime
+* No event loop
+* No background async side effects
+
+This ensures predictable execution and easy reasoning about behavior.
+
+---
+
+## Separation of responsibilities
+
+| Layer       | Responsibility                      |
+| ----------- | ----------------------------------- |
+| Routes      | URL structure and HTTP methods      |
+| Actions     | Request handling and logic          |
+| Rust server | Execution, routing, and performance |
+
+This separation keeps applications clean, testable, and maintainable.
+
+---
+
+## Mental model
+
+> Routes describe **structure**
+> Actions handle **behavior**
+> Titan compiles both into **Rust**
+
+This model scales cleanly from small APIs to large production systems.

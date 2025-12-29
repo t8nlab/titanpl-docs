@@ -1,0 +1,138 @@
+---
+title: Routes
+description: Define HTTP routes in clean, declarative JavaScript that Titan compiles into a high-performance native Rust router.
+---
+
+## Static routes (`/`, `/health`)
+
+Static routes match exact paths and return a fixed response.  
+Calling `.reply()` defines a **static response** that is embedded directly into the native Rust server at build time.
+
+```js title="app.js"
+t.get("/").reply("hii")
+````
+
+* Responds to `GET /`
+* Returns a plain text response
+* No request object, params, or runtime logic involved
+
+```js title="app.js"
+t.get("/health").reply({
+  name: "titan",
+  health: 50,
+})
+```
+
+* Responds to `GET /health`
+* Returns JSON automatically
+* Objects passed to `reply()` are serialized at build time
+
+> `reply()` is intentionally static.
+> Use **actions** when request data or logic is required.
+
+---
+
+## Dynamic routes (`/user/:id<number>`)
+
+Dynamic routes capture parameters from the URL and forward them to an action.
+
+```js title="app.js"
+t.get("/user/:id<number>").action("getUser")
+```
+
+* `:id<number>` declares a **typed route parameter**
+* Titan validates the parameter before invoking the action
+* The parsed parameter is available inside the action via `req.params`
+
+---
+
+## Typed route parameters
+
+Route parameters can be typed directly in the path definition:
+
+* `:id<number>` → numeric only
+* `:slug<string>` → string
+
+If a parameter fails validation, the request is rejected automatically—before any user code runs.
+
+---
+
+## Automatic method matching (GET / POST)
+
+Routes are bound to HTTP methods explicitly.
+
+```js title="app.js"
+t.get("/posts").action("listPosts")
+t.post("/posts").action("createPost")
+```
+
+* `GET /posts` and `POST /posts` are distinct routes
+* Unsupported methods return proper HTTP errors
+* No manual method checks required
+
+---
+
+## Query parsing (`req.query`)
+
+Query parameters are **available only inside actions**.
+
+```js title="app.js"
+t.get("/search").action("search")
+```
+
+
+```js title="app/actions/search.js"
+export function search(req) {
+  return { q: req.query.q }
+}
+```
+
+* `GET /search?q=titan`
+* `req.query.q === "titan"`
+* Route files remain declarative and static
+
+---
+
+## Body parsing (`req.body`)
+
+Request bodies are parsed automatically and exposed inside actions.
+
+```js title="app.js"
+t.post("/login").action("login")
+```
+
+
+```js title="app/actions/login.js"
+export function login(req) {
+  return { email: req.body.email }
+}
+```
+
+* JSON bodies are parsed automatically
+* `req.body` exists only when applicable
+* Invalid or malformed payloads are rejected early
+
+---
+
+## Zero-config routing metadata generation
+
+During build, Titan generates routing metadata (`server/routes.json`, `server/action_map.json`) including: 
+
+* Route paths
+* HTTP methods
+* Parameter types
+* Validation rules
+* Action bindings
+
+This metadata is compiled directly into the Rust server, enabling:
+
+* Fast native route matching
+* Type-safe parameter extraction
+* Zero runtime reflection
+* No Node.js dependency in production
+
+**Routes describe structure.
+Actions handle logic.
+Titan compiles both into Rust.**
+
+

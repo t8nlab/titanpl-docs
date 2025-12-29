@@ -1,13 +1,97 @@
 ---
-title: Hello World
-description: Your first document
+title: Quick Start
+description: Build a native Rust backend using pure JavaScript in minutes
 ---
 
-Welcome to the docs! You can start writing documents in `/content/docs`.
 
-## What is Next?
+Welcome to **Titan** — a JavaScript-first backend framework that compiles your JavaScript routes and actions into a **native Rust + Axum server**.
+
+You write **zero Rust**.  
+Titan handles routing, bundling, runtime execution, hot reload, and deployment — all powered by Rust under the hood.
+
+---
+
+## ⚙ Requirements
+
+Before installing Titan, make sure you have the following installed:
 
 <Cards>
-  <Card title="Learn more about Next.js" href="https://nextjs.org/docs" />
-  <Card title="Learn more about Fumadocs" href="https://fumadocs.dev" />
+  <Card
+    title="Node.js v18+"
+    href="https://nodejs.org/en/download"
+  >
+    Required for the Titan CLI, bundler, and JavaScript compilation pipeline.
+  </Card>
+
+  <Card
+    title="Rust (latest stable)"
+    href="https://www.rust-lang.org/tools/install"
+  >
+    Used to compile the native Rust + Axum server.
+  </Card>
+
+  <Card
+    title="Package Manager"
+  >
+    Use **npm**, **pnpm**, or **yarn** — whichever you prefer.
+  </Card>
 </Cards>
+
+
+Verify your setup:
+
+```bash
+node -v
+npm -v
+rustc -V
+```
+
+## 📦 Installation
+
+Install the Titan CLI globally using your preferred package manager.
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+<Tabs defaultValue="npm" items={['npm', 'pnpm', 'yarn']}>
+  <Tab value="npm">
+    ```bash
+    npm install -g @ezetgalaxy/titan
+    ```
+  </Tab>
+
+  <Tab value="pnpm">
+    ```bash
+    pnpm add -g @ezetgalaxy/titan
+    ```
+  </Tab>
+
+  <Tab value="yarn">
+    ```bash
+    yarn global add @ezetgalaxy/titan
+    ```
+  </Tab>
+</Tabs>
+
+Verify the installation:
+
+```bash
+tit --version
+```
+
+## 🚀 Create first server
+Create your fist titan server using ```tit init```
+
+```bash
+tit init my-app
+cd my-app
+tit dev
+```
+
+Titan will:
+
+* Build routes
+* Bundle actions
+* Start Rust dev server
+* Watch file changes
+* Trigger instant reload
+

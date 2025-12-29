@@ -1,0 +1,218 @@
+---
+title: Titan Logs
+description: Understand Titan’s structured terminal logs during development and runtime.
+---
+
+## Overview
+
+Titan provides **structured, readable terminal logs** that reflect what is happening inside the native Rust server at runtime.  
+These logs are designed to help you understand routing, action execution, performance, and request flow—without noise.
+
+Titan logs are emitted directly by the Rust server and the JavaScript runtime layer.
+
+---
+
+## Server startup logs
+
+When you run Titan in development mode, the server prints startup information to the terminal.
+
+```bash
+Titan server running at: http://localhost:5000
+````
+
+This confirms that:
+
+* The Rust server compiled successfully
+* Routes and actions were loaded
+* The HTTP server is listening and ready
+
+---
+
+## Build and bundling logs
+
+During development, Titan automatically bundles actions and regenerates metadata when files change.
+
+```bash
+[Titan] Bundling actions...
+[Titan] Bundling app/actions/hii.js → server/actions/hii.jsbundle
+[Titan] Bundling finished.
+Titan: routes.json + action_map.json written
+```
+
+These logs indicate:
+
+* JavaScript actions are bundled into `.jsbundle` files
+* Routing metadata is regenerated
+* The Rust server is aware of the latest application state
+
+---
+
+## Automatic server restarts
+
+When routes or actions change, Titan restarts the Rust server automatically.
+
+```bash
+[Titan] Restarting Rust server...
+[Titan] Rust server exited: 1
+Running target/debug/server.exe
+```
+
+This ensures:
+
+* No manual restarts are required
+* The running server always reflects current code
+* Development feedback is fast and deterministic
+
+---
+
+## Request execution logs
+
+For every incoming request, Titan logs a concise execution summary.
+
+```bash
+[Titan] GET /hii → hii (dynamic) in 7.70ms
+```
+
+This log shows:
+
+* HTTP method (`GET`)
+* Request path (`/hii`)
+* Action name (`hii`)
+* Route type (`dynamic`)
+* Execution time (`7.70ms`)
+
+This makes it easy to track performance and behavior per request.
+
+---
+
+## Action-level logs (`t.log`)
+
+Inside actions, you can emit logs using `t.log()`.
+
+```js
+t.log(req)
+```
+
+These logs appear in the terminal as structured output:
+
+```bash
+[Titan] log(hii): {
+  body: null,
+  method: "GET",
+  path: "/hii",
+  params: {},
+  query: {}
+}
+```
+
+This is useful for:
+
+* Debugging request data
+* Inspecting parameters and queries
+* Tracing action execution
+
+Unlike `console.log`, `t.log` is routed through Titan’s logging system and remains consistent across environments.
+
+---
+
+## Error logs
+
+When an action throws an error or fails during execution, Titan logs a structured **error summary** in the terminal.  
+This allows you to quickly identify *what failed*, *where it failed*, and *how long the request ran before failing*.
+
+```bash
+[Titan] GET / → error in 13.51ms
+Action: hii
+ReferenceError: var is not defined
+````
+
+### What this log means
+
+* `GET /`
+  The incoming HTTP request and path.
+
+* `→ error`
+  Indicates the request failed during execution.
+
+* `13.51ms`
+  Total time spent before the error occurred.
+
+* `Action: hii`
+  The action responsible for handling the request.
+
+* `ReferenceError: var is not defined`
+  The JavaScript runtime error thrown inside the action.
+
+---
+
+### When this log appears
+
+Titan emits this log when:
+
+* An action throws a runtime error
+* Invalid JavaScript is executed
+* A required variable or reference is missing
+* A runtime API call fails and propagates an error
+
+Errors are surfaced immediately and are never swallowed silently.
+
+---
+
+### Why Titan logs errors this way
+
+* Keeps error output concise and readable
+* Clearly links the failure to a specific action
+* Avoids noisy stack traces by default
+* Preserves request timing for debugging performance issues
+
+This makes debugging fast without overwhelming the terminal.
+
+---
+
+### Recommended debugging flow
+
+1. Check the **action name** in the error log
+2. Open the corresponding file in `app/actions`
+3. Fix the runtime error
+4. Save the file — Titan will rebuild and restart automatically
+
+Manual restart is required sometimes for error.
+
+---
+
+> Errors are part of execution, not framework failure.
+> Titan logs them clearly so you can fix them quickly.
+
+
+## What Titan logs by default
+
+Titan logs the following automatically:
+
+* Server startup and shutdown
+* Action bundling and rebuilds
+* Route execution summaries
+* Execution time per request
+* Explicit logs via `t.log()`
+
+There is no silent failure—important events are always visible.
+
+---
+
+## What Titan does not log
+
+By design, Titan avoids:
+
+* Verbose framework noise
+* Internal Rust stack traces (unless fatal)
+* Unstructured debug spam
+
+This keeps terminal output readable even at scale.
+
+---
+
+## Mental model
+
+> Titan logs reflect **real execution**, not framework abstraction.
+> If you see it in the terminal, it happened in the Rust server.
+
+These logs are safe to rely on for development, debugging, and early production observability.
