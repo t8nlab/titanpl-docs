@@ -1,0 +1,50 @@
+---
+title: Updates
+description: How to update the Titan CLI and your project to the latest version.
+---
+
+## Update to the latest version
+
+Keeping Titan up to date involves **two simple steps**:
+
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+
+<Steps>
+  <Step title="Update the Titan CLI">
+    Update the global Titan CLI to the latest version:
+
+    ```bash
+    npm install -g @ezetgalaxy/titan@latest
+    ```
+
+    This ensures you are using the newest commands, bundlers, and tooling.
+  </Step>
+
+  <Step title="Update your Titan project">
+    Inside your Titan project directory, run:
+
+    ```bash
+    tit update
+    ```
+
+    The `tit update` command will:
+
+    - Update internal Titan files
+    - Add newly introduced features
+    - Apply required migrations automatically
+    - Keep your existing app code intact
+
+    You do **not** need to recreate your project.
+  </Step>
+</Steps>
+
+
+
+## When should you run `tit update`?
+
+- After installing a new Titan CLI version
+- When new framework features are released
+- If the docs mention an update step
+
+> **Tip**  
+> Always update the CLI first, then run `tit update` inside your project.
