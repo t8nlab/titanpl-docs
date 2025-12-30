@@ -45,6 +45,9 @@ export const metadata: Metadata = {
     description:
       'JavaScript simplicity. Rust power. Native backends powered by the Boa engine.',
   },
+  verification: {
+    google: "N9sdgiZupGzt7Ib-WtTXDBF78oGUvM5EEJ4UcQWCSTQ",
+  },
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
