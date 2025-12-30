@@ -1,0 +1,276 @@
+---
+title: Production
+description: Build and deploy Titan as a single native Rust binary without Node.js in production.
+---
+
+import { Steps, Step } from "fumadocs-ui/components/steps";
+import { Callout } from "fumadocs-ui/components/callout";
+import { Files, Folder, File } from "fumadocs-ui/components/files";
+
+Titan production builds generate a **single native Rust binary**.  
+Node.js, npm, and the JavaScript toolchain are **not required at runtime**.
+
+JavaScript is executed via an embedded runtime (Boa), while **all networking, concurrency, and async execution are handled by Rust**.
+
+---
+
+## 🏗️ Production Build
+
+From your Titan project root, run:
+
+```bash
+titan build
+````
+
+<Steps>
+  <Step title="Generate metadata">
+    Titan executes <code>app/app.js --build</code> to generate routing metadata and action mappings.
+  </Step>
+
+<Step title="Bundle actions">
+All JavaScript actions are bundled into deterministic <code>.jsbundle</code> artifacts.
+</Step>
+
+<Step title="Compile native binary">
+A release-grade Rust binary is compiled using <code>cargo build --release</code>.
+</Step> </Steps>
+
+On success, you will see output similar to:
+
+```text
+Titan: Building production output...
+→ Building Titan metadata + bundling actions...
+→ Found action bundle: getUser.jsbundle
+→ Building Rust release binary...
+✔ Titan production build complete!
+```
+
+---
+
+## 📦 Build Output
+
+After the build completes, the final artifact is located at:
+
+<Files>
+  <Folder name="server" defaultOpen>
+    <Folder name="target" defaultOpen>
+      <Folder name="release" defaultOpen>
+        <File name="titan-server" />
+      </Folder>
+    </Folder>
+  </Folder>
+</Files>
+
+On Windows:
+
+```
+titan-server.exe
+```
+
+This binary is your **entire backend**.
+
+No Node.js.
+No runtime dependencies.
+No JS process.
+
+---
+
+## 🚀 Deployment (Direct Binary)
+
+<Callout type="info">
+  Once built, you deploy Titan by <strong>uploading the binary</strong>.  
+  No extra Titan commands, no build steps, no tooling required on the server.
+</Callout>
+
+You do **not** need to:
+
+* Run `titan build` again
+* Install Node.js or npm
+* Install Titan on the server
+* Use Docker (unless you want to)
+* Run any Titan-specific tooling
+
+### Typical deployment flow
+
+1. Run `titan build` locally or in CI
+2. Upload `titan-server` to your server or platform
+3. Run the binary
+
+That’s it.
+
+Works on:
+
+* Any VPS
+* Bare metal
+* Systemd services
+* Cloud VMs
+* Any Rust-compatible platform
+
+---
+
+## ▶️ Running in Production
+
+Run the binary directly:
+
+```bash
+./titan-server
+```
+
+Windows:
+
+```powershell
+titan-server.exe
+```
+
+Titan starts immediately as a native server process.
+
+---
+
+## 🐳 Docker (Already Provided)
+
+<Callout type="info">
+  Titan projects ship with a <strong>fully ready Dockerfile</strong>.  
+  You do not need to write or configure anything.
+</Callout>
+
+If you choose Docker, this is all you do:
+
+```bash
+titan build
+docker build -t titan-app .
+docker run -p 3000:3000 titan-app
+```
+
+Nothing else.
+
+No Node.js image.
+No multi-stage hacks.
+No runtime JS.
+
+Docker is **optional**, not required.
+
+---
+
+## ⚡ JavaScript Runtime in Production (Boa)
+
+<Callout type="info">
+  Boa does <strong>not</strong> reduce Titan’s production performance.
+</Callout>
+
+Facts:
+
+* JavaScript runs via **Boa**, embedded in the Rust server
+* **HTTP, async I/O, threading, and scheduling are fully Rust-owned**
+* There is **no JavaScript event loop**
+* Actions execute synchronously from Rust’s perspective
+
+Boa is used **only for business logic**.
+Rust owns the performance-critical hot path.
+
+Result:
+
+* Predictable latency
+* Stable throughput
+* No dev vs prod behavior gap
+
+---
+
+## ☁️ Deploy on Railway / Render (GitHub → Production)
+
+<Callout type="info">
+  For Railway and Render, you do <strong>not</strong> deploy the binary manually.  
+  Just push your Titan project to GitHub and connect the repository.
+</Callout>
+
+Titan projects ship with a **fully production-ready Dockerfile**.  
+Railway and Render automatically detect it and handle the entire build and runtime process.
+
+### How it works
+
+1. Push your full Titan project to GitHub  
+2. Connect the repository to **Railway** or **Render**
+3. Click deploy
+
+That’s it.
+
+The platform will:
+
+- Run `titan build` inside Docker
+- Compile the native Rust binary
+- Start the server using the final binary
+- Expose the service publicly
+
+You do **not** need to:
+
+- Install Titan on the platform
+- Install Node.js manually
+- Configure Rust
+- Write a custom build command
+- Manage runtime processes
+
+### What gets deployed
+
+- Your JavaScript routes and actions
+- The compiled Rust server
+- A single production-ready container
+
+The provided Dockerfile handles **everything** required for production.
+
+### Recommended settings
+
+- **Service type:** Docker
+- **Build source:** GitHub repository
+- **Port:** Whatever your Titan server exposes (default documented)
+
+Railway and Render both work out of the box with Titan’s default setup.
+
+---
+
+**Summary**
+
+- Push project to GitHub
+- Connect repo to Railway or Render
+- Dockerfile builds and runs Titan automatically
+- Zero manual production configuration
+
+
+## 🔄 Updating a Production Project
+
+To update Titan internals:
+
+```bash
+titan update
+```
+
+This updates:
+
+* Embedded Titan runtime
+* Server templates
+* Build infrastructure
+
+Your application code and bundled actions are untouched.
+
+---
+
+## 🧩 Reverse Proxy Setup
+
+Titan is designed to run **behind standard reverse proxies**, including:
+
+* nginx
+* Caddy
+* Cloudflare
+* Traefik
+
+Titan does **not** replace these tools.
+
+---
+
+## Summary
+
+* Production output is a **single native Rust binary**
+* Deploy by **uploading and running the binary**
+* No Node.js or JS runtime in production
+* Boa does **not** slow production
+* Rust controls concurrency, async execution, and networking
+* Docker is optional — and already handled for you
+

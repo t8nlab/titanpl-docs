@@ -1,6 +1,7 @@
 import { source } from '@/lib/source'
 import { DocsLayout } from 'fumadocs-ui/layouts/docs'
 import { baseOptions } from '@/lib/layout.shared'
+import { Package } from 'lucide-react'
 
 export default function Layout({
   children,
@@ -13,6 +14,13 @@ export default function Layout({
     <DocsLayout
       tree={source.pageTree}
       {...base}
+      sidebar={{
+        banner: (
+          <div className="p-2 font-medium flex gap-2 items-center bg-blue-600/20 border border-blue-600/60 text-blue-600 rounded-md">
+           <Package color='#155dfc' size={20} /> Stable · v25.15.6
+          </div>
+        )
+      }}
     >
       {children}
     </DocsLayout>
