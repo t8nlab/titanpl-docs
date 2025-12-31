@@ -1,10 +1,12 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+import Image from "next/image"
+
 
 export function baseOptions(): BaseLayoutProps {
   return {
     nav: {
       title: (
-        <span className='border border-blue-800 bg-blue-600/20 px-2 rounded-bl-lg rounded-2xl'>Titan Planet</span>
+        <Image src={"/favicon.ico"} alt='titan planet' height={38} width={38} className='rounded-full' />
       ),
     },
     links: [

@@ -1,0 +1,128 @@
+---
+title: Environment Variables
+description: Configure secrets and environment-specific values using environment variables.
+---
+
+## Overview
+
+Titan supports **environment variables** through a standard `.env` file located at the **project root**.
+
+Environment variables are loaded by the native runtime and made available inside **actions** via `process.env`
+
+This allows you to configure secrets, API keys, and environment-specific values without hardcoding them into your application.
+
+---
+
+## Creating a `.env` file
+
+Create a file named `.env` in the root of your Titan project:
+
+```
+JWT_SECRET=soham
+DATABASE_URL=postgres://user:pass@localhost:5432/app
+NODE_ENV=development
+````
+
+> The `.env` file should **not** be committed to version control.
+> Add it to `.gitignore`
+
+---
+
+## Accessing environment variables
+
+Environment variables are accessed using `process.env`
+
+```js
+const secret = process.env.JWT_SECRET
+```
+
+They are available inside **actions only**.
+
+---
+
+## Example: using env with JWT
+
+```js title="app/actions/login.js"
+export function login(req) {
+  const token = t.jwt.sign(
+    { userId: 1 },
+    process.env.JWT_SECRET,
+    { expiresIn: "1h" }
+  )
+
+  return {
+    status: 200,
+    json: { token }
+  }
+}
+```
+
+This keeps secrets out of source code and allows different values per environment.
+
+---
+
+## Supported environments
+
+You can define different `.env` values for different environments:
+
+```
+# development
+JWT_SECRET=dev-secret
+```
+
+```
+# production
+JWT_SECRET=prod-secret
+```
+
+Titan does not impose a specific environment naming convention.
+You control how variables are defined and used.
+
+---
+
+## Important notes
+
+* Environment variables are **strings**
+* Missing variables resolve to `undefined`
+* Titan does not auto-fallback or inject defaults
+* Validation should be handled explicitly in actions
+
+Example validation:
+
+```js
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET is not configured")
+}
+```
+
+---
+
+## Where environment variables are available
+
+| Location   | Available |
+| ---------- | --------- |
+| Routes     | ❌ No      |
+| Actions    | ✅ Yes     |
+| Build time | ❌ No      |
+
+Environment variables are read **at runtime**, not during build.
+
+---
+
+## Best practices
+
+* Store secrets only in `.env`
+* Never hardcode credentials
+* Use different secrets per environment
+* Rotate secrets periodically
+
+---
+
+## Mental model
+
+> Configuration lives outside code
+> Secrets live in environment variables
+> Actions read configuration at runtime
+> Rust executes everything safely
+
+This keeps Titan applications secure, flexible, and production-ready.

@@ -5,11 +5,11 @@ export default function HomePage() {
     <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-6">
       {/* Background glow */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500/10 blur-3xl" />
+        <div className="absolute left-1/2 top-1/2 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500/10 blur-3xl" />
       </div>
 
       {/* Content */}
-      <div className="max-w-3xl text-center">
+      <div className="mt-2 max-w-3xl text-center">
         <span className="inline-block rounded-full border px-4 py-1 text-sm font-medium text-muted-foreground">
           JavaScript Simplicity · Rust Performance
         </span>
@@ -18,36 +18,44 @@ export default function HomePage() {
           Titan Planet
         </h1>
 
-        <p className="mt-4 text-lg text-gray-400 text-muted-foreground">
-          A JavaScript-first backend framework that compiles your code into a
-          native Rust server — powered by the Boa JavaScript engine and Titan’s
-          own CLI.
+        <p className="mt-4 text-lg leading-relaxed text-muted-foreground text-white/70">
+          A JavaScript-first backend framework that lets you write your backend
+          logic in JavaScript and ship a single native Rust server — powered by
+          the Boa JavaScript engine and Titan’s CLI.
         </p>
 
         {/* Feature highlights */}
-        <div className="mt-8 grid gap-4 sm:grid-cols-3">
+        <div className="mt-10 grid gap-4 sm:grid-cols-3">
           <Feature
-            title="Boa Engine"
-            description="Execute JavaScript inside a native Rust runtime with predictable performance."
+            title="Boa JavaScript Engine"
+            description="Run JavaScript inside a native Rust runtime with predictable execution."
           />
           <Feature
-            title="Native Rust Output"
-            description="No Node.js in production. Ship a single compiled binary."
+            title="Single Native Binary"
+            description="No Node.js in production. Compile and ship one Rust binary."
           />
           <Feature
             title="Titan CLI"
-            description="Build, bundle, and run your backend with one command."
+            description="Scaffold, bundle, develop, and build with simple CLI commands."
           />
         </div>
 
         {/* Actions */}
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
           <Link
             href="/docs"
             className="rounded-lg border px-6 py-3 text-sm font-semibold transition hover:bg-muted"
           >
             Quick Start
+          </Link>
+
+          <Link
+            href="https://x.com/TitanPl"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-lg border border-dashed px-6 py-3 text-sm font-semibold text-muted-foreground transition hover:bg-muted"
+          >
+            Follow on X
           </Link>
         </div>
 
@@ -70,7 +78,9 @@ function Feature({
   return (
     <div className="rounded-xl border bg-background/60 p-4 text-left backdrop-blur">
       <h3 className="text-sm font-semibold">{title}</h3>
-      <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+      <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+        {description}
+      </p>
     </div>
   )
 }

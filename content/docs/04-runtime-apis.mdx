@@ -113,7 +113,7 @@ return {
 
 ---
 
-## Error behavior
+### Error behavior
 
 If a request fails:
 
@@ -125,9 +125,130 @@ If a request fails:
 const res = t.fetch(url)
 
 if (res.status !== 200) {
-  throw new Error("Upstream service failed")
+  t.log("Upstream service failed")
 }
 ```
+
+---
+
+## `t.jwt` — JSON Web Tokens
+
+`t.jwt` provides **Rust-backed JSON Web Token (JWT)** signing and verification.
+All cryptographic operations are executed natively in Rust.
+
+There is **no Node.js JWT library**, no JS crypto, and no async behavior.
+
+---
+
+### `t.jwt.sign()`
+
+Creates and signs a JWT.
+
+```js
+const token = t.jwt.sign(
+  { userId: 1, email: "admin@ez.app" },
+  processe.env.JWT_SECRET,
+  { expiresIn: "1m" }
+)
+````
+
+#### Parameters
+
+* **payload** — Object to encode into the token
+* **secret** — HMAC secret key
+* **options** *(optional)*
+
+#### Supported `expiresIn` formats
+
+| Value   | Meaning    |
+| ------- | ---------- |
+| `60`    | 60 seconds |
+| `"1m"`  | 1 minute   |
+| `"1h"`  | 1 hour     |
+| `"30d"` | 30 days    |
+
+Expiration is converted into a JWT `exp` claim **inside Rust**.
+
+> If `expiresIn` is omitted, the token does not expire.
+
+---
+
+### `t.jwt.verify()`
+
+Verifies a JWT and returns its decoded payload.
+
+```js
+const payload = t.jwt.verify(token, processe.env.JWT_SECRET)
+```
+
+#### Behavior
+
+* Signature is validated
+* `exp` (expiration) is enforced
+* Expired tokens throw immediately
+* Time comparison is done in Rust
+
+```js
+try {
+  const payload = t.jwt.verify(token, processe.env.JWT_SECRET)
+} catch {
+  // invalid or expired token
+}
+```
+
+`jwt.io` may decode expired tokens, but Titan **correctly rejects them**.
+
+### Error log on expired token
+<img
+  src="/err-log-token-exp.png"
+  alt="Titan Runtime APIs"
+  style={{ borderRadius: "12px" }}
+/>
+
+---
+
+## `t.password` — Password hashing
+
+`t.password` provides secure password hashing and verification using **Rust-native cryptography**.
+
+Passwords are **never processed by JavaScript libraries**.
+
+---
+
+### `t.password.hash()`
+
+Hashes a plaintext password.
+
+```js
+const hash = t.password.hash("admin123")
+```
+
+* Uses a secure adaptive hashing algorithm
+* Safe to store in a database
+* Deterministic and production-ready
+
+---
+
+### `t.password.verify()`
+
+Verifies a password against a stored hash.
+
+```js
+const ok = t.password.verify("admin123", hash)
+```
+
+* Returns `true` if the password matches
+* Returns `false` otherwise
+* No timing-sensitive logic in JavaScript
+
+---
+
+## Security guarantees
+
+* No plaintext passwords stored
+* No JS-side cryptography
+* No implicit expiration handling
+* All verification enforced in Rust
 
 ---
 
@@ -165,3 +286,114 @@ There is no hidden magic and no implicit globals beyond `t`
 
 This keeps Titan applications predictable, fast, and maintainable.
 
+## Example Actions
+
+```json title="credentials"
+{
+  "email": "admin@ez.app",
+  "password": "mypassword123"
+}
+```
+### Login to the account
+```js title="app/action/login.js"
+export function login(req) {
+    const { email, password } = req.body || {}
+  
+    if (!email || !password) {
+      return {
+        status: 400,
+        json: { error: "Email and password required" }
+      }
+    }
+  
+    // ⚠️ Mock DB
+    const user = {
+      id: 1,
+      email: "admin@ez.app",
+      passwordHash: "$2b$12$MJwttSgptEQJCkPJ.J8mce1xxtmxlJPCsISvc1WEzR6mqdD/ZJyOC"
+    }
+  
+    if (email !== user.email) {
+      return {
+        status: 401,
+        json: { error: "Invalid credentials" }
+      }
+    }
+  
+    const ok = t.password.verify(password, user.passwordHash)
+  
+    if (!ok) {
+      return {
+        status: 401,
+        json: { error: "Invalid credentials" }
+      }
+    }
+  
+    const token = t.jwt.sign(
+      { userId: user.id, email: user.email },
+      processe.env.JWT_SECRET,
+      { expiresIn: "1m" }   // 👈 1 minute token
+    )
+  
+    return {
+      status: 200,
+      json: {
+        token,
+        expiresIn: "1 minute"
+      }
+    }
+  }
+```
+### Register a account
+```js title="app/action/register.js"
+export function register(req) {
+    const { email, password } = req.body || {}
+  
+    if (!email || !password) {
+      return {
+        status: 400,
+        json: { error: "Email and password are required" }
+      }
+    }
+  
+    // ⚠️ Mock DB
+    // IMPORTANT: store passwordHash, never password
+    const passwordHash = t.password.hash(password)
+  
+    // pretend we saved this
+    const user = {
+      id: 1,
+      email,
+      passwordHash
+    }
+  
+    return {
+      status: 201,
+      json: {
+        message: "Account created",
+        user: {
+          id: user.id,
+          email: user.email,
+          passwordHash: user.passwordHash
+        }
+      }
+    }
+  }
+
+```
+### Get the user details
+
+```js title="app/action/getUser.js"
+export function getUser(req) {
+    const { token } = req.body || {}
+  
+    const payload = t.jwt.verify(token, processe.env.JWT_SECRET)
+  
+    return {
+      status: 200,
+      json: {
+        user: payload
+      }
+    }
+  }
+```
