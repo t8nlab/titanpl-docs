@@ -1,0 +1,245 @@
+---
+title: How Titan Planet Works
+description: A step-by-step walkthrough of Titan’s build pipeline, runtime model, performance characteristics, and native execution flow
+---
+
+import { Callout } from "fumadocs-ui/components/callout"
+import { Steps, Step } from "fumadocs-ui/components/steps"
+import { File, Folder, Files } from 'fumadocs-ui/components/files';
+
+## Overview
+
+**Titan Planet** is a **JavaScript-first backend framework** where application logic is written in JavaScript, while **routing, concurrency, and execution are handled by a native Rust server**.
+
+You write JavaScript.  
+Titan builds Rust.  
+Production runs a **single native binary**.
+
+<Callout type="info">
+Titan does not run a JavaScript server in production.  
+JavaScript executes only as a controlled logic layer inside Rust.
+</Callout>
+
+---
+
+## High-Level Idea
+
+Titan is designed around a **strict responsibility split**.
+
+### JavaScript Responsibility
+
+- Route declarations
+- Business logic (actions)
+- Validation and transformations
+
+### Rust Responsibility
+
+- HTTP server (Axum)
+- Routing and method matching
+- Concurrency and async I/O
+- Process lifecycle and deployment
+
+<Callout type="note">
+JavaScript never owns the request lifecycle.  
+Rust always does.
+</Callout>
+
+---
+
+## Step 1 — Writing Routes
+
+Routes are declared using Titan’s DSL in:
+
+
+```js title="app/app.js"
+t.post("/login").action("login")
+t.post("/ca").action("register")
+t.post("/").action("hello")
+````
+
+<Callout type="warning">
+This file is parsed at <strong>build time</strong>.  
+It is <strong>not executed per request</strong>.
+</Callout>
+
+At runtime, JavaScript never performs routing.
+
+---
+
+## Step 2 — Action Authoring
+
+Each action lives in: `
+app/actions/
+`
+
+Example:
+
+```js title="app/actions/"
+export default function login(req) {
+  return { ok: true }
+}
+```
+
+These files contain **pure application logic only**.
+
+* No HTTP server
+* No routing
+* No async orchestration 
+* No event loop control
+
+<Callout type="info">
+Actions run only after Rust has already resolved the request.
+</Callout>
+
+<Callout type="success">
+Titan auto manage the ***async/await*** using rust tokio
+</Callout>
+
+---
+
+## Step 3 — Build-Time Compilation
+
+When you run:
+
+```bash
+tit build
+```
+
+Titan performs **deterministic compile-time steps**.
+
+<Steps>
+  <Step title="Generate routes.json">
+    A static routing table is generated for the Rust server.
+  </Step>
+
+  <Step title="Generate action_map.json">
+    Routes are mapped to action identifiers.
+  </Step>
+
+  <Step title="Bundle actions with esbuild">
+    Each action is bundled into a deterministic <code>.jsbundle</code> file, using ``esbuild``
+  </Step>
+
+  <Step title="Compile native Rust server">
+    Axum, runtime code, and the embedded JS engine are compiled into one binary.
+  </Step>
+</Steps>
+
+<Callout type="success">
+No routing logic, module resolution, or imports exist at runtime.
+</Callout>
+
+---
+
+## Step 4 — Server Runtime Layout
+
+All production artifacts live inside the **server runtime boundary**.
+
+  <Folder name="server" defaultOpen>
+    <Folder name="actions" defaultOpen>
+      <File name="hello.jsbundle" />
+      <File name="login.jsbundle" />
+      <File name="register.jsbundle" />
+    </Folder>
+
+<File name="routes.json" />
+<File name="action_map.json" />
+<File name="Cargo.toml" />
+<File name="Cargo.lock" />
+<Folder name="target" />
+
+
+  </Folder>
+
+
+<Callout type="warning">
+Everything inside <code>server/</code> belongs to the native execution layer.  
+JavaScript never reads or modifies these files at runtime.
+</Callout>
+
+---
+
+## Step 5 — Runtime Execution Flow
+
+When a request hits production:
+
+1. HTTP request reaches the **native Rust server**
+2. Rust matches the route using `routes.json`
+3. Rust resolves the action using `action_map.json`
+4. The bundled JS action executes inside the embedded JS engine
+5. The result is returned to the client
+
+<Callout type="info">
+Routing, concurrency, and I/O are completed <strong>before</strong> JavaScript runs.
+</Callout>
+
+---
+
+## Performance & Speed (Important)
+
+### Does using Boa make Titan slow?
+
+**No — and this is by design.**
+
+Titan does **not** use JavaScript as a server runtime.
+
+Boa executes only:
+
+* Bundled action logic
+* Synchronous business rules
+* JSON transformations
+
+Boa does **not** execute:
+
+* HTTP servers
+* Event loops
+* Async schedulers
+* Threads
+* Networking
+* File I/O
+
+All performance-critical work is handled by **Rust + Axum + Tokio**.
+
+<Callout type="success">
+JavaScript is not in the hot path of networking or concurrency.
+</Callout>
+
+### Why this is fast in practice
+
+* Routing is static and Rust-owned
+* No JS router
+* No dynamic imports
+* No promise-heavy execution
+* No Node.js runtime overhead
+* No garbage-heavy request lifecycle
+
+JavaScript runs **only when business logic is required**, and only for a short, bounded duration.
+
+---
+
+## Final Output
+
+After a successful build, Titan produces a single binary: `
+server/target/titan_server
+`
+
+This binary contains:
+
+* Axum HTTP server
+* Routing metadata
+* Bundled JavaScript logic
+* Embedded JavaScript runtime
+
+<Callout type="success">
+No Node.js.  
+No runtime JS server.  
+One native binary: <strong>titan_server</strong>.
+</Callout>
+
+---
+
+## One-Sentence Summary
+
+<Callout type="info">
+Titan Planet is a JavaScript-first backend framework that compiles routes and actions into static metadata and executes them inside a native Rust server, producing a single high-performance binary for production.
+</Callout>

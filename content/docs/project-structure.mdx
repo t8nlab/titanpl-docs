@@ -1,0 +1,217 @@
+---
+title: Project Structure & Deployment Model
+description: What you commit, what is generated, and what actually runs in production in Titan Planet
+---
+
+import { Callout } from "fumadocs-ui/components/callout"
+import { Tabs, Tab } from "fumadocs-ui/components/tabs"
+import { File, Folder, Files } from 'fumadocs-ui/components/files';
+import { Cards, Card } from 'fumadocs-ui/components/card'
+import { Info } from 'lucide-react'
+
+## Overview
+
+Titan Planet enforces a **strict separation** between:
+
+- **source code (what you write and commit)**
+- **generated build artifacts (local-only)**
+- **final production output (what actually runs)**
+
+This separation is enforced by the `.gitignore` and is essential to understanding **what matters in production**.
+
+---
+
+## Development Structure (What You See While Working)
+
+This is the full structure you see **during development**.
+
+  <Folder name="my-titan-app" defaultOpen>
+    <Folder name="app" defaultOpen>
+      <File name="app.js" />
+      <Folder name="actions" defaultOpen>
+        <File name="hello.js" />
+      </Folder>
+    </Folder>
+
+    <Folder name="server">
+      <Folder name="actions">
+        <File name="*.jsbundle" />
+      </Folder>
+
+      <File name="routes.json" />
+      <File name="action_map.json" />
+      <File name="Cargo.toml" />
+      <File name="Cargo.lock" />
+      <Folder name="target" />
+    </Folder>
+
+    <Folder name="titan">
+      <File name="titan.js" />
+      <File name="bundle.js" />
+      <File name="dev.js" />
+    </Folder>
+
+    <Folder name="node_modules" />
+    <File name="package.json" />
+    <File name="Dockerfile" />
+    <File name=".dockerignore" />
+    <File name=".gitignore" />
+    <File name=".env.local" />
+  </Folder>
+
+<Callout type="info">
+Not everything you see here is committed or deployed.  
+Some of these files exist only to produce the final binary.
+</Callout>
+
+---
+
+## What You Commit to Git (Source of Truth)
+
+These files are **committed** and represent your real source code.
+
+  <Folder name="committed-to-git" defaultOpen>
+    <Folder name="app">
+      <File name="app.js" />
+      <Folder name="actions">
+        <File name="*.js" />
+      </Folder>
+    </Folder>
+
+    <Folder name="server">
+      <Folder name="actions">
+      </Folder>
+      <File name="Cargo.toml" />
+      <File name="Cargo.lock" />
+      <Folder name="target" />
+    </Folder>
+
+    <Folder name="titan">
+      <File name="titan.js" />
+      <File name="bundle.js" />
+      <File name="dev.js" />
+    </Folder>
+
+    <File name="Dockerfile" />
+    <File name="package.json" />
+    <File name=".dockerignore" />
+    <File name=".gitignore" />
+  </Folder>
+
+<Callout type="success">
+This is the only code you maintain long-term.
+</Callout>
+
+---
+
+## Generated & Ignored Files (Never Committed)
+
+The following files are **automatically generated** and ignored by Git:
+
+```
+server/routes.json
+server/action_map.json
+server/actions/*.jsbundle
+server/titan/*.jsbundle
+server/target/**
+````
+
+<Callout type="warning">
+These are build outputs, not source code.  
+They are recreated on every build and must never be edited manually.
+</Callout>
+
+### Why These Are Ignored
+
+* They are deterministic
+* They depend on the local build environment
+* They are embedded into the final binary
+* They do not represent developer intent
+
+---
+
+## What Actually Runs in Production
+
+After running:
+
+```bash
+titan build
+```
+
+Titan produces **one executable**.
+
+<Tabs items={['prod']} defaultValue="prod">
+  <Tab value="prod">
+    <Folder name="release" defaultOpen>
+      <File name="titan_server" />
+    </Folder>
+    <Callout type="success">
+      This binary is the production server.
+    </Callout>
+  </Tab>
+</Tabs>
+
+
+## Learn More About Production
+
+<Cards>
+  <Card
+    href="/docs/08-production"
+    title="How to deploy"
+    icon={<Info />}
+  >
+    Dive deeper into how production runtime works, deployment strategies, and configuration best practices.
+  </Card>
+   <Card
+    href="/docs/08-production#%EF%B8%8F-deploy-on-railway--render-github--production"
+    title="Deploy on Railway / Render (GitHub → Production)"
+    icon={<Info />}
+  >
+  Titan projects ship with a fully production-ready Dockerfile.
+  Railway and Render automatically detect it and handle the entire build and runtime process.
+  </Card>
+</Cards>
+
+---
+
+## What Does NOT Exist in Production
+
+These **never ship** to production:
+
+* `node_modules/`
+* `app/`
+* `titan/`
+* `.js` source files
+* `.jsbundle` files
+* `routes.json`
+* `action_map.json`
+* `server/target/`
+* Build tooling
+
+<Callout type="info">
+Production does not contain JavaScript files or a JS runtime server.
+</Callout>
+
+---
+
+## Mental Model (Very Important)
+
+<Callout type="info">
+Development is file-heavy.  
+Production is binary-only.
+</Callout>
+
+* JavaScript exists **only at build time**
+* Rust owns **runtime execution**
+* The binary is **self-contained**
+* Deployment is intentionally boring and predictable
+
+---
+
+## Summary
+
+* **Write & commit**: JavaScript source + Titan tooling
+* **Ignore**: generated routing, bundles, and Rust outputs
+* **Run in production**: one native binary (`titan_server`)
+
+Titan Planet’s structure removes runtime ambiguity and makes production deployment as simple and reliable as possible.
