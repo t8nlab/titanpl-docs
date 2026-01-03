@@ -295,7 +295,7 @@ This keeps Titan applications predictable, fast, and maintainable.
 }
 ```
 ### Login to the account
-```js title="app/action/login.js"
+```js title="app/actions/login.js"
 export function login(req) {
     const { email, password } = req.body || {}
   
@@ -345,7 +345,7 @@ export function login(req) {
   }
 ```
 ### Register a account
-```js title="app/action/register.js"
+```js title="app/actions/register.js"
 export function register(req) {
     const { email, password } = req.body || {}
   
@@ -383,7 +383,7 @@ export function register(req) {
 ```
 ### Get the user details
 
-```js title="app/action/getUser.js"
+```js title="app/actions/getUser.js"
 export function getUser(req) {
     const { token } = req.body || {}
   
@@ -396,4 +396,61 @@ export function getUser(req) {
       }
     }
   }
+```
+
+### A example of regiter user with supabse postgress:
+
+**Don't forget to add this environment variables in `.env` file `SUPABASE_ANON_KEY`, `SUPABASE_PROJECT_ID`**
+
+```js title="app/actions/register.js"
+export default function register(req) {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return { status: 400, error: "Email and password are required" };
+  }
+
+  const password_hash = t.password.hash(password);
+
+  // HARD GUARD — REQUIRED
+  if (typeof password_hash !== "string") {
+    return { status: 500, error: "Password hashing failed" };
+  }
+
+  const res = t.fetch(
+    `https://${process.env.SUPABASE_PROJECT_ID}.supabase.co/rest/v1/users`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": process.env.SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+        "Prefer": "return=representation"
+      },
+      body: {
+        email,
+        password_hash
+      }
+    }
+  );
+
+  // Duplicate email
+  if (res.status === 409) {
+    return { status: 409, error: "Email already registered" };
+  }
+
+  // Any other failure
+  if (res.status < 200 || res.status >= 300) {
+    return {
+      status: res.status,
+      error: res.body || "User creation failed"
+    };
+  }
+  t.log("SUPABASE RES:", res);
+
+  return {
+    status: 201,
+    message: "User registered successfully",
+  };
+}
 ```
