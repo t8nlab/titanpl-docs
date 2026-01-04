@@ -46,7 +46,7 @@ export const metadata: Metadata = {
       'JavaScript simplicity. Rust power. Native backends powered by the Boa engine.',
   },
   verification: {
-    google: "N9sdgiZupGzt7Ib-WtTXDBF78oGUvM5EEJ4UcQWCSTQ",
+    google: "hMltFPqeOSHo-jwT47ISZC7XQWiYOWQE6pcUepmxeFk",
   },
 };
 
