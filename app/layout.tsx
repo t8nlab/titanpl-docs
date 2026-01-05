@@ -55,14 +55,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <html lang="en" className={inter.className} suppressHydrationWarning>
       <body cz-shortcut-listen="true" className="flex flex-col min-h-screen">
         <RootProvider>
-          <Notice variant='warning'>
-            <strong>Don&#39;t install <code>v25.15.5</code>, it&#39;s a broken version of titan</strong>
-          </Notice>
-          <Notice>
-            The Titan CLI command is now <strong>titan</strong>.
-            <br />
-            The previous <code>tit</code> command is still supported as a legacy alias.
-          </Notice>
           {children}
         </RootProvider>
       </body>
