@@ -55,6 +55,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <html lang="en" className={inter.className} suppressHydrationWarning>
       <body cz-shortcut-listen="true" className="flex flex-col min-h-screen">
         <RootProvider>
+          <Notice title='No more Boa' variant='success'>
+            <span>Titan now uses v8 for run js no more boa</span>
+          </Notice>
           {children}
         </RootProvider>
       </body>

@@ -92,8 +92,10 @@ Actions run only after Rust has already resolved the request.
 </Callout>
 
 <Callout type="success">
-Titan auto manage the ***async/await*** using rust tokio
+Titan does not expose an async runtime to JavaScript.  
+Rust (Tokio) owns all async I/O and scheduling; JavaScript executes synchronously inside that boundary.
 </Callout>
+
 
 ---
 
@@ -173,23 +175,25 @@ When a request hits production:
 Routing, concurrency, and I/O are completed <strong>before</strong> JavaScript runs.
 </Callout>
 
+
 ---
 
-## Performance & Speed (Important)
+## Performance & Speed
 
-### Does using Boa make Titan slow?
+### Does using V8 make Titan slow?
 
 **No — and this is by design.**
 
 Titan does **not** use JavaScript as a server runtime.
 
-Boa executes only:
+V8 executes **only**:
 
 * Bundled action logic
-* Synchronous business rules
-* JSON transformations
+* Deterministic business rules
+* JSON parsing and transformations
+* Short-lived, bounded computation
 
-Boa does **not** execute:
+V8 does **not** execute:
 
 * HTTP servers
 * Event loops
@@ -197,25 +201,100 @@ Boa does **not** execute:
 * Threads
 * Networking
 * File I/O
+* System calls
 
-All performance-critical work is handled by **Rust + Axum + Tokio**.
+All performance-critical responsibilities are handled by **Rust + Axum + Tokio**.
 
 <Callout type="success">
-JavaScript is not in the hot path of networking or concurrency.
+JavaScript is not in the hot path of networking, concurrency, or I/O.
 </Callout>
+
+---
 
 ### Why this is fast in practice
 
 * Routing is static and Rust-owned
-* No JS router
-* No dynamic imports
-* No promise-heavy execution
+* No JavaScript router
+* No dynamic module resolution
+* No runtime imports
+* No promise-driven request lifecycle
 * No Node.js runtime overhead
-* No garbage-heavy request lifecycle
+* No garbage-heavy server abstractions
 
-JavaScript runs **only when business logic is required**, and only for a short, bounded duration.
+JavaScript runs **only when business logic is required**, and only for a **short, strictly bounded duration**.
 
 ---
+
+## JavaScript Engine Choice (V8, Not Node.js)
+
+Titan Planet now uses the **V8 JavaScript engine** as its embedded runtime.
+
+This does **not** mean Titan uses Node.js.
+
+### What V8 Is (and What It Is Not)
+
+**V8 is:**
+
+* A JavaScript execution engine
+* A bytecode interpreter + JIT compiler
+* A garbage-collected runtime core
+
+**V8 is not:**
+
+* Node.js
+* A web server
+* An event loop
+* A package manager
+* An async I/O runtime
+
+Node.js is a **platform built on top of V8**, not V8 itself.
+
+<Callout type="info">
+Using V8 does not imply Node.js.  
+Titan embeds V8 directly, without Node’s APIs, runtime, or event loop.
+</Callout>
+
+---
+
+### What Titan Explicitly Does *Not* Include
+
+Even with V8, Titan intentionally does **not** include:
+
+* Node.js runtime
+* libuv
+* Node event loop
+* Node core modules (`fs`, `net`, `http`, etc.)
+* Node globals (`process`, `Buffer`, etc.)
+
+JavaScript code in Titan **cannot** start servers, manage async I/O, or control scheduling.
+
+---
+
+### Responsibility Boundary (Final Mental Model)
+
+* **Rust + Tokio** own:
+
+  * Concurrency
+  * Async scheduling
+  * Networking
+  * Timers
+  * File and system I/O
+
+* **JavaScript (V8)** owns:
+
+  * Application logic
+  * Validation
+  * Data transformation
+  * Pure computation
+
+<Callout type="success">
+V8 executes JavaScript.  
+Rust executes the server.
+</Callout>
+
+---
+
+
 
 ## Final Output
 

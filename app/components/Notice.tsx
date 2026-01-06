@@ -19,21 +19,35 @@ const VARIANT_STYLES: Record<
 > = {
   info: {
     icon: <Info size={14} />,
-    container: "border-zinc-800 bg-zinc-900/60",
-    iconWrap: "bg-blue-500/10",
-    iconColor: "text-blue-400",
+    container:
+      "border border-blue-200 bg-blue-50 text-blue-900 " +
+      "dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-100",
+    iconWrap:
+      "bg-blue-100 dark:bg-blue-500/10",
+    iconColor:
+      "text-blue-600 dark:text-blue-400",
   },
+
   warning: {
     icon: <AlertTriangle size={14} />,
-    container: "border-amber-900/40 bg-amber-950/30",
-    iconWrap: "bg-amber-500/10",
-    iconColor: "text-amber-400",
+    container:
+      "border border-amber-300 bg-amber-50 text-amber-900 " +
+      "dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-zinc-100",
+    iconWrap:
+      "bg-amber-200 dark:bg-amber-500/10",
+    iconColor:
+      "text-amber-600 dark:text-amber-400",
   },
+
   success: {
     icon: <CheckCircle2 size={14} />,
-    container: "border-emerald-900/40 bg-emerald-950/30",
-    iconWrap: "bg-emerald-500/10",
-    iconColor: "text-emerald-400",
+    container:
+      "border border-emerald-300 bg-emerald-800 text-emerald-900 " +
+      "dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-zinc-100",
+    iconWrap:
+      "bg-emerald-200 dark:bg-emerald-500/10",
+    iconColor:
+      "text-emerald-600 dark:text-emerald-400",
   },
 };
 

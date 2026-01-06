@@ -18,16 +18,16 @@ export default function HomePage() {
           Titan Planet
         </h1>
 
-        <p className="mt-4 text-lg leading-relaxed text-muted-foreground text-white/70">
+        <p className="mt-4 text-lg leading-relaxed text-muted-foreground text-black/70 dark:text-white/70">
           A JavaScript-first backend framework that lets you write your backend
           logic in JavaScript and ship a single native Rust server — powered by
-          the Boa JavaScript engine and Titan’s CLI.
+          the v8 JavaScript engine and Titan’s CLI.
         </p>
 
         {/* Feature highlights */}
         <div className="mt-10 grid gap-4 sm:grid-cols-3">
           <Feature
-            title="Boa JavaScript Engine"
+            title="v8 JavaScript Engine"
             description="Run JavaScript inside a native Rust runtime with predictable execution."
           />
           <Feature
@@ -61,7 +61,7 @@ export default function HomePage() {
 
         {/* Footer note */}
         <p className="mt-10 text-xs text-muted-foreground">
-          Built with Rust · Executed by Boa · Designed for production
+          Built with Rust · Executed by v8 · Designed for production
         </p>
       </div>
     </main>
