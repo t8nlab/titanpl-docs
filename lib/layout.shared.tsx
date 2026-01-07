@@ -20,6 +20,11 @@ export function baseOptions(): BaseLayoutProps {
         url: "https://github.com/ezet-galaxy/-ezetgalaxy-titan",
         active: "nested-url"
       },
+      {
+        text: <div className='bg-blue-600/40 border-dashed border border-blue-600/80 px-1 dark:text-white text-black'>Join Community</div>,
+        url: "/community",
+        active: "nested-url"
+      },
     ]
   };
 }

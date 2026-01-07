@@ -1,4 +1,5 @@
 import { RootProvider } from 'fumadocs-ui/provider/next';
+import { AuthProvider } from '@/context/AuthContext';
 import './global.css';
 import { Inter } from 'next/font/google';
 import type { Metadata } from 'next';
@@ -55,10 +56,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <html lang="en" className={inter.className} suppressHydrationWarning>
       <body cz-shortcut-listen="true" className="flex flex-col min-h-screen">
         <RootProvider>
-          <Notice title='No more Boa' variant='success'>
-            <span>Titan now uses v8 for run js no more boa</span>
-          </Notice>
-          {children}
+          <AuthProvider>
+            <Notice title='No more Boa' variant='success'>
+              <span>Titan now uses v8 for run js no more boa</span>
+            </Notice>
+            {children}
+          </AuthProvider>
         </RootProvider>
       </body>
     </html>
