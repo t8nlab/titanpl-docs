@@ -8,6 +8,7 @@ import AuthModal from './AuthModal';
 import CreatePostModal from './CreatePostModal';
 import CommentsModal from './CommentsModal';
 import NotificationsModal from './NotificationsModal';
+import Image from 'next/image';
 
 export default function Community() {
     const { user, logout, loading } = useAuth();
@@ -52,10 +53,7 @@ export default function Community() {
             const res = await fetch(`/api/posts?page=${pageNum}&limit=30`);
             const data = await res.json();
             if (Array.isArray(data)) {
-                // If we receive no data, then we've reached the end.
-                // Note: We check for length 0 instead of < 10 because our "mixed" algorithm (popular + new)
-                // might return slightly fewer than 10 items due to deduplication (same post being both new and popular),
-                // so < 10 is not a reliable indicator of "end of list".
+
                 if (data.length === 0) setHasMore(false);
 
                 setPosts(prev => {
@@ -130,17 +128,10 @@ export default function Community() {
 
         const res = await fetch(`/api/posts/${pid}/like`, { method: 'POST' });
         if (!res.ok) {
-            // Revert on failure
-            // Silent fail or toast? For now just revert logic could be added but simple optimistic is usually fine
         }
     };
 
     const handleCreatePostSuccess = async () => {
-        // Instead of full reload, just fetch page 1 silently or ideally prepend the new post.
-        // For simplicity and correctness with "New/Popular" mix, reloading Page 1 is safest to adhere to algorithm.
-        // But to avoid "flash", we can just call loadPosts(1) without clearing state first?
-        // My loadPosts logic replaces state if page=1.
-        // Let's just do that.
         loadPosts(1);
     };
 
@@ -199,7 +190,7 @@ export default function Community() {
                                 >
                                     <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-white text-black flex items-center justify-center font-bold text-sm overflow-hidden border border-gray-300 dark:border-white/20">
                                         {user.avatarUrl ? (
-                                            <img src={user.avatarUrl} alt={user.username} className="w-full h-full object-cover" />
+                                            <Image height={40} width={40} src={user.avatarUrl} alt={user.username} className="w-full h-full object-cover" />
                                         ) : (
                                             user.username[0].toUpperCase()
                                         )}
