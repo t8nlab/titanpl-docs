@@ -1,12 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { posts, likes, collaborators, users } from "@/db/schema";
 import { getSession } from "@/lib/auth";
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, and } from "drizzle-orm";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const pid = params.id;
+        const { id: pid } = await params;
         const session = await getSession();
 
         const post = await db.select({
@@ -65,4 +65,4 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     }
 }
 
-import { and } from "drizzle-orm";
+
