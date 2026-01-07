@@ -16,6 +16,7 @@ export async function GET(req: Request) {
             .select({
                 uid: users.uid,
                 username: users.username,
+                avatarUrl: users.avatarUrl,
             })
             .from(users)
             .where(ilike(users.username, `${query}%`))

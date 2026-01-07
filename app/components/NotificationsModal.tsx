@@ -8,6 +8,7 @@ interface NotificationsModalProps {
 }
 
 import { formatDistanceToNow } from 'date-fns';
+import Image from 'next/image';
 
 export default function NotificationsModal({ onClose, onNotificationClick }: NotificationsModalProps) {
     const [notifications, setNotifications] = useState<any[]>([]);
@@ -68,9 +69,9 @@ export default function NotificationsModal({ onClose, onNotificationClick }: Not
                             className="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer transition-colors group"
                         >
                             <div className="mt-1 relative">
-                                <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden border border-white dark:border-white/10">
+                                <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
                                     {n.actorAvatar ? (
-                                        <img src={n.actorAvatar} alt={n.actorName} className="w-full h-full object-cover" />
+                                        <Image height={40} width={40} src={n.actorAvatar} alt={n.actorName} className="w-full h-full object-cover" />
                                     ) : (
                                         <div className="flex items-center justify-center h-full text-xs font-bold text-gray-700 dark:text-gray-300">
                                             {n.actorName?.[0]?.toUpperCase()}

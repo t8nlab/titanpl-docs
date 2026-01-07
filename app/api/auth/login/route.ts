@@ -22,7 +22,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
         }
 
-        const token = signToken({ uid: user.uid, username: user.username });
+        const token = signToken({ uid: user.uid, username: user.username, avatarUrl: user.avatarUrl });
 
         // Set HTTP-only cookie
         const cookieStore = await cookies();
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
             maxAge: 60 * 60 * 24 * 7 // 1 week
         });
 
-        return NextResponse.json({ success: true, user: { uid: user.uid, username: user.username, email: user.email } });
+        return NextResponse.json({ success: true, user: { uid: user.uid, username: user.username, email: user.email, avatarUrl: user.avatarUrl } });
     } catch (e) {
         console.error("Login Error:", e);
         return NextResponse.json({ error: "Login failed" }, { status: 500 });

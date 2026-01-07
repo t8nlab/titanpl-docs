@@ -4,9 +4,12 @@ import { comments, users } from "@/db/schema";
 import { getSession } from "@/lib/auth";
 import { eq, desc, and, isNull, inArray } from "drizzle-orm"; // Ensure imports
 
+import { sql } from "drizzle-orm";
+
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const postId = searchParams.get('postId');
+    const parentId = searchParams.get('parentId');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = (page - 1) * limit;
@@ -14,55 +17,43 @@ export async function GET(req: Request) {
     if (!postId) return NextResponse.json({ error: "Post ID required" }, { status: 400 });
 
     try {
-        const roots = await db.select({
+        const query = db.select({
             id: comments.id,
             content: comments.content,
             parentId: comments.parentId,
             createdAt: comments.createdAt,
             userId: comments.userId,
             username: users.username,
-            avatarUrl: users.avatarUrl
+            avatarUrl: users.avatarUrl,
+            replyCount: sql<number>`(SELECT count(*)::int FROM comments c2 WHERE c2.parent_id = ${comments.id})`
         })
             .from(comments)
-            .innerJoin(users, eq(comments.userId, users.uid))
-            .where(
-                and(
-                    eq(comments.postId, postId),
-                    isNull(comments.parentId)
-                )
-            )
-            .orderBy(desc(comments.createdAt))
+            .innerJoin(users, eq(comments.userId, users.uid));
+
+        let conditions = eq(comments.postId, postId);
+
+        if (parentId) {
+            conditions = and(conditions, eq(comments.parentId, parentId))!;
+        } else {
+            conditions = and(conditions, isNull(comments.parentId))!;
+        }
+
+        const data = await query.where(conditions)
+            .orderBy(parentId ? comments.createdAt : desc(comments.createdAt)) // Oldest first for replies, Newest for roots
             .limit(limit)
             .offset(offset);
 
-        const rootIds = roots.map(r => r.id);
-        let allRelatedComments = [...roots];
+        // Transform count to number
+        const formatted = data.map(c => ({
+            ...c,
+            replyCount: parseInt(String(c.replyCount || 0), 10)
+        }));
 
-        if (rootIds.length > 0) {
-            const children = await db.select({
-                id: comments.id,
-                content: comments.content,
-                parentId: comments.parentId,
-                createdAt: comments.createdAt,
-                userId: comments.userId,
-                username: users.username,
-                avatarUrl: users.avatarUrl
-            })
-                .from(comments)
-                .innerJoin(users, eq(comments.userId, users.uid))
-                .where(
-                    and(
-                        eq(comments.postId, postId),
-                        inArray(comments.parentId, rootIds)
-                    )
-                )
-                .orderBy(comments.createdAt);
+        // console.log("Debug Comments:", formatted);
 
-            allRelatedComments = [...allRelatedComments, ...children];
-        }
-
-        return NextResponse.json(allRelatedComments);
+        return NextResponse.json(formatted);
     } catch (e) {
+        console.error(e);
         return NextResponse.json({ error: "Failed to fetch comments" }, { status: 500 });
     }
 }

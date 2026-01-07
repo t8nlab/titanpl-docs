@@ -1,4 +1,6 @@
 'use client';
+import { showToast } from '@/lib/toast';
+import Image from 'next/image';
 import { useState, useRef, useEffect } from 'react';
 import { X, Plus } from 'lucide-react';
 import { clsx } from 'clsx';
@@ -65,16 +67,21 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, user }
 
     const createPost = async () => {
         if (!title || !content || !user) return;
-        await fetch('/api/posts', {
-            method: 'POST',
-            body: JSON.stringify({ title, content, link }),
-            headers: { 'Content-Type': 'application/json' }
-        });
-        setTitle('');
-        setContent('');
-        setLink('');
-        onPostCreated();
-        onClose();
+        try {
+            await fetch('/api/posts', {
+                method: 'POST',
+                body: JSON.stringify({ title, content, link }),
+                headers: { 'Content-Type': 'application/json' }
+            });
+            setTitle('');
+            setContent('');
+            setLink('');
+            onPostCreated();
+            onClose();
+            showToast.success('Post Created', 'Your post is now live.');
+        } catch (e) {
+            showToast.error('Error', 'Failed to create post.');
+        }
     };
 
     if (!isOpen) return null;
@@ -131,7 +138,13 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, user }
                                         onClick={() => addMention(u.username)}
                                         className="w-full text-left px-4 py-3 hover:bg-gray-100 dark:hover:bg-white/10 flex items-center gap-3 border-b border-gray-100 dark:border-white/5 last:border-0 transition-colors"
                                     >
-                                        <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-bold text-black dark:text-white border border-transparent dark:border-white/10">{u.username[0].toUpperCase()}</div>
+                                        <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-bold text-black dark:text-white border border-transparent dark:border-white/10 overflow-hidden">
+                                            {u.avatarUrl ? (
+                                                <Image height={32} width={32} src={u.avatarUrl} alt={u.username} className="w-full h-full object-cover" />
+                                            ) : (
+                                                u.username[0].toUpperCase()
+                                            )}
+                                        </div>
                                         <div className="flex flex-col">
                                             <span className="text-sm font-medium text-black dark:text-white">{u.username}</span>
                                             <span className="text-[10px] text-gray-500 dark:text-gray-400">Collaborator</span>

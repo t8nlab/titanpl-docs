@@ -8,12 +8,13 @@ interface PostCardProps {
     post: any;
     onLike: (pid: string) => void;
     onCommentClick: (post: any) => void;
+    onCollaboratorClick?: (post: any) => void;
     innerRef?: React.Ref<HTMLDivElement>;
 }
 
 import { formatDistanceToNow } from 'date-fns';
 
-const PostCard = forwardRef<HTMLDivElement, PostCardProps>(({ post, onLike, onCommentClick }, ref) => {
+const PostCard = forwardRef<HTMLDivElement, PostCardProps>(({ post, onLike, onCommentClick, onCollaboratorClick }, ref) => {
     return (
         <div
             ref={ref}
@@ -74,20 +75,41 @@ const PostCard = forwardRef<HTMLDivElement, PostCardProps>(({ post, onLike, onCo
                     className="cursor-pointer"
                     onClick={() => onCommentClick(post)}
                 >
-                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-6 line-clamp-3 leading-relaxed group-hover:text-gray-900 dark:group-hover:text-gray-300 transition-colors">
-                        {post.content.split(' ').map((word: string, i: number) =>
-                            word.startsWith('@') ? <span key={i} className="text-blue-500 dark:text-blue-400 font-medium">{word} </span> : word + ' '
+                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-6 line-clamp-3 leading-relaxed group-hover:text-gray-900 dark:group-hover:text-gray-300 transition-colors whitespace-pre-wrap break-words">
+                        {post.content.split(/(@\w+)/g).map((part: string, i: number) =>
+                            part.startsWith('@') ? (
+                                <span key={i} className="text-blue-500 dark:text-blue-400 font-medium hover:underline relative z-10">{part}</span>
+                            ) : (
+                                part
+                            )
                         )}
                     </p>
                 </div>
 
                 {/* Collaborators */}
                 {post.collaborators && post.collaborators.length > 0 && (
-                    <div className="flex items-center gap-1 mb-4">
+                    <div
+                        className="flex items-center gap-1 mb-4 cursor-pointer hover:opacity-80 transition-opacity w-fit"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onCollaboratorClick && onCollaboratorClick(post);
+                        }}
+                    >
                         <Users size={12} className="text-gray-500 mr-1" />
-                        {post.collaborators.map((c: any) => (
-                            <div key={c.uid} className="w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700 border border-white dark:border-black" title={c.username} />
+                        {post.collaborators.slice(0, 4).map((c: any) => (
+                            <div key={c.uid} className="w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700 border border-white dark:border-black overflow-hidden flex items-center justify-center text-[8px] font-bold text-gray-500" title={c.username}>
+                                {c.avatarUrl ? (
+                                    <Image height={20} width={20} src={c.avatarUrl} alt={c.username} className="w-full h-full object-cover" />
+                                ) : (
+                                    c.username[0].toUpperCase()
+                                )}
+                            </div>
                         ))}
+                        {post.collaborators.length > 4 && (
+                            <div className="w-5 h-5 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-[8px] font-bold text-gray-500 border border-white dark:border-black">
+                                +{post.collaborators.length - 4}
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -111,21 +133,21 @@ const PostCard = forwardRef<HTMLDivElement, PostCardProps>(({ post, onLike, onCo
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => onLike(post.pid)}
-                            className="flex items-center gap-1.5 group/like transition-all"
+                            className="flex items-center gap-1.5 group/like transition-all active:scale-90"
                         >
                             {post.isLiked ? (
-                                <RiHeart3Fill size={20} className="text-red-500 fill-red-500 scale-110" />
+                                <RiHeart3Fill size={20} className="text-red-500 fill-red-500 scale-110 transition-transform duration-200 ease-spring" />
                             ) : (
-                                <RiHeart3Line size={20} className="text-gray-500 group-hover/like:text-red-500 transition-colors" />
+                                <RiHeart3Line size={20} className="text-gray-500 group-hover/like:text-red-500 transition-colors duration-200" />
                             )}
-                            <span className="text-xs font-bold text-gray-500 group-hover/like:text-gray-700 dark:group-hover/like:text-gray-300">{post.likes}</span>
+                            <span className="text-xs font-bold text-gray-500 group-hover/like:text-gray-700 dark:group-hover/like:text-gray-300 transition-colors">{post.likes}</span>
                         </button>
                         <button
                             onClick={() => onCommentClick(post)}
                             className="flex items-center gap-1.5 text-gray-500 hover:text-black dark:hover:text-white transition-colors group/comment"
                         >
                             <RiChat1Line size={20} className="group-hover/comment:text-blue-500 dark:group-hover/comment:text-blue-400 transition-colors" />
-                            <span className="text-xs font-bold">0</span>
+                            <span className="text-xs font-bold">{post.commentCount || 0}</span>
                         </button>
                     </div>
                 </div>

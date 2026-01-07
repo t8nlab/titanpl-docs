@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { X, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { showToast } from '@/lib/toast';
 
 interface AuthModalProps {
     isOpen: boolean;
@@ -39,12 +40,14 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             if (authTab === 'login') {
                 setAuthUser(data.user);
                 onSuccess(data.user);
+                showToast.success('Welcome Back', `Signed in as ${data.user.username}`);
             } else {
                 setAuthTab('login');
-                setAuthError('Account created! Please login.');
+                showToast.success('Account Created', 'You can now login with your credentials.');
             }
         } catch (err: any) {
             setAuthError(err.message);
+            showToast.error('Authentication Failed', err.message);
         }
     };
 

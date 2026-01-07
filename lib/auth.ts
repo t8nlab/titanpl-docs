@@ -29,5 +29,5 @@ export async function getSession() {
     const token = cookieStore.get('token')?.value;
     if (!token) return null;
     const decoded = verifyToken(token);
-    return decoded as { uid: string; username: string } | null;
+    return decoded as { uid: string; username: string; avatarUrl?: string } | null;
 }

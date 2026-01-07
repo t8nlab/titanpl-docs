@@ -1,4 +1,6 @@
 'use client';
+import useSWR from 'swr';
+import { showToast } from '@/lib/toast';
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { LogOut, Plus, Bell, ChevronDown } from 'lucide-react';
@@ -7,6 +9,7 @@ import PostCard from './PostCard';
 import AuthModal from './AuthModal';
 import CreatePostModal from './CreatePostModal';
 import CommentsModal from './CommentsModal';
+import CollaboratorsModal from './CollaboratorsModal';
 import NotificationsModal from './NotificationsModal';
 import Image from 'next/image';
 
@@ -14,24 +17,25 @@ export default function Community() {
     const { user, logout, loading } = useAuth();
     const [posts, setPosts] = useState<any[]>([]);
 
-    // Modal States
+
     const [isAuthOpen, setIsAuthOpen] = useState(false);
     const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [activeCommentPost, setActiveCommentPost] = useState<any | null>(null);
+    const [activeCollaboratorPost, setActiveCollaboratorPost] = useState<any | null>(null);
 
-    // Infinite Scroll State
+
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const [postLoading, setPostLoading] = useState(false);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
 
-    // Observers
+
     const observer = useRef<IntersectionObserver | null>(null);
     const lastPostElementRef = useRef<HTMLDivElement>(null);
 
-    // Column State for Masonry
+
     const [columns, setColumns] = useState(1);
 
     useEffect(() => {
@@ -40,7 +44,7 @@ export default function Community() {
             else if (window.innerWidth >= 768) setColumns(2);
             else setColumns(1);
         };
-        handleResize(); // Init
+        handleResize();
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
@@ -49,7 +53,7 @@ export default function Community() {
         if (postLoading) return;
         setPostLoading(true);
         try {
-            // Updated to match 30 limit from API to fill screen better
+
             const res = await fetch(`/api/posts?page=${pageNum}&limit=30`);
             const data = await res.json();
             if (Array.isArray(data)) {
@@ -57,10 +61,10 @@ export default function Community() {
                 if (data.length === 0) setHasMore(false);
 
                 setPosts(prev => {
-                    // Start fresh if page 1
+
                     if (pageNum === 1) return data;
 
-                    // Dedupe against client state too, just in case
+
                     const existingIds = new Set(prev.map(p => p.pid));
                     const newPosts = data.filter(p => !existingIds.has(p.pid));
                     return [...prev, ...newPosts];
@@ -75,9 +79,9 @@ export default function Community() {
         }
     };
 
-    // Initial Post Load
+
     useEffect(() => {
-        // Only reload if user ID changed
+
         setPage(1);
         setPosts([]);
         setHasMore(true);
@@ -85,7 +89,7 @@ export default function Community() {
         loadPosts(1);
     }, [user?.uid]);
 
-    // Infinite Scroll Observer
+
     useEffect(() => {
         if (postLoading) return;
         if (observer.current) observer.current.disconnect();
@@ -100,12 +104,11 @@ export default function Community() {
             }
         });
 
-        // Attach to the sentinel div
         if (lastPostElementRef.current) observer.current.observe(lastPostElementRef.current);
-    }, [postLoading, hasMore]); // Removed posts.length dependency to stop re-attaching constantly
+    }, [postLoading, hasMore]);
 
 
-    // Computed Columns
+
     const getColumns = () => {
         const cols: any[][] = Array.from({ length: columns }, () => []);
         posts.forEach((post, i) => {
@@ -118,7 +121,7 @@ export default function Community() {
 
     const toggleLike = async (pid: string) => {
         if (!user) { setIsAuthOpen(true); return; }
-        // Optimistic update
+
         setPosts(posts.map(p => {
             if (p.pid === pid) {
                 return { ...p, likes: p.isLiked ? p.likes - 1 : p.likes + 1, isLiked: !p.isLiked };
@@ -128,7 +131,38 @@ export default function Community() {
 
         const res = await fetch(`/api/posts/${pid}/like`, { method: 'POST' });
         if (!res.ok) {
+            showToast.error("Error", "Failed to like post");
         }
+    };
+
+    const fetcher = (url: string) => fetch(url).then(res => res.json());
+    const { data: notificationsData } = useSWR(user ? '/api/notifications' : null, fetcher, {
+        revalidateOnFocus: false,
+        dedupingInterval: 60000
+    });
+
+    const [unseenNotifications, setUnseenNotifications] = useState<any[]>([]);
+    const [showTooltip, setShowTooltip] = useState(false);
+
+    useEffect(() => {
+        if (notificationsData && Array.isArray(notificationsData)) {
+            const lastCheck = localStorage.getItem('titan_last_check');
+            const lastDate = lastCheck ? new Date(lastCheck) : new Date(0);
+            const newOnes = notificationsData.filter((n: any) => new Date(n.createdAt) > lastDate);
+            setUnseenNotifications(newOnes);
+
+            if (newOnes.length > 0) {
+                setShowTooltip(true);
+                setTimeout(() => setShowTooltip(false), 3000);
+            }
+        }
+    }, [notificationsData]);
+
+
+    const handleBellClick = () => {
+        setIsNotificationsOpen(true);
+        setUnseenNotifications([]);
+        localStorage.setItem('titan_last_check', new Date().toISOString());
     };
 
     const handleCreatePostSuccess = async () => {
@@ -136,12 +170,12 @@ export default function Community() {
     };
 
     const handleNotificationClick = async (pid: string) => {
-        // 1. Check if post is already in feed
+
         const existing = posts.find(p => p.pid === pid);
         if (existing) {
             setActiveCommentPost(existing);
         } else {
-            // 2. Fetch it
+
             try {
                 const res = await fetch(`/api/posts/${pid}`);
                 if (res.ok) {
@@ -158,7 +192,7 @@ export default function Community() {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 relative font-sans overflow-x-hidden transition-colors duration-300">
-            {/* Navbar */}
+
             <nav className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-white/10 sticky top-0 z-20 backdrop-blur-md bg-white/80 dark:bg-black/80 transition-colors duration-300">
                 <div className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
@@ -169,18 +203,46 @@ export default function Community() {
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={() => setIsCreatePostOpen(true)}
-                                className="hidden sm:flex items-center gap-2 px-4 py-2 bg-black text-white dark:bg-white dark:text-black rounded-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors text-sm"
+                                className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 bg-black text-white dark:bg-white dark:text-black rounded-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors text-sm"
                             >
-                                <Plus size={16} />
-                                <span>Create Post</span>
+                                <Plus size={18} className="sm:w-4 sm:h-4" />
+                                <span className="hidden sm:inline">Create Post</span>
                             </button>
 
                             <button
-                                onClick={() => setIsNotificationsOpen(true)}
-                                className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded-full transition-colors text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white relative"
+                                onClick={handleBellClick}
+                                className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded-full transition-colors text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white relative group/bell"
                             >
-                                <Bell size={20} />
-                                {/* Could add red dot here if unread notifications exist (need fetch for that, simplified for now) */}
+                                <Bell size={20} className={unseenNotifications.length > 0 ? "animate-pulse" : ""} />
+                                {unseenNotifications.length > 0 && (
+                                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-black animate-pulse" />
+                                )}
+
+
+                                {showTooltip && unseenNotifications.length > 0 && (
+                                    <div className="absolute top-full right-0 mt-4 w-60 bg-white dark:bg-[#151518] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl p-3 z-50 animate-in fade-in slide-in-from-top-2 duration-500 cursor-default">
+                                        <div className="absolute -top-1 right-3 w-2 h-2 bg-white dark:bg-[#151518] border-l border-t border-gray-200 dark:border-white/10 rotate-45" />
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-xs font-bold text-black dark:text-white">{unseenNotifications.length} New Interaction{unseenNotifications.length > 1 ? 's' : ''}</span>
+                                        </div>
+                                        <div className="flex -space-x-1.5 overflow-hidden mb-2 pl-1">
+                                            {unseenNotifications.slice(0, 5).map((n, i) => (
+                                                <div key={i} className="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-[#151518] bg-gray-200 dark:bg-gray-700 overflow-hidden relative z-0 hover:z-10 transition-all">
+                                                    {n.actorAvatar ? (
+                                                        <img src={n.actorAvatar} alt={n.actorName} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-[8px] font-bold text-gray-500">{n.actorName?.[0]}</div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                            {unseenNotifications.length > 5 && (
+                                                <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-[#151518] bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-[8px] text-gray-500 font-bold z-0">
+                                                    +{unseenNotifications.length - 5}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                             </button>
 
                             <div className="relative">
@@ -188,7 +250,7 @@ export default function Community() {
                                     onClick={() => setIsProfileOpen(!isProfileOpen)}
                                     className="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-white/10 p-1.5 pr-3 rounded-full transition-colors border border-transparent hover:border-gray-200 dark:hover:border-white/10"
                                 >
-                                    <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-white text-black flex items-center justify-center font-bold text-sm overflow-hidden border border-gray-300 dark:border-white/20">
+                                    <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-white text-black flex items-center justify-center font-bold text-sm overflow-hidden">
                                         {user.avatarUrl ? (
                                             <Image height={40} width={40} src={user.avatarUrl} alt={user.username} className="w-full h-full object-cover" />
                                         ) : (
@@ -227,7 +289,7 @@ export default function Community() {
                             </a>
                             <button
                                 onClick={() => { setIsAuthOpen(true); }}
-                                className="px-5 py-2 bg-black text-white dark:bg-white dark:text-black rounded-md font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors text-sm"
+                                className="px-4 py-2 bg-black text-white dark:bg-white dark:text-black rounded-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors text-sm whitespace-nowrap"
                             >
                                 Join Community
                             </button>
@@ -241,21 +303,9 @@ export default function Community() {
                     <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 via-gray-700 to-gray-500 dark:from-white dark:via-gray-200 dark:to-gray-500 bg-clip-text text-transparent">
                         Discover Thoughts & Projects
                     </h1>
-
-
-                    {/* Mobile Create Button */}
-                    {user && (
-                        <button
-                            onClick={() => setIsCreatePostOpen(true)}
-                            className="mt-6 sm:hidden flex items-center gap-2 px-6 py-3 bg-black text-white dark:bg-white dark:text-black rounded-full font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors shadow-lg shadow-black/10 dark:shadow-white/10"
-                        >
-                            <Plus size={18} />
-                            <span>Share Thought</span>
-                        </button>
-                    )}
                 </div>
 
-                {/* Loading State */}
+
                 {isInitialLoading && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
                         {[...Array(6)].map((_, i) => (
@@ -274,6 +324,7 @@ export default function Community() {
                                         post={post}
                                         onLike={toggleLike}
                                         onCommentClick={setActiveCommentPost}
+                                        onCollaboratorClick={setActiveCollaboratorPost}
                                     />
                                 ))}
                             </div>
@@ -281,7 +332,7 @@ export default function Community() {
                     </div>
                 )}
 
-                {/* Sentinel for infinite scroll */}
+
                 <div ref={lastPostElementRef} className="h-10 w-full mt-8" />
 
                 {!isInitialLoading && posts.length === 0 && (
@@ -292,7 +343,7 @@ export default function Community() {
                 )}
             </main>
 
-            {/* Modals */}
+
             <CreatePostModal
                 isOpen={isCreatePostOpen}
                 onClose={() => setIsCreatePostOpen(false)}
@@ -305,6 +356,7 @@ export default function Community() {
                     post={activeCommentPost}
                     onClose={() => setActiveCommentPost(null)}
                     user={user}
+                    onCollaboratorClick={setActiveCollaboratorPost}
                 />
             )}
 
@@ -313,9 +365,16 @@ export default function Community() {
                 onClose={() => setIsAuthOpen(false)}
                 onSuccess={(user) => {
                     setIsAuthOpen(false);
-                    // maybe refresh or just rely on context
+                    setIsAuthOpen(false);
                 }}
             />
+
+            {activeCollaboratorPost && (
+                <CollaboratorsModal
+                    collaborators={activeCollaboratorPost.collaborators}
+                    onClose={() => setActiveCollaboratorPost(null)}
+                />
+            )}
 
             {isNotificationsOpen && (
                 <NotificationsModal

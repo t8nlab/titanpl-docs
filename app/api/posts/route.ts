@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { posts, likes, collaborators, users } from "@/db/schema";
+import { posts, likes, collaborators, users, comments } from "@/db/schema";
 import { getSession } from "@/lib/auth";
-import { desc, eq, inArray } from "drizzle-orm";
+import { desc, eq, inArray, sql } from "drizzle-orm";
 
 // Simple in-memory rate limiter
 const rateLimit = new Map<string, number[]>();
@@ -16,7 +16,7 @@ const checkRateLimit = (ip: string) => {
     // Filter out old timestamps
     const recent = timestamps.filter(t => t > windowStart);
 
-    if (recent.length >= 100) return false; // 100 requests per minute
+    if (recent.length >= 50) return false; // 50 requests per minute
 
     recent.push(now);
     rateLimit.set(ip, recent);
@@ -128,10 +128,23 @@ export async function GET(req: Request) {
             }
         });
 
+        // Fetch Comment Counts
+        const commentCounts = await db.select({
+            postId: comments.postId,
+            count: sql<number>`cast(count(${comments.id}) as int)`
+        })
+            .from(comments)
+            .where(inArray(comments.postId, postIds))
+            .groupBy(comments.postId);
+
+        const commentCountMap = new Map<string, number>();
+        commentCounts.forEach(c => commentCountMap.set(c.postId, c.count));
+
         const result = finalPosts.map(p => ({
             ...p,
             isLiked: userLikes.has(p.pid),
             collaborators: collabMap.get(p.pid) || [],
+            commentCount: commentCountMap.get(p.pid) || 0,
             author: {
                 username: p.authorName || 'Unknown',
                 avatarUrl: p.authorAvatar

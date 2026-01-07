@@ -4,6 +4,7 @@ import './global.css';
 import { Inter } from 'next/font/google';
 import type { Metadata } from 'next';
 import Notice from './components/Notice';
+import { Toaster } from 'react-hot-toast';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -61,6 +62,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <span>Titan now uses v8 for run js no more boa</span>
             </Notice>
             {children}
+            <Toaster position="bottom-right" reverseOrder={false} />
           </AuthProvider>
         </RootProvider>
       </body>
