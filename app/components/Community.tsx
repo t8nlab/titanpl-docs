@@ -229,7 +229,7 @@ export default function Community() {
                                             {unseenNotifications.slice(0, 5).map((n, i) => (
                                                 <div key={i} className="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-[#151518] bg-gray-200 dark:bg-gray-700 overflow-hidden relative z-0 hover:z-10 transition-all">
                                                     {n.actorAvatar ? (
-                                                        <img src={n.actorAvatar} alt={n.actorName} className="w-full h-full object-cover" />
+                                                        <Image height={40} width={40} src={n.actorAvatar} alt={n.actorName} className="w-full h-full object-cover" />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center text-[8px] font-bold text-gray-500">{n.actorName?.[0]}</div>
                                                     )}
