@@ -1,8 +1,8 @@
 'use client';
 import { formatDistanceToNow } from 'date-fns';
 import { showToast } from '@/lib/toast';
-import { useState, useRef, useEffect, useMemo, memo } from 'react';
-import { X, Send } from 'lucide-react';
+import { useState, useRef, useEffect, useMemo, memo, useCallback } from 'react';
+import { X, Send, Heart } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import Image from 'next/image';
@@ -12,29 +12,10 @@ function cn(...inputs: (string | undefined | null | false)[]) {
     return twMerge(clsx(inputs));
 }
 
-// Simple Tree Builder
-const buildCommentTree = (comments: any[]) => {
-    const map = new Map();
-    const roots: any[] = [];
-    // Clone to avoid mutation
-    const nodes = comments.map(c => ({ ...c, children: [] }));
 
-    nodes.forEach(c => {
-        map.set(c.id, c);
-    });
 
-    nodes.forEach(c => {
-        if (c.parentId && map.has(c.parentId)) {
-            map.get(c.parentId).children.push(c);
-        } else {
-            roots.push(c);
-        }
-    });
-    return roots;
-};
-
-const CommentItem = ({ comment, depth = 0, postAuthorId, onReply, onLoadReplies, isLast, innerRef }: { comment: any, depth?: number, postAuthorId: string, onReply: (username: string, id: string) => void, onLoadReplies: (parentId: string) => void, isLast?: boolean, innerRef?: React.Ref<HTMLDivElement> }) => {
-    const [visibleCount, setVisibleCount] = useState(3);
+const CommentItem = ({ comment, depth = 0, postAuthorId, onReply, onLoadReplies, onLike, isLast, innerRef }: { comment: any, depth?: number, postAuthorId: string, onReply: (username: string, id: string) => void, onLoadReplies: (parentId: string) => void, onLike: (id: string) => void, isLast?: boolean, innerRef?: React.Ref<HTMLDivElement> }) => {
+    const [visibleCount, setVisibleCount] = useState(10);
 
     const loadedReplies = comment.children?.length || 0;
     const totalReplies = Math.max(Number(comment.replyCount) || 0, loadedReplies);
@@ -43,21 +24,21 @@ const CommentItem = ({ comment, depth = 0, postAuthorId, onReply, onLoadReplies,
     const hasMore = showingCount < totalReplies;
 
     return (
-        <div ref={innerRef} className={cn("relative flex gap-3", depth > 0 && "ml-4 mt-3")}>
+        <div ref={innerRef} className={cn("relative flex gap-2 sm:gap-3 animate-in fade-in zoom-in-95 duration-200", depth > 0 && "ml-2 sm:ml-4 mt-3")}>
             {/* Connector Lines */}
             {depth > 0 && (
                 <>
                     {/* Curved connector to this item */}
-                    <div className="absolute -left-4 top-0 w-4 h-6 border-l-2 border-b-2 border-gray-200 dark:border-white/10 rounded-bl-xl" />
+                    <div className="absolute -left-2 sm:-left-4 top-0 w-2 sm:w-4 h-6 border-l-2 border-b-2 border-gray-200 dark:border-white/10 rounded-bl-xl" />
                     {/* Vertical rail continuing down if not last */}
                     {!isLast && (
-                        <div className="absolute -left-4 top-0 bottom-0 w-[2px] bg-gray-200 dark:bg-white/10" />
+                        <div className="absolute -left-2 sm:-left-4 top-0 bottom-0 w-[2px] bg-gray-200 dark:bg-white/10" />
                     )}
                 </>
             )}
 
             <div className="flex-shrink-0 mt-1 relative z-10">
-                <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden ring-2 ring-white dark:ring-[#0F0F12]">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden ring-2 ring-white dark:ring-[#0F0F12]">
                     {comment.avatarUrl ? (
                         <Image height={40} width={40} src={comment.avatarUrl} alt={comment.username} className="w-full h-full object-cover" />
                     ) : (
@@ -68,24 +49,40 @@ const CommentItem = ({ comment, depth = 0, postAuthorId, onReply, onLoadReplies,
                 </div>
             </div>
             <div className="flex-grow min-w-0">
-                <div className="bg-gray-50 dark:bg-[#1A1A1D] rounded-xl px-4 py-2 border border-gray-100 dark:border-white/5 relative group">
+                <div className="bg-gray-50 dark:bg-[#1A1A1D] rounded-xl px-3 sm:px-4 py-2 border border-gray-100 dark:border-white/5 relative group">
                     {postAuthorId === comment.userId && (
                         <div className="absolute -top-2 -right-2 px-2 py-0.5 bg-blue-600 rounded-full text-[9px] font-bold text-white border border-white dark:border-[#0F0F12]">
                             AUTHOR
                         </div>
                     )}
-                    <div className="items-center gap-2 mb-2 leading-none">
-                        <span className="text-sm font-bold text-gray-900 dark:text-gray-200">{comment.username}</span> <br />
-                        <span className="text-gray-500 text-xs">{formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}</span>
+                    <div className="items-center gap-2 mb-1 sm:mb-2 leading-none">
+                        <span className="text-sm font-bold text-gray-900 dark:text-gray-200">{comment.username}</span>
+                        <span className="text-gray-500 text-[10px] sm:text-xs ml-2">{formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}</span>
                     </div>
                     <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">{comment.content}</p>
-                    <div className="flex gap-2 mt-2">
+                    <div className="flex items-center gap-4 mt-2">
+                        {depth < 3 && (
+                            <button
+                                onClick={() => onReply(comment.username, comment.id)}
+                                className="flex items-center gap-1.5 text-[10px] font-bold text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                            >
+                                <div className="p-1 rounded-full bg-gray-200 dark:bg-white/10">
+                                    <RiChat1Line size={12} />
+                                </div>
+                                Reply
+                            </button>
+                        )}
+
                         <button
-                            onClick={() => onReply(comment.username, comment.id)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-[10px] font-bold text-gray-600 dark:text-gray-300 transition-all border border-transparent hover:border-gray-200 dark:hover:border-white/10"
+                            onClick={() => onLike(comment.id)}
+                            className={cn("flex items-center gap-1.5 text-[10px] font-bold transition-colors",
+                                comment.isLiked ? "text-pink-500" : "text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                            )}
                         >
-                            <RiChat1Line size={16} className="text-blue-500" />
-                            Reply
+                            <div className={cn("p-1 rounded-full transition-colors", comment.isLiked ? "bg-pink-100 dark:bg-pink-900/30" : "bg-gray-200 dark:bg-white/10")}>
+                                <Heart size={12} className={cn(comment.isLiked && "fill-current")} />
+                            </div>
+                            {comment.likeCount > 0 && <span>{comment.likeCount}</span>}
                         </button>
                     </div>
                 </div>
@@ -102,22 +99,23 @@ const CommentItem = ({ comment, depth = 0, postAuthorId, onReply, onLoadReplies,
                                 postAuthorId={postAuthorId}
                                 onReply={onReply}
                                 onLoadReplies={onLoadReplies}
+                                onLike={onLike}
                                 isLast={index === arr.length - 1 && !hasMore}
                             />
                         ))}
 
                         {/* Button logic */}
                         {hasMore && (
-                            <div className="relative flex gap-3 ml-4 mt-3">
+                            <div className="relative flex gap-3 ml-2 sm:ml-4 mt-3">
                                 {/* Connector for button */}
-                                <div className="absolute -left-4 top-0 w-4 h-4 border-l-2 border-b-2 border-gray-200 dark:border-white/10 rounded-bl-xl" />
+                                <div className="absolute -left-2 sm:-left-4 top-0 w-2 sm:w-4 h-4 border-l-2 border-b-2 border-gray-200 dark:border-white/10 rounded-bl-xl" />
 
                                 <button
                                     onClick={() => {
                                         if (visibleCount >= loadedReplies) {
                                             onLoadReplies(comment.id);
                                         }
-                                        setVisibleCount(prev => prev + 5);
+                                        setVisibleCount(prev => prev + 10);
                                     }}
                                     className="text-xs text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-2 font-medium transition-colors relative group h-8"
                                 >
@@ -133,15 +131,48 @@ const CommentItem = ({ comment, depth = 0, postAuthorId, onReply, onLoadReplies,
         </div>
     );
 };
-const arePropsEqual = (prev: any, next: any) => {
-    if (prev.comment.id !== next.comment.id) return false;
-    if (prev.comment.content !== next.comment.content) return false;
-    if (prev.comment.replyCount !== next.comment.replyCount) return false;
-    if (prev.isLast !== next.isLast) return false;
-    // Check loaded children length (proxy for structure change)
-    if ((prev.comment.children?.length || 0) !== (next.comment.children?.length || 0)) return false;
-    return true;
+
+// Optimized Tree Builder (No deep signature calculation)
+const buildCommentTree = (comments: any[]) => {
+    const map = new Map();
+    const roots: any[] = [];
+
+    // 1. Create nodes and map
+    const nodes = comments.map(c => ({
+        ...c,
+        children: []
+    }));
+
+    nodes.forEach(c => {
+        map.set(c.id, c);
+    });
+
+    // 2. Build Tree Structure
+    nodes.forEach(c => {
+        if (c.parentId && map.has(c.parentId)) {
+            map.get(c.parentId).children.push(c);
+        } else {
+            roots.push(c);
+        }
+    });
+
+    return roots;
 };
+
+// ... (CommentItem)
+
+const arePropsEqual = (prev: any, next: any) => {
+    // 1. Identity
+    if (prev.comment.id !== next.comment.id) return false;
+
+    // 2. Props Check
+    if (prev.isLast !== next.isLast) return false;
+    if (prev.depth !== next.depth) return false;
+
+   
+    return prev.comment === next.comment;
+};
+
 const MemoizedCommentItem = memo(CommentItem, arePropsEqual);
 
 const CommentInput = memo(({ replyTo, onCancelReply, onSubmit, disabled }: { replyTo: any, onCancelReply: () => void, onSubmit: (text: string) => Promise<void>, disabled: boolean }) => {
@@ -156,9 +187,9 @@ const CommentInput = memo(({ replyTo, onCancelReply, onSubmit, disabled }: { rep
     return (
         <div className="p-4 bg-white dark:bg-[#0F0F12] border-t border-gray-200 dark:border-white/10 rounded-b-2xl transition-colors">
             {replyTo && (
-                <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300 px-3 py-1.5 rounded-lg mb-2 text-xs border border-blue-100 dark:border-transparent">
+                <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300 px-3 py-2 rounded-lg mb-2 text-xs border border-blue-100 dark:border-transparent">
                     <span>Replying to <b>@{replyTo.username}</b></span>
-                    <button onClick={onCancelReply} className="hover:text-black dark:hover:text-white"><X size={12} /></button>
+                    <button onClick={onCancelReply} className="hover:text-black dark:hover:text-white"><X size={16} /></button>
                 </div>
             )}
             <div className="relative">
@@ -254,7 +285,7 @@ export default function CommentsModal({ post, onClose, user, onCollaboratorClick
         try {
             // Use ref to get current state without triggering re-render of this function
             const currentChildren = commentsRef.current.filter(c => c.parentId === parentId);
-            const limit = 50; // Load more to ensure we fill the tree
+            const limit = 10; // Load 10 at a time
             const nextPage = Math.floor(currentChildren.length / limit) + 1;
 
             const res = await fetch(`/api/comments?postId=${post.pid}&parentId=${parentId}&page=${nextPage}&limit=${limit}`);
@@ -333,7 +364,9 @@ export default function CommentsModal({ post, onClose, user, onCollaboratorClick
                     username: user.username || user.name || 'User',
                     avatarUrl: user.avatarUrl || user.image,
                     children: [],
-                    replyCount: 0
+                    replyCount: 0,
+                    likeCount: 0,
+                    isLiked: false
                 };
 
                 setComments(prev => {
@@ -356,6 +389,39 @@ export default function CommentsModal({ post, onClose, user, onCollaboratorClick
             setCommenting(false);
         }
     };
+
+    const handleLike = useCallback(async (commentId: string) => {
+        // Optimistic Update
+        const previousComments = [...commentsRef.current];
+        setComments(prev => prev.map(c => {
+            if (c.id === commentId) {
+                const isLiked = !c.isLiked;
+                const currentCount = Number(c.likeCount) || 0;
+                return {
+                    ...c,
+                    isLiked,
+                    likeCount: isLiked ? currentCount + 1 : Math.max(0, currentCount - 1)
+                };
+            }
+            return c;
+        }));
+
+        try {
+            const res = await fetch('/api/comments/like', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ commentId })
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to like");
+            }
+        } catch (e) {
+            // Revert on failure
+            setComments(previousComments);
+            showToast.error("Error", "Failed to update like");
+        }
+    }, [/* No dependencies needed as we use ref and functional updates */]);
 
     const tree = useMemo(() => buildCommentTree(comments), [comments]);
 
@@ -397,7 +463,7 @@ export default function CommentsModal({ post, onClose, user, onCollaboratorClick
                             >
                                 <span className="text-xs text-gray-500 font-medium">Collaborators:</span>
                                 <div className="flex items-center gap-1">
-                                    {post.collaborators.slice(0, 4).map((c: any) => (
+                                    {post.collaborators.slice(0, 5).map((c: any) => (
                                         <div key={c.uid} className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 border border-white dark:border-black overflow-hidden flex items-center justify-center text-[10px] font-bold text-gray-500" title={c.username}>
                                             {c.avatarUrl ? (
                                                 <Image height={24} width={24} src={c.avatarUrl} alt={c.username} className="w-full h-full object-cover" />
@@ -406,9 +472,9 @@ export default function CommentsModal({ post, onClose, user, onCollaboratorClick
                                             )}
                                         </div>
                                     ))}
-                                    {post.collaborators.length > 4 && (
+                                    {post.collaborators.length > 5 && (
                                         <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-[10px] font-bold text-gray-500 border border-white dark:border-black">
-                                            +{post.collaborators.length - 4}
+                                            +{post.collaborators.length - 5}
                                         </div>
                                     )}
                                 </div>
@@ -428,6 +494,7 @@ export default function CommentsModal({ post, onClose, user, onCollaboratorClick
                                     postAuthorId={post.authorId}
                                     onReply={onReply}
                                     onLoadReplies={loadReplies}
+                                    onLike={handleLike}
                                     isLast={isLast}
                                 />
                             );

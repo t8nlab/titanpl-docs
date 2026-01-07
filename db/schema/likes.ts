@@ -1,6 +1,7 @@
 import { pgTable, text, timestamp, primaryKey } from "drizzle-orm/pg-core";
 import { users } from "./users";
 import { posts } from "./posts";
+import { comments } from "./interactions";
 
 export const likes = pgTable(
     "likes",
@@ -15,5 +16,21 @@ export const likes = pgTable(
     },
     (t) => ({
         pk: primaryKey({ columns: [t.userId, t.postId] }),
+    })
+);
+
+export const commentLikes = pgTable(
+    "comment_likes",
+    {
+        userId: text("user_id")
+            .references(() => users.uid)
+            .notNull(),
+        commentId: text("comment_id")
+            .references(() => comments.id)
+            .notNull(),
+        createdAt: timestamp("created_at").defaultNow(),
+    },
+    (t) => ({
+        pk: primaryKey({ columns: [t.userId, t.commentId] }),
     })
 );

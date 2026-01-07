@@ -9,6 +9,7 @@ interface NotificationsModalProps {
 
 import { formatDistanceToNow } from 'date-fns';
 import Image from 'next/image';
+import { RiChat1Line } from '@remixicon/react';
 
 export default function NotificationsModal({ onClose, onNotificationClick }: NotificationsModalProps) {
     const [notifications, setNotifications] = useState<any[]>([]);
@@ -25,10 +26,19 @@ export default function NotificationsModal({ onClose, onNotificationClick }: Not
 
     const getIcon = (type: string) => {
         switch (type) {
-            case 'like': return <Heart size={12} className="text-red-500 fill-red-500" />;
-            case 'comment': return <MessageCircle size={12} className="text-blue-500 fill-blue-500" />;
+            case 'like': return <Heart size={12} className="text-pink-500 fill-pink-500" />;
+            case 'comment': return <RiChat1Line size={12} className="text-blue-500" />;
             case 'mention': return <UserPlus size={12} className="text-green-500" />;
             default: return <Bell size={12} />;
+        }
+    };
+
+    const getTypeColor = (type: string) => {
+        switch (type) {
+            case 'like': return "bg-pink-100 dark:bg-pink-900/30";
+            case 'comment': return "bg-blue-100 dark:bg-blue-900/30";
+            case 'mention': return "bg-green-100 dark:bg-green-900/30";
+            default: return "bg-gray-100 dark:bg-gray-800";
         }
     };
 
@@ -78,7 +88,7 @@ export default function NotificationsModal({ onClose, onNotificationClick }: Not
                                         </div>
                                     )}
                                 </div>
-                                <div className="absolute -bottom-1 -right-1 bg-white dark:bg-[#0F0F12] rounded-full p-0.5 border border-gray-100 dark:border-white/10">
+                                <div className={`absolute -bottom-1 -right-1 rounded-full p-0.5 border border-gray-100 dark:border-white/10 ${getTypeColor(n.type)}`}>
                                     {getIcon(n.type)}
                                 </div>
                             </div>

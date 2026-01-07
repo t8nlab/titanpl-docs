@@ -193,8 +193,8 @@ export default function Community() {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 relative font-sans overflow-x-hidden transition-colors duration-300">
 
-            <nav className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-white/10 sticky top-0 z-20 backdrop-blur-md bg-white/80 dark:bg-black/80 transition-colors duration-300">
-                <div className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <nav className="flex items-center justify-between px-3 lg:px-6 py-4 border-b border-gray-200 dark:border-white/10 sticky top-0 z-20 backdrop-blur-md bg-white/80 dark:bg-black/80 transition-colors duration-300">
+                <div className="lg:text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
                     Titan Atmosphere
                 </div>

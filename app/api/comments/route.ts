@@ -17,6 +17,9 @@ export async function GET(req: Request) {
     if (!postId) return NextResponse.json({ error: "Post ID required" }, { status: 400 });
 
     try {
+        const session = await getSession();
+        const currentUserId = session?.uid || null;
+
         const query = db.select({
             id: comments.id,
             content: comments.content,
@@ -25,7 +28,9 @@ export async function GET(req: Request) {
             userId: comments.userId,
             username: users.username,
             avatarUrl: users.avatarUrl,
-            replyCount: sql<number>`(SELECT count(*)::int FROM comments c2 WHERE c2.parent_id = ${comments.id})`
+            replyCount: sql<number>`(SELECT count(*)::int FROM comments c2 WHERE c2.parent_id = ${comments.id})`,
+            likeCount: sql<number>`(SELECT count(*)::int FROM comment_likes cl WHERE cl.comment_id = ${comments.id})`,
+            isLiked: sql<boolean>`(EXISTS (SELECT 1 FROM comment_likes cl WHERE cl.comment_id = ${comments.id} AND cl.user_id = ${currentUserId}))`
         })
             .from(comments)
             .innerJoin(users, eq(comments.userId, users.uid));
@@ -46,7 +51,9 @@ export async function GET(req: Request) {
         // Transform count to number
         const formatted = data.map(c => ({
             ...c,
-            replyCount: parseInt(String(c.replyCount || 0), 10)
+            replyCount: parseInt(String(c.replyCount || 0), 10),
+            likeCount: parseInt(String(c.likeCount || 0), 10),
+            isLiked: Boolean(c.isLiked)
         }));
 
         // console.log("Debug Comments:", formatted);
