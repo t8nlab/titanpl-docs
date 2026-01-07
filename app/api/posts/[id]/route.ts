@@ -4,9 +4,9 @@ import { posts, likes, collaborators, users } from "@/db/schema";
 import { getSession } from "@/lib/auth";
 import { eq, inArray, and } from "drizzle-orm";
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: NextRequest, props: any) {
     try {
-        const { id: pid } = await params;
+        const { id: pid } = await props.params;
         const session = await getSession();
 
         const post = await db.select({

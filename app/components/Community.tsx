@@ -284,12 +284,9 @@ export default function Community() {
                         </div>
                     ) : (
                         <div className="flex gap-4">
-                            <a href="/login" className="px-5 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors">
-                                Login
-                            </a>
                             <button
                                 onClick={() => { setIsAuthOpen(true); }}
-                                className="px-4 py-2 bg-black text-white dark:bg-white dark:text-black rounded-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors text-sm whitespace-nowrap"
+                                className="px-4 py-1 lg:py-2 bg-black text-white dark:bg-white dark:text-black rounded-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors text-sm whitespace-nowrap"
                             >
                                 Join Community
                             </button>
