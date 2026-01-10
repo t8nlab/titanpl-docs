@@ -34,7 +34,7 @@ export default function Footer() {
                             >
                                 Join the Community
                                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                                <div className="absolute inset-0 -z-10 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 transition-opacity group-hover:animate-shimmer" />
+                                <div className="absolute inset-0 -z-10 bg-linear-to-r from-transparent via-white/10 to-transparent opacity-0 transition-opacity group-hover:animate-shimmer" />
                             </Link>
                         </div>
                     </div>
@@ -63,19 +63,19 @@ export default function Footer() {
                                     <RiGithubFill className="h-4 w-4" />
                                     <span>Source Code</span>
                                 </div>
-                                <ul className="space-y-2 pl-3 border-l border-border border-dashed dark:border-white/70 border-black/70">
+                                <ul className="space-y-2 pl-3 border-l border-border border-dashed dark:border-white/50 border-black/50">
                                     <li>
-                                        <Link href="https://github.com/ezet-galaxy/titanpl" target="_blank" className="block text-sm text-muted-foreground transition-colors hover:text-foreground">
+                                        <Link href="https://github.com/ezet-galaxy/titanpl" target="_blank" className="block text-sm text-black/90 dark:text-white/90 transition-colors hover:text-foreground">
                                             titanpl
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link href="https://github.com/ezet-galaxy/titanpl/tree/main/titanpl-sdk" target="_blank" className="block text-sm text-muted-foreground transition-colors hover:text-foreground">
+                                        <Link href="https://github.com/ezet-galaxy/titanpl/tree/main/titanpl-sdk" target="_blank" className="block text-sm text-black/90 dark:text-white/90 transition-colors hover:text-foreground">
                                             titanpl-sdk
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link href="https://github.com/ezet-galaxy/titanpl/tree/main/templates/extension" target="_blank" className="block text-sm text-muted-foreground transition-colors hover:text-foreground">
+                                        <Link href="https://github.com/ezet-galaxy/titanpl/tree/main/templates/extension" target="_blank" className="block text-sm text-black/90 dark:text-white/90 transition-colors hover:text-foreground">
                                             titanpl-ext-template
                                         </Link>
                                     </li>
@@ -88,14 +88,14 @@ export default function Footer() {
                                     <RiNpmjsFill className="h-4 w-4" />
                                     <span>Packages</span>
                                 </div>
-                                <ul className="space-y-2 pl-3 border-l border-border border-dashed dark:border-white/70 border-black/70">
+                                <ul className="space-y-2 pl-3 border-l border-border border-dashed dark:border-white/50 border-black/50">
                                     <li>
-                                        <Link href="https://www.npmjs.com/package/@ezetgalaxy/titan" target="_blank" className="block text-sm text-muted-foreground transition-colors hover:text-foreground">
+                                        <Link href="https://www.npmjs.com/package/@ezetgalaxy/titan" target="_blank" className="block text-sm text-black/90 dark:text-white/90 transition-colors hover:text-foreground">
                                             @ezetgalaxy/titan
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link href="https://www.npmjs.com/package/titanpl-sdk" target="_blank" className="block text-sm text-muted-foreground transition-colors hover:text-foreground">
+                                        <Link href="https://www.npmjs.com/package/titanpl-sdk" target="_blank" className="block text-sm text-black/90 dark:text-white/90 transition-colors hover:text-foreground">
                                             titanpl-sdk
                                         </Link>
                                     </li>
@@ -121,6 +121,11 @@ export default function Footer() {
                     <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
                         <p className="text-xs leading-5 text-muted-foreground">
                             &copy; {new Date().getFullYear()} Titan Planet. All rights reserved.
+                        </p>
+                        <p className="text-xs leading-5 text-black/80 dark:text-white/80">
+                            <Link href="https://github.com/ezet-galaxy/titanpl" target="_blank" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                                Privacy Policy
+                            </Link>
                         </p>
                     </div>
                 </div>

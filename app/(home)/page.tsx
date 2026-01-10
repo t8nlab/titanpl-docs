@@ -7,6 +7,7 @@ import { motion, useScroll, useTransform } from "framer-motion"
 import { Terminal, Zap, Cpu, Rocket, Binary } from "lucide-react"
 import VideoLoader from "@/app/components/VideoLoader"
 import Footer from "@/app/components/Footer"
+import StatusBadge from "@/app/components/StatusBadge"
 import { RiJavascriptFill } from "@remixicon/react"
 
 export default function HomePage() {
@@ -121,7 +122,7 @@ export default function HomePage() {
           </motion.div>
         </div>
 
-       
+
         <div ref={videoContainerRef} className="relative w-full min-h-[40vh] flex items-center justify-center py-10">
           <motion.div
             style={{ scale, opacity, borderRadius: "1.5rem" }}
@@ -135,7 +136,7 @@ export default function HomePage() {
               playsInline
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-linear-to-t from-background/20 to-transparent pointer-events-none" />
           </motion.div>
         </div>
 
@@ -153,8 +154,11 @@ export default function HomePage() {
               />
             </div>
             <div className="text-left">
-              <div className="inline-flex items-center rounded-full border bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-500 mb-6">
-                Core Toolkit
+              <div className="flex flex-wrap items-center gap-3 mb-6">
+                <div className="inline-flex items-center rounded-full border bg-blue-500/10 border-blue-500/20 px-3 py-1 text-xs font-medium text-blue-500">
+                  Core Toolkit
+                </div>
+                <StatusBadge status="BETA" />
               </div>
               <h2 className="text-3xl font-bold tracking-tight">TitanPL SDK</h2>
               <p className="mt-4 text-lg leading-relaxed text-muted-foreground text-black/70 dark:text-white/70">
@@ -175,8 +179,11 @@ export default function HomePage() {
           {/* Extensions Section */}
           <div className="group relative grid gap-8 overflow-hidden rounded-2xl border bg-background/40 p-6 backdrop-blur-sm transition-all hover:bg-background/60 md:grid-cols-2 md:items-center md:gap-12 md:p-10">
             <div className="order-last md:order-first text-left">
-              <div className="inline-flex items-center rounded-full border bg-purple-500/10 px-3 py-1 text-xs font-medium text-purple-500 mb-6">
-                Modular Architecture
+              <div className="flex flex-wrap items-center gap-3 mb-6">
+                <div className="inline-flex items-center rounded-full border bg-purple-500/10 border-purple-500/20 px-3 py-1 text-xs font-medium text-purple-500">
+                  Modular Architecture
+                </div>
+                <StatusBadge status="ALPHA" />
               </div>
               <h2 className="text-3xl font-bold tracking-tight">TitanPL Extensions</h2>
               <p className="mt-4 text-lg leading-relaxed text-muted-foreground text-black/70 dark:text-white/70">
@@ -184,7 +191,7 @@ export default function HomePage() {
               </p>
               <div className="mt-8 flex gap-4">
                 <Link
-                  href="https://github.com/ezet-galaxy/titanpl/tree/main/templates/extension"
+                  href="https://github.com/topics/titanpl-ext"
                   target="_blank"
                   className="inline-flex items-center rounded-lg border bg-background px-5 py-2.5 text-sm font-semibold transition hover:bg-muted"
                 >
