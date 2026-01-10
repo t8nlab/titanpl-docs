@@ -123,7 +123,7 @@ export default function Footer() {
                             &copy; {new Date().getFullYear()} Titan Planet. All rights reserved.
                         </p>
                         <p className="text-xs leading-5 text-black/80 dark:text-white/80">
-                            <Link href="https://github.com/ezet-galaxy/titanpl" target="_blank" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                            <Link href="https://petalite-stew-867.notion.site/Ezet-privacy-vault-2742b05812ae802da69ef20c3ef491d8" target="_blank" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
                                 Privacy Policy
                             </Link>
                         </p>
