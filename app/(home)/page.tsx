@@ -210,8 +210,6 @@ export default function HomePage() {
           </div>
 
         </div>
-
-        <Footer />
       </main>
     </>
   )

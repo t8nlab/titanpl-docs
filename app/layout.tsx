@@ -6,6 +6,7 @@ import type { Metadata } from 'next';
 import Notice from './components/Notice';
 import { Toaster } from 'react-hot-toast';
 import { Analytics } from "@vercel/analytics/next"
+import Footer from './components/Footer';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -63,6 +64,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <span>Titan now uses v8 for run js no more boa</span>
             </Notice>
             {children}
+            <Footer />
             <Analytics />
             <Toaster position="bottom-right" reverseOrder={false} />
           </AuthProvider>

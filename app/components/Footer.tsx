@@ -107,7 +107,7 @@ export default function Footer() {
                             <h3 className="text-sm font-semibold text-foreground">Socials</h3>
                             <Link href="https://x.com/TitanPl" target="_blank" className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
                                 <RiTwitterXLine className="h-4 w-4" />
-                                X (Twitter)
+                                @TitanPl
                             </Link>
                             <Link href="https://github.com/ezet-galaxy" target="_blank" className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
                                 <RiGithubFill className="h-4 w-4" />
