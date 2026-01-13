@@ -1,3 +1,25 @@
 @import 'tailwindcss';
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
+
+/* Override sidebar link background for the specific GitHub link */
+a[href="https://github.com/ezet-galaxy/titanpl"] {
+    background-color: transparent !important;
+    padding: 0 !important;
+}
+
+a[href="https://github.com/ezet-galaxy/titanpl"]:hover {
+    background-color: transparent !important;
+}
+
+a {
+    margin-bottom: 4px;
+}
+
+a[href="/community"]:not([target="_blank"]) {
+    padding: 0 !important;
+}
+
+a[href="/community"]:hover {
+    background-color: transparent !important;
+}

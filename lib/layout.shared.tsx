@@ -1,7 +1,8 @@
-import { RiGithubFill } from '@remixicon/react';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import Image from "next/image"
 import { GithubStars } from '@/app/components/github-stars';
+
+import { RiDiscussFill } from "@remixicon/react";
 
 export function baseOptions(): BaseLayoutProps {
   return {
@@ -19,12 +20,15 @@ export function baseOptions(): BaseLayoutProps {
 
       {
         text: <GithubStars />,
-        icon: <RiGithubFill size={15} />,
         url: "https://github.com/ezet-galaxy/titanpl",
         active: "nested-url"
       },
       {
-        text: <div className='bg-blue-600/40 border-dashed border border-blue-600/80 px-1 dark:text-white text-black'>Join Community</div>,
+        text: (
+          <div className="flex gap-2 items-center bg-blue-600/40 border-dashed border border-blue-600/80 px-1 dark:text-white text-black w-full py-1.5">
+            <span>Join Community</span>
+          </div>
+        ),
         url: "/community",
         active: "nested-url"
       },

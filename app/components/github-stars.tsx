@@ -1,7 +1,7 @@
-import { RiStarSFill } from "@remixicon/react";
+import { RiGithubFill, RiStarSFill } from "@remixicon/react";
 
 export async function GithubStars() {
-    let stars = null;
+    let stars: number | null = null;
 
     try {
         const res = await fetch('https://api.github.com/repos/ezet-galaxy/titanpl', {
@@ -17,12 +17,22 @@ export async function GithubStars() {
     }
 
     return (
-        <div className='flex items-center gap-2'>
-            <span>Github</span>
+        <div
+            className="group w-full my-0.5 flex items-center gap-2 hover:rounded-lg rounded-full border border-black/5 bg-zinc-500/5 px-3 py-1.5 text-xs font-medium text-zinc-800 backdrop-blur-md transition-all hover:bg-zinc-500/10 hover:shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10"
+        >
+            <div className="flex items-center gap-1.5">
+                <RiGithubFill className="h-4 w-4 opacity-70 transition-opacity group-hover:opacity-100" />
+                <span>titanpl</span>
+            </div>
+
             {stars !== null && (
-                <div className='flex items-center gap-0.5 text-xs bg-zinc-500/10 px-1.5 py-0.5 rounded-full border border-black/5 dark:border-white/10'>
-                    <span>titanpl •</span><RiStarSFill /> {stars}
-                </div>
+                <>
+                    <div className="h-3 w-px bg-black/10 dark:bg-white/10" />
+                    <div className="flex items-center gap-1 text-zinc-600 transition-colors group-hover:text-amber-500 dark:text-zinc-400 dark:group-hover:text-amber-400">
+                        <RiStarSFill className="h-3.5 w-3.5" />
+                        <span className="mt-0.5">{stars.toLocaleString()}</span>
+                    </div>
+                </>
             )}
         </div>
     );
