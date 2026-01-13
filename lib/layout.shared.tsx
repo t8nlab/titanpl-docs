@@ -1,6 +1,7 @@
+import { RiGithubFill } from '@remixicon/react';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import Image from "next/image"
-
+import { GithubStars } from '@/app/components/github-stars';
 
 export function baseOptions(): BaseLayoutProps {
   return {
@@ -15,9 +16,11 @@ export function baseOptions(): BaseLayoutProps {
         url: "/docs",
         active: "nested-url"
       },
+
       {
-        text: "Github",
-        url: "https://github.com/ezet-galaxy/-ezetgalaxy-titan",
+        text: <GithubStars />,
+        icon: <RiGithubFill size={15} />,
+        url: "https://github.com/ezet-galaxy/titanpl",
         active: "nested-url"
       },
       {
