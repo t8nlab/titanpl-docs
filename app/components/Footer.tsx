@@ -31,7 +31,7 @@ export default function Footer() {
                             <Link
                                 href="/community"
                                 target="_blank"
-                                className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-foreground px-6 py-2.5 text-sm font-semibold border border-dashed border-black/70 dark:border-white/70 text-background transition-all hover:bg-foreground/90 active:scale-95"
+                                className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-foreground px-6 py-1.5 text-sm font-semibold border border-dashed border-black/70 dark:border-white/70 text-background transition-all hover:bg-foreground/90 active:scale-95"
                             >
                                 Join the Community
                                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -76,6 +76,11 @@ export default function Footer() {
                                         </Link>
                                     </li>
                                     <li>
+                                        <Link href="https://github.com/shoya-129/-titanpl-valid" target="_blank" className="block text-sm text-black/90 dark:text-white/90 transition-colors hover:text-foreground">
+                                            -titanpl-valid
+                                        </Link>
+                                    </li>
+                                    <li>
                                         <Link href="https://github.com/ezet-galaxy/titanpl/tree/main/templates/extension" target="_blank" className="block text-sm text-black/90 dark:text-white/90 transition-colors hover:text-foreground">
                                             titanpl-ext-template
                                         </Link>
@@ -98,6 +103,11 @@ export default function Footer() {
                                     <li>
                                         <Link href="https://www.npmjs.com/package/titanpl-sdk" target="_blank" className="block text-sm text-black/90 dark:text-white/90 transition-colors hover:text-foreground">
                                             titanpl-sdk
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href="https://www.npmjs.com/package/@titanpl/valid" target="_blank" className="block text-sm text-black/90 dark:text-white/90 transition-colors hover:text-foreground">
+                                            @titanpl/valid
                                         </Link>
                                     </li>
                                 </ul>

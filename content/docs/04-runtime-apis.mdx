@@ -15,14 +15,16 @@ Runtime APIs are exposed through the global `t` object.
 
 ---
 
-## `t.log()` — Structured logging
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 
+<Accordions>
+<Accordion title="t.log() — Structured logging">
 `t.log()` is Titan’s built-in logging API.  
 It allows actions to emit logs that are collected and handled by the native Rust server.
 
 ```js
 t.log("User login started")
-````
+```
 
 ### Logging structured data
 
@@ -47,11 +49,9 @@ t.log({
 * Zero Node.js dependency
 
 Use `t.log()` instead of `console.log()` in all actions.
+</Accordion>
 
----
-
-## `t.fetch()` — Outbound HTTP requests
-
+<Accordion title="t.fetch() — Outbound HTTP requests">
 `t.fetch()` allows actions to make outbound HTTP requests.
 It follows a familiar `fetch`-style API while executing through Titan’s Rust networking layer.
 
@@ -72,8 +72,6 @@ export default function example(req) {
 * No Node.js networking stack
 * Predictable performance
 
----
-
 ### Sending a JSON request
 
 ```js title="app/actions/login.js"
@@ -92,8 +90,6 @@ t.fetch("https://api.example.com/login", {
 * Headers are optional
 * No manual JSON handling required
 
----
-
 ### Reading the response
 
 `t.fetch()` returns a parsed response object.
@@ -111,8 +107,6 @@ return {
 * `res.body` → parsed response body
 * Errors propagate naturally to the caller
 
----
-
 ### Error behavior
 
 If a request fails:
@@ -128,17 +122,13 @@ if (res.status !== 200) {
   t.log("Upstream service failed")
 }
 ```
+</Accordion>
 
----
-
-## `t.jwt` — JSON Web Tokens
-
+<Accordion title="t.jwt — JSON Web Tokens">
 `t.jwt` provides **Rust-backed JSON Web Token (JWT)** signing and verification.
 All cryptographic operations are executed natively in Rust.
 
 There is **no Node.js JWT library**, no JS crypto, and no async behavior.
-
----
 
 ### `t.jwt.sign()`
 
@@ -150,7 +140,7 @@ const token = t.jwt.sign(
   processe.env.JWT_SECRET,
   { expiresIn: "1m" }
 )
-````
+```
 
 #### Parameters
 
@@ -170,8 +160,6 @@ const token = t.jwt.sign(
 Expiration is converted into a JWT `exp` claim **inside Rust**.
 
 > If `expiresIn` is omitted, the token does not expire.
-
----
 
 ### `t.jwt.verify()`
 
@@ -204,16 +192,12 @@ try {
   alt="Titan Runtime APIs"
   style={{ borderRadius: "12px" }}
 />
+</Accordion>
 
----
-
-## `t.password` — Password hashing
-
+<Accordion title="t.password — Password hashing">
 `t.password` provides secure password hashing and verification using **Rust-native cryptography**.
 
 Passwords are **never processed by JavaScript libraries**.
-
----
 
 ### `t.password.hash()`
 
@@ -227,8 +211,6 @@ const hash = t.password.hash("admin123")
 * Safe to store in a database
 * Deterministic and production-ready
 
----
-
 ### `t.password.verify()`
 
 Verifies a password against a stored hash.
@@ -241,23 +223,16 @@ const ok = t.password.verify("admin123", hash)
 * Returns `false` otherwise
 * No timing-sensitive logic in JavaScript
 
----
-
-## Security guarantees
+### Security guarantees
 
 * No plaintext passwords stored
 * No JS-side cryptography
 * No implicit expiration handling
 * All verification enforced in Rust
+</Accordion>
 
----
-
-
-## 🐘 Titan Database API (`t.db`)
-
+<Accordion title="t.db — Titan Database API">
 Titan includes a built-in, high-performance PostgreSQL client available directly in your runtime via the global `t` object. This allows you to interact with your data without installing any external Node.js dependencies.
-
----
 
 ### 🚀 Quick Start
 
@@ -280,8 +255,6 @@ Titan includes a built-in, high-performance PostgreSQL client available directly
    }
    ```
 
----
-
 ### 📚 API Reference: `t.db.connect(connectionString)`
 
 Establishes a synchronous connection to the PostgreSQL database.
@@ -301,8 +274,6 @@ Executes a SQL query against the database.
 
 #### Supported Data Types
 
-Titan automatically maps JavaScript types to PostgreSQL types and vice versa:
-
 | JavaScript Type | PostgreSQL Type |
 | :--- | :--- |
 | `String` | `TEXT`, `VARCHAR`, `CHAR` |
@@ -310,8 +281,6 @@ Titan automatically maps JavaScript types to PostgreSQL types and vice versa:
 | `Boolean` | `BOOLEAN` |
 | `null` | `NULL` |
 | `Object/Array` | `JSON`, `JSONB` |
-
----
 
 ### 🛠 Best Practices
 
@@ -366,14 +335,48 @@ export default function(req) {
 }
 ```
 
----
-
 ### ⚠️ Important Notes
 
 - **Synchronous Execution**: Database queries in Titan are currently synchronous. This simplifies logic but means the query blocks the specific action execution. Titan handles concurrency at the server thread level.
 - **Connection Pooling**: Titan manages connections for you, but `t.db.connect` aims to be lightweight.
 - **Environment Variables**: Always use `process.env` for sensitive credentials. Never hardcode passwords.
+</Accordion>
 
+<Accordion title="t.read() — Native File Reader">
+Titan provides an optimized file reading API.
+
+```js
+const config = t.read("./config.json")
+```
+
+- Synchronous and fast (Rust-backed)
+- Root-scoped for security
+- Ideal for SQL files, templates, or static config.
+</Accordion>
+</Accordions>
+
+
+---
+
+## Where Runtime APIs can be used
+
+| Location   | Allowed |
+| ---------- | ------- |
+| Routes     | ❌ No    |
+| Actions    | ✅ Yes   |
+| Build time | ❌ No    |
+
+Runtime APIs execute **only at request time**.
+
+---
+
+## Design philosophy
+
+Titan’s runtime APIs are:
+
+* Minimal by design
+* Explicitly scoped
+* Rust-backed
 
 ---
 
@@ -410,172 +413,3 @@ There is no hidden magic and no implicit globals beyond `t`
 > Rust executes everything
 
 This keeps Titan applications predictable, fast, and maintainable.
-
-## Example Actions
-
-```json title="credentials"
-{
-  "email": "admin@ez.app",
-  "password": "mypassword123"
-}
-```
-### Login to the account
-```js title="app/actions/login.js"
-export function login(req) {
-    const { email, password } = req.body || {}
-  
-    if (!email || !password) {
-      return {
-        status: 400,
-        json: { error: "Email and password required" }
-      }
-    }
-  
-    // ⚠️ Mock DB
-    const user = {
-      id: 1,
-      email: "admin@ez.app",
-      passwordHash: "$2b$12$MJwttSgptEQJCkPJ.J8mce1xxtmxlJPCsISvc1WEzR6mqdD/ZJyOC"
-    }
-  
-    if (email !== user.email) {
-      return {
-        status: 401,
-        json: { error: "Invalid credentials" }
-      }
-    }
-  
-    const ok = t.password.verify(password, user.passwordHash)
-  
-    if (!ok) {
-      return {
-        status: 401,
-        json: { error: "Invalid credentials" }
-      }
-    }
-  
-    const token = t.jwt.sign(
-      { userId: user.id, email: user.email },
-      processe.env.JWT_SECRET,
-      { expiresIn: "1m" }   // 👈 1 minute token
-    )
-  
-    return {
-      status: 200,
-      json: {
-        token,
-        expiresIn: "1 minute"
-      }
-    }
-  }
-```
-### Register a account
-```js title="app/actions/register.js"
-export function register(req) {
-    const { email, password } = req.body || {}
-  
-    if (!email || !password) {
-      return {
-        status: 400,
-        json: { error: "Email and password are required" }
-      }
-    }
-  
-    // ⚠️ Mock DB
-    // IMPORTANT: store passwordHash, never password
-    const passwordHash = t.password.hash(password)
-  
-    // pretend we saved this
-    const user = {
-      id: 1,
-      email,
-      passwordHash
-    }
-  
-    return {
-      status: 201,
-      json: {
-        message: "Account created",
-        user: {
-          id: user.id,
-          email: user.email,
-          passwordHash: user.passwordHash
-        }
-      }
-    }
-  }
-
-```
-### Get the user details
-
-```js title="app/actions/getUser.js"
-export function getUser(req) {
-    const { token } = req.body || {}
-  
-    const payload = t.jwt.verify(token, processe.env.JWT_SECRET)
-  
-    return {
-      status: 200,
-      json: {
-        user: payload
-      }
-    }
-  }
-```
-
-### A example of regiter user with supabse postgress:
-
-**Don't forget to add this environment variables in `.env` file `SUPABASE_ANON_KEY`, `SUPABASE_PROJECT_ID`**
-
-```js title="app/actions/register.js"
-export default function register(req) {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return { status: 400, error: "Email and password are required" };
-  }
-
-  const password_hash = t.password.hash(password);
-
-  // HARD GUARD — REQUIRED
-  if (typeof password_hash !== "string") {
-    return { status: 500, error: "Password hashing failed" };
-  }
-
-  const res = t.fetch(
-    `https://${process.env.SUPABASE_PROJECT_ID}.supabase.co/rest/v1/users`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": process.env.SUPABASE_ANON_KEY,
-        "Authorization": `Bearer ${process.env.SUPABASE_ANON_KEY}`,
-        "Prefer": "return=representation"
-      },
-      body: {
-        email,
-        password_hash
-      }
-    }
-  );
-
-  // Duplicate email
-  if (res.status === 409) {
-    return { status: 409, error: "Email already registered" };
-  }
-
-  // Any other failure
-  if (res.status < 200 || res.status >= 300) {
-    return {
-      status: res.status,
-      error: res.body || "User creation failed"
-    };
-  }
-  t.log("SUPABASE RES:", res);
-
-  return {
-    status: 201,
-    message: "User registered successfully",
-  };
-}
-```

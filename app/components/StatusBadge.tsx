@@ -57,8 +57,8 @@ export default function StatusBadge({ status, className = "" }: StatusBadgeProps
     }, [])
 
     return (
-        <div className="relative inline-flex" ref={containerRef}>
-            <motion.div
+        <span className="relative inline-flex" ref={containerRef}>
+            <motion.span
                 onClick={() => setIsOpen(!isOpen)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -69,11 +69,11 @@ export default function StatusBadge({ status, className = "" }: StatusBadgeProps
                     <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ${config.dot}`}></span>
                 </span>
                 {status}
-            </motion.div>
+            </motion.span>
 
             <AnimatePresence>
                 {isOpen && (
-                    <motion.div
+                    <motion.span
                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -81,14 +81,14 @@ export default function StatusBadge({ status, className = "" }: StatusBadgeProps
                         className="absolute z-50 mt-2 w-48 -translate-x-1/2 left-1/2 p-3 rounded-lg border bg-popover text-popover-foreground shadow-lg backdrop-blur-md bg-white/90 dark:bg-zinc-900/90 border-zinc-200 dark:border-zinc-800"
                         style={{ left: "50%", transform: "translateX(-50%)" }}
                     >
-                        <div className="text-xs font-medium leading-relaxed text-center">
+                        <span className="text-xs font-medium leading-relaxed text-center block">
                             {config.explanation}
-                        </div>
+                        </span>
                         {/* Arrow/Triangle */}
-                        <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 border-l border-t bg-inherit border-zinc-200 dark:border-zinc-800" />
-                    </motion.div>
+                        <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 border-l border-t bg-inherit border-zinc-200 dark:border-zinc-800" />
+                    </motion.span>
                 )}
             </AnimatePresence>
-        </div>
+        </span>
     )
 }

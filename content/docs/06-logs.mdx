@@ -17,8 +17,8 @@ Titan logs are emitted directly by the Rust server and the JavaScript runtime la
 When you run Titan in development mode, the server prints startup information to the terminal.
 
 ```bash
-Titan server running at: http://localhost:5000
-````
+  Titan server running at: http://localhost:5000
+```
 
 This confirms that:
 
@@ -33,10 +33,15 @@ This confirms that:
 During development, Titan automatically bundles actions and regenerates metadata when files change.
 
 ```bash
-[Titan] Bundling actions...
-[Titan] Bundling app/actions/hii.js → server/actions/hii.jsbundle
-[Titan] Bundling finished.
-Titan: routes.json + action_map.json written
+  Titan Planet   v26.8.0   [ Dev Mode ]
+
+  Type:        Rust + JS Actions
+  Hot Reload:  Enabled
+
+  • Preparing runtime... Done
+  • A new orbit is ready for your app in 0.9s
+  • Your app is now orbiting Titan Planet
+
 ```
 
 These logs indicate:
@@ -50,6 +55,7 @@ These logs indicate:
 ## Automatic server restarts
 
 When routes or actions change, Titan restarts the Rust server automatically.
+
 
 ```bash
 [Titan] Restarting Rust server...

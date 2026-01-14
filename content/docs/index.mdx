@@ -3,10 +3,9 @@ title: Quick Start
 description: Build a native Rust backend using pure JavaScript in minutes
 ---
 
-
 Welcome to **Titan** — a JavaScript-first backend framework that compiles your JavaScript routes and actions into a **native Rust + Axum server**.
 
-You write **zero Rust**.  
+You write **zero Rust**.
 Titan handles routing, bundling, runtime execution, hot reload, and deployment — all powered by Rust under the hood.
 
 ---
@@ -92,6 +91,21 @@ Titan will:
 * Build routes
 * Bundle actions
 * Start Rust dev server
-* Watch file changes
 * Trigger instant reload
 
+> **Note:** Titan automatically generates a `.gitignore` during `titan init` with all the necessary exclusions (like `node_modules`, `.titan_test_run`, and your native build artifacts), so you don't need to add them manually.
+
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+<Callout title="Migrating to Hybrid Actions" type="warn">
+  To use **Rust Actions** in an existing project:
+  
+  1. **Update CLI**: `npm install -g @ezetgalaxy/titan`
+  2. **Enable Template**: Add to `package.json`:
+     ```json
+     "titan": { "template": "rust" }
+     ```
+  3. **Sync Orbit**: Run `titan update` to scaffold the native core.
+</Callout>

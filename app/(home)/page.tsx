@@ -209,6 +209,38 @@ export default function HomePage() {
             </div>
           </div>
 
+          {/* Rust Actions Section */}
+          <div className="group relative grid gap-8 overflow-hidden rounded-2xl border bg-background/40 p-6 backdrop-blur-sm transition-all hover:bg-background/60 md:grid-cols-2 md:items-center md:gap-12 md:p-10">
+            <div className="relative aspect-square w-full overflow-hidden rounded-xl border shadow-2xl">
+              <Image
+                src="/images/rust-actions.png"
+                alt="Rust Actions Visualization"
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+            </div>
+            <div className="text-left">
+              <div className="flex flex-wrap items-center gap-3 mb-6">
+                <div className="inline-flex items-center rounded-full border bg-orange-500/10 border-orange-500/20 px-3 py-1 text-xs font-medium text-orange-500">
+                  High Performance
+                </div>
+                <StatusBadge status="BETA" />
+              </div>
+              <h2 className="text-3xl font-bold tracking-tight">Hybrid Rust Actions</h2>
+              <p className="mt-4 text-lg leading-relaxed text-muted-foreground text-black/70 dark:text-white/70">
+                Need raw power? Write your performance-critical logic in Native Rust. Titan compiles your Rust actions directly into the server binary, giving you low-level access and maximum execution speed alongside JavaScript.
+              </p>
+              <div className="mt-8 flex gap-4">
+                <Link
+                  href="/docs/03-actions#-rust-actions-beta"
+                  className="inline-flex items-center rounded-lg border bg-background px-5 py-2.5 text-sm font-semibold transition hover:bg-muted"
+                >
+                  Learn about Rust Actions
+                </Link>
+              </div>
+            </div>
+          </div>
+
         </div>
       </main>
     </>

@@ -1,24 +1,95 @@
 ---
 title: Actions
-description: Execute request-aware business logic in JavaScript, compiled and embedded into Titan’s native Rust server.
+description: Execute request-aware business logic in JavaScript or Rust, compiled and embedded into Titan’s native server.
 ---
 
 import { File, Folder, Files } from 'fumadocs-ui/components/files';
+import { Callout } from 'fumadocs-ui/components/callout';
 
+<Callout title="Migrating to Hybrid Actions" type="warn">
+  To use **Rust Actions** in an existing project:
+  
+  1. **Update CLI**: `npm install -g @ezetgalaxy/titan`
+  2. **Enable Template**: Add to `package.json`:
+     ```json
+     "titan": { "template": "rust" }
+     ```
+  3. **Sync Orbit**: Run `titan update` to scaffold the native core.
+</Callout>
 
 ## What is an Action?
 
-An **action** is a JavaScript function that executes when a route is matched.  
+An **action** is a function that executes when a route is matched.  
 Actions receive the full request context and are responsible for all **dynamic behavior** in a Titan application.
 
 Routes define *what* endpoint exists.  
 Actions define *what happens* when that endpoint is called.
 
 ```js title="app/actions/hello.js"
-export default function hello(req) {
+export function run(req) {
   return { ok: true }
 }
-````
+```
+
+---
+
+## ⚡ Hybrid Action System
+
+Titan is unique because it allows you to write endpoints in **both** JavaScript and Rust within the same project.
+
+### 🟡 JavaScript Actions (`app/actions/hello.js`)
+Perfect for business logic, rapid prototyping, and IO-bound tasks.
+```javascript
+export function run(req) {
+    t.log("Handling user request...");
+    return { 
+        message: "Hello from JavaScript!",
+        user_id: req.params.id 
+    };
+}
+```
+
+### 🔴 Rust Actions <span className="inline-flex items-center rounded-full border bg-blue-500/10 border-blue-500/20 px-2 py-0.5 text-[10px] font-medium text-blue-500 ml-2">BETA</span>
+Perfect for heavy computation, encryption, image processing, or low-level system access.
+
+```rust title="app/actions/compute.rs"
+use axum::{response::{IntoResponse, Json}, http::Request, body::Body};
+use serde_json::json;
+
+pub async fn run(req: Request<Body>) -> impl IntoResponse {
+    t.log("Processed 1M records in Rust");
+    Json(json!({ "result": "Processed 1M records in Rust" }))
+}
+```
+
+**Titan automatically detects, compiles, and routes both types.**
+* `.js` files are bundled with esbuild.
+* `.rs` files are compiled into the native binary.
+* Both share the same `routes.json` or `app.js` configuration.
+
+---
+
+## ⚙️ Enabling Rust Actions
+To enable Rust support in an existing Titan project:
+
+1. **Update your CLI** to the latest version:
+   ```bash
+   npm install -g @ezetgalaxy/titan
+   ```
+
+2. **Update `package.json`** to include the rust template:
+   ```json
+   {
+     "titan": {
+       "template": "rust"
+     }
+   }
+   ```
+
+3. **Run the update command** to generate the necessary native files:
+   ```bash
+   titan update
+   ```
 
 ---
 
@@ -47,6 +118,10 @@ Titan automatically resolves this to:
 `
 app/actions/getUser.js
 `
+or
+`
+app/actions/getUser.rs
+`
 
 No imports or wiring are required.
 
@@ -61,14 +136,14 @@ Actions live in the `app/actions` directory.
     <File name="app.js" />
     <Folder name="actions" defaultOpen>
       <File name="getUser.js" />
+      <File name="compute.rs" />
       <File name="login.js" />
-      <File name="search.js" />
     </Folder>
   </Folder>
 </Files>
 
 
-Each file exports a single function.
+Each file exports a single function. In JavaScript, it's the `run` or default function. In Rust, it's the `run` function.
 
 ---
 
@@ -134,7 +209,7 @@ export function login(req) {
 
 ## Returning responses
 
-Actions return plain JavaScript values.
+Actions return plain JavaScript values (JS) or `IntoResponse` (Rust).
 
 ```js title="app/actions/example.js"
 export function example(req) {
@@ -170,9 +245,9 @@ Titan converts errors into proper HTTP responses or log on the terminal.
 
 ---
 
-## Synchronous and deterministic execution
+## Synchronous and deterministic execution (JS)
 
-Actions execute synchronously inside Titan’s embedded JavaScript engine.
+JavaScript actions execute synchronously inside Titan’s embedded JavaScript engine.
 
 * No Node.js runtime
 * No event loop

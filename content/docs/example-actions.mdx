@@ -1,0 +1,184 @@
+---
+title: Example Actions
+description: Real-world examples of Titan actions for authentication, database integration, and more.
+---
+
+import { Steps } from 'fumadocs-ui/components/steps';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Build powerful backends with these practical examples. Titan makes it easy to combine speed and simplicity.
+
+<Steps>
+### Authentication Flow
+Implement robust user authentication using `t.password` and `t.jwt`.
+
+<Tabs items={['Login', 'Register', 'Get User']}>
+  <Tab value="Login">
+    ```js title="app/actions/login.js"
+    export function login(req) {
+        const { email, password } = req.body || {}
+      
+        if (!email || !password) {
+          return {
+            status: 400,
+            json: { error: "Email and password required" }
+          }
+        }
+      
+        // ⚠️ Mock DB Interaction
+        const user = {
+          id: 1,
+          email: "admin@ez.app",
+          passwordHash: "$2b$12$MJwttSgptEQJCkPJ.J8mce1xxtmxlJPCsISvc1WEzR6mqdD/ZJyOC"
+        }
+      
+        if (email !== user.email) {
+          return {
+            status: 401,
+            json: { error: "Invalid credentials" }
+          }
+        }
+      
+        const ok = t.password.verify(password, user.passwordHash)
+      
+        if (!ok) {
+          return {
+            status: 401,
+            json: { error: "Invalid credentials" }
+          }
+        }
+      
+        const token = t.jwt.sign(
+          { userId: user.id, email: user.email },
+          process.env.JWT_SECRET,
+          { expiresIn: "1h" }
+        )
+      
+        return {
+          status: 200,
+          json: {
+            token,
+            expiresIn: "1 hour"
+          }
+        }
+      }
+    ```
+  </Tab>
+  <Tab value="Register">
+    ```js title="app/actions/register.js"
+    export function register(req) {
+        const { email, password } = req.body || {}
+      
+        if (!email || !password) {
+          return {
+            status: 400,
+            json: { error: "Email and password are required" }
+          }
+        }
+      
+        // Hash password securely in Rust
+        const passwordHash = t.password.hash(password)
+      
+        // Save user to your database here
+        const user = { id: 1, email, passwordHash }
+      
+        return {
+          status: 201,
+          json: {
+            message: "Account created",
+            user: { id: user.id, email: user.email }
+          }
+        }
+      }
+    ```
+  </Tab>
+  <Tab value="Get User">
+    ```js title="app/actions/getUser.js"
+    export function getUser(req) {
+        const { token } = req.body || {}
+      
+        try {
+          const payload = t.jwt.verify(token, process.env.JWT_SECRET)
+          return {
+            status: 200,
+            json: { user: payload }
+          }
+        } catch (e) {
+          return { status: 401, json: { error: "Invalid token" } }
+        }
+      }
+    ```
+  </Tab>
+</Tabs>
+
+### External Integration
+Connect to third-party services like Supabase using standard REST APIs with Rust-native performance.
+
+<Callout title="Setup" type="info">
+  Ensure you have `SUPABASE_ANON_KEY` and `SUPABASE_PROJECT_ID` in your `.env` file.
+</Callout>
+
+```js title="app/actions/register_external.js"
+export default function register(req) {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return { status: 400, error: "Email and password are required" };
+  }
+
+  const password_hash = t.password.hash(password);
+
+  const res = t.fetch(
+    `https://${process.env.SUPABASE_PROJECT_ID}.supabase.co/rest/v1/users`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": process.env.SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+        "Prefer": "return=representation"
+      },
+      body: { email, password_hash }
+    }
+  );
+
+  if (res.status === 409) {
+    return { status: 409, error: "Email already registered" };
+  }
+
+  if (res.status < 200 || res.status >= 300) {
+    return { status: res.status, error: res.body || "Creation failed" };
+  }
+
+  return {
+    status: 201,
+    message: "User registered successfully",
+  };
+}
+```
+
+### Database Operations
+Interacting with PostgreSQL using the native `t.db` connector.
+
+```js title="app/actions/list_users.js"
+export default function(req) {
+    const db = t.db.connect(process.env.DATABASE_URL);
+    
+    // Read SQL from external file for clean code
+    const sql = t.read("../db/get_users.sql");
+    
+    const users = db.query(sql, [req.query.active || true]);
+    
+    return {
+        status: 200,
+        json: users
+    };
+}
+```
+</Steps>
+
+---
+
+## What's Next?
+Check out the [Runtime APIs](/docs/04-runtime-apis) to see exactly what the `t` object can do.

@@ -1,0 +1,96 @@
+---
+title: Extensions
+description: Elevate Titan Planet with custom JavaScript and high-performance Native Rust logic.
+badge: ALPHA
+---
+
+Titan Planet allows you to add modular features to any project through Extensions. These extensions can be written in pure JavaScript or a hybrid of JavaScript and Native Rust.
+
+## Project Structure
+
+A typical Titan extension has the following structure:
+
+- `index.js`: The JavaScript entry point where you define your extension's API on the global `t` object.
+- `titan.json`: Manifest file defining extension metadata and Native module mappings.
+- `native/`: Directory for Rust source code.
+  - `src/lib.rs`: Your Native function implementations.
+  - `Cargo.toml`: Rust package and dependency configuration.
+- `jsconfig.json`: Enables full IntelliSense for the Titan Runtime API.
+
+---
+
+## 🚀 Quick Start
+
+### 1. Create a new Extension
+Use the Titan CLI to scaffold a new extension:
+```bash
+titan create ext <name>
+```
+
+### 2. Install Dependencies
+Get full type support in your IDE:
+```bash
+npm install
+```
+
+### 3. Build Native Module (Optional)
+If your extension uses Rust, compile it to a dynamic library:
+```bash
+cd native
+cargo build --release
+cd ..
+```
+
+### 4. Test the Extension
+Use the Titan SDK to run a local test harness:
+```bash
+titan run ext
+```
+*Tip: Visit `http://localhost:3000/test` after starting the runner to see your extension in action!*
+
+---
+
+## 💻 Development Guide
+
+### Writing JavaScript
+Extensions interact with the global `t` object. It's best practice to namespace your extension:
+
+```javascript
+t.myExtension = {
+    myMethod: (val) => {
+        t.log("myExtension", "Doing something...");
+        return val * 2;
+    }
+};
+```
+
+### Writing Native Rust Functions
+Native functions should be marked with `#[no_mangle]` and use `extern "C"`:
+
+```rust
+#[no_mangle]
+pub extern "C" fn multiply(a: f64, b: f64) -> f64 {
+    a * b
+}
+```
+
+### Mapping Native Functions in `titan.json`
+Expose your Rust functions to JavaScript by adding them to the `native.functions` section:
+
+```json
+"functions": {
+    "add": {
+        "symbol": "add",
+        "parameters": ["f64", "f64"],
+        "result": "f64"
+    }
+}
+```
+
+---
+
+## 📦 Deployment
+To use your extension in a Titan project:
+1. Publish your extension to npm or link it locally.
+2. In your Titan project: `npm install my-extension`.
+3. The Titan Runtime will automatically detect and load your extension if it contains a `titan.json`.

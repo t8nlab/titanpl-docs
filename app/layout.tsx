@@ -7,6 +7,7 @@ import Notice from './components/Notice';
 import { Toaster } from 'react-hot-toast';
 import { Analytics } from "@vercel/analytics/next"
 import Footer from './components/Footer';
+import StatusBadge from './components/StatusBadge';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -60,8 +61,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <body cz-shortcut-listen="true" className="flex flex-col min-h-screen">
         <RootProvider>
           <AuthProvider>
-            <Notice title='No more Boa' variant='success'>
-              <span>Titan now uses v8 for run js no more boa</span>
+            <Notice variant='success'>
+              <p>Hybrid Rust Actions are now in Try it out!</p>
             </Notice>
             {children}
             <Footer />

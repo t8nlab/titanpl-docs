@@ -1,0 +1,62 @@
+---
+title: CLI Commands
+description: Master the Titan CLI to build, test, and deploy your native backend.
+---
+
+The Titan CLI is the central tool for managing your Titan Planet projects.
+
+## Installation
+
+```bash
+npm install -g @ezetgalaxy/titan
+```
+
+> **Note:** `titan` is the canonical command. `tit` remains supported as an alias.
+
+---
+
+## Project Commands
+
+### `titan init <name>`
+Scaffolds a new Titan project.
+- **Interactive Prompts:** Choose between JavaScript (Standard) or Rust + JavaScript (Beta).
+- **Template selection:** Sets up the necessary structure and `package.json` configuration.
+
+### `titan dev`
+Starts the Titan development server with hot reload.
+- **Bundling:** Uses `esbuild` to bundle JavaScript actions.
+- **Compilation:** Compiles Rust code and the native server.
+- **Hot Reload:** Watches for file changes and restarts the orbit instantly.
+
+### `titan build`
+Compiles your application into a single, high-performance native binary for production.
+
+### `titan update`
+Syncs and generates necessary native files and configurations.
+- **Migration:** Essential when enabling Rust Actions in an existing project.
+- **Core Sync:** Ensures your project's native wrapper matches your local CLI version.
+- **Automation:** Re-downloads and configures the native core based on your `package.json` settings.
+
+---
+
+## Extension Commands
+
+### `titan create ext <name>`
+Scaffolds a new Titan extension in a subdirectory.
+- Creates `titan.json`, `index.js`, and a `native/` Rust directory.
+
+### `titan run ext`
+Runs the Extension Test Harness.
+- **Virtual Project:** Sets up a temporary Titan environment.
+- **Native Link:** Links your local native code to the test runner.
+- **Test Server:** Starts a server where you can verify your extension logic.
+
+---
+
+## Help & Version
+
+### `titan --help`
+Displays help information for all commands.
+
+### `titan --version`
+Displays the current version of the Titan CLI.
