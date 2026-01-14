@@ -33,6 +33,7 @@
     "react-dom": "^19.2.3",
     "react-hot-toast": "^2.6.0",
     "react-use": "^17.6.0",
+    "recharts": "^3.6.0",
     "swr": "^2.3.8"
   },
   "devDependencies": {

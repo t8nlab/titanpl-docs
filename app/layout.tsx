@@ -8,6 +8,7 @@ import { Toaster } from 'react-hot-toast';
 import { Analytics } from "@vercel/analytics/next"
 import Footer from './components/Footer';
 import StatusBadge from './components/StatusBadge';
+import { VersionProvider } from '@/context/VersionContext';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -61,13 +62,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <body cz-shortcut-listen="true" className="flex flex-col min-h-screen">
         <RootProvider>
           <AuthProvider>
-            <Notice variant='success'>
-              <p>Hybrid Rust Actions are now in Try it out!</p>
-            </Notice>
-            {children}
-            <Footer />
-            <Analytics />
-            <Toaster position="bottom-right" reverseOrder={false} />
+            <VersionProvider>
+              <Notice variant='success'>
+                <p>Hybrid Rust Actions are now in Try it out!</p>
+              </Notice>
+              {children}
+              <Footer />
+              <Analytics />
+              <Toaster position="bottom-right" reverseOrder={false} />
+            </VersionProvider>
           </AuthProvider>
         </RootProvider>
       </body>

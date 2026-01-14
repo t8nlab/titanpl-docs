@@ -19,6 +19,11 @@ export function baseOptions(): BaseLayoutProps {
       },
 
       {
+        text: "Benchmark",
+        url: "/benchmark",
+        active: "nested-url"
+      },
+      {
         text: <GithubStars />,
         url: "https://github.com/ezet-galaxy/titanpl",
         active: "nested-url"

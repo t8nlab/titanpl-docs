@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { Activity, ArrowRight } from "lucide-react";
 import { RiGithubFill, RiNpmjsFill, RiTwitterXLine } from "@remixicon/react";
 import Image from "next/image";
 
@@ -46,6 +46,10 @@ export default function Footer() {
                             <h3 className="text-sm font-semibold text-foreground">Product</h3>
                             <Link href="/docs" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
                                 Documentation
+                            </Link>
+                            <Link href="/benchmark" className="flex gap-2 items-center text-sm text-muted-foreground font-medium transition-colors hover:text-foreground">
+                                <Activity size={14} />
+                                Benchmark
                             </Link>
                             <Link href="/docs/how-titan-works" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
                                 How Titan Works
