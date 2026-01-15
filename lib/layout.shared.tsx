@@ -30,8 +30,9 @@ export function baseOptions(): BaseLayoutProps {
       },
       {
         text: (
-          <div className="flex gap-2 items-center bg-blue-600/40 border-dashed border border-blue-600/80 px-1 dark:text-white text-black w-full py-1.5">
-            <span>Join Community</span>
+          <div className="group flex gap-2 items-center justify-center bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 hover:border-blue-500/40 rounded-lg px-3 py-1 transition-all duration-300 w-full">
+            <RiDiscussFill className="w-4 h-4 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" />
+            <span className="text-sm font-medium text-blue-600 dark:text-blue-400">Join Community</span>
           </div>
         ),
         url: "/community",

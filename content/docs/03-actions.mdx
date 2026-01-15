@@ -1,21 +1,10 @@
 ---
 title: Actions
-description: Execute request-aware business logic in JavaScript or Rust, compiled and embedded into Titan’s native server.
+description: Execute request-aware business logic in JavaScript, TypeScript (Beta), or Rust, compiled and embedded into Titan’s native server.
 ---
 
 import { File, Folder, Files } from 'fumadocs-ui/components/files';
 import { Callout } from 'fumadocs-ui/components/callout';
-
-<Callout title="Migrating to Hybrid Actions" type="warn">
-  To use **Rust Actions** in an existing project:
-  
-  1. **Update CLI**: `npm install -g @ezetgalaxy/titan`
-  2. **Enable Template**: Add to `package.json`:
-     ```json
-     "titan": { "template": "rust" }
-     ```
-  3. **Sync Orbit**: Run `titan update` to scaffold the native core.
-</Callout>
 
 ## What is an Action?
 
@@ -25,21 +14,43 @@ Actions receive the full request context and are responsible for all **dynamic b
 Routes define *what* endpoint exists.  
 Actions define *what happens* when that endpoint is called.
 
-```js title="app/actions/hello.js"
-export function run(req) {
-  return { ok: true }
-}
-```
+Titan is unique because it allows you to write endpoints in **JavaScript**, **TypeScript** (Beta), and **Rust** within the same project.
 
 ---
 
-## ⚡ Hybrid Action System
+## 🔵 TypeScript Actions (`.ts`)
 
-Titan is unique because it allows you to write endpoints in **both** JavaScript and Rust within the same project.
+<span className="inline-flex items-center rounded-full border bg-green-500/10 border-green-500/20 px-2 text-[10px] font-medium text-green-500">BETA</span>
 
-### 🟡 JavaScript Actions (`app/actions/hello.js`)
+Fully typed, strict, and auto-compiled. Titan enforces zero type errors before running.
+
+```typescript title="app/actions/hello.ts"
+
+export function run(req:any) {
+    t.log("Handling request with strict types...");
+    
+    // Type checking allows safe property access
+    const user = req.body as { name: string };
+    
+    return { 
+        message: "Hello from TypeScript!",
+        user_name: user.name 
+    };
+}
+```
+
+### Strict Type Safety
+If `titan dev` detects a type error, the server **will not run**. This ensures you never ship or test broken code.
+
+---
+
+## 🟡 JavaScript Actions (`.js`)
+
+<span className="inline-flex items-center rounded-full border bg-yellow-500/10 border-yellow-500/20 px-2 text-[10px] font-medium text-yellow-500">STANDARD</span>
+
 Perfect for business logic, rapid prototyping, and IO-bound tasks.
-```javascript
+
+```javascript title="app/actions/hello.js"
 export function run(req) {
     t.log("Handling user request...");
     return { 
@@ -49,23 +60,44 @@ export function run(req) {
 }
 ```
 
-### 🔴 Rust Actions <span className="inline-flex items-center rounded-full border bg-blue-500/10 border-blue-500/20 px-2 py-0.5 text-[10px] font-medium text-blue-500 ml-2">BETA</span>
+---
+
+## 🔴 Rust Actions (`.rs`)
+
+<span className="inline-flex items-center rounded-full border bg-blue-500/10 border-blue-500/20 px-2 text-[10px] font-medium text-blue-500">BETA</span>
+
 Perfect for heavy computation, encryption, image processing, or low-level system access.
+
+> **Note:** The Native Rust Action API is currently in **Beta**.
 
 ```rust title="app/actions/compute.rs"
 use axum::{response::{IntoResponse, Json}, http::Request, body::Body};
 use serde_json::json;
 
 pub async fn run(req: Request<Body>) -> impl IntoResponse {
+    // Perform heavy computation here
     t.log("Processed 1M records in Rust");
     Json(json!({ "result": "Processed 1M records in Rust" }))
 }
 ```
 
-**Titan automatically detects, compiles, and routes both types.**
-* `.js` files are bundled with esbuild.
+---
+
+## ⚡ Hybrid Action System
+
+Titan automatically detects, compiles, and routes all types.
+
+* `.ts` files are type-checked and compiled.
+* `.js` files are bundled.
 * `.rs` files are compiled into the native binary.
-* Both share the same `routes.json` or `app.js` configuration.
+* All share the same `routes.json` configuration.
+
+| Mode | Status | Description |
+| :--- | :--- | :--- |
+| **JavaScript** | ✅ Stable | Standard JS development. |
+| **TypeScript** | ⚠️ Beta | Strict typing usage. |
+| **Rust + JS** | ⚠️ Beta | Hybrid runtime with Rust actions. |
+| **Rust + TS** | ⚠️ Beta | Hybrid runtime with Rust and TS actions. |
 
 ---
 
@@ -115,15 +147,19 @@ t.get("/user/:id<number>").action("getUser")
 ```
 
 Titan automatically resolves this to:
-`
-app/actions/getUser.js
-`
-or
-`
-app/actions/getUser.rs
-`
+* `app/actions/getUser.ts`
+* `app/actions/getUser.js`
+* `app/actions/getUser.rs`
 
 No imports or wiring are required.
+
+<Callout title="Naming Convention Warning" type="warn">
+  You **MUST** ensure the following match exactly:
+  1. The **file name** in `app/actions` (e.g., `getUser.ts`)
+  2. The **route reference** in `app.js` (e.g., `.action("getUser")`)
+  
+  Titan uses this convention to automatically wire your application. If they do not match, the action will not be found.
+</Callout>
 
 ---
 
@@ -135,7 +171,7 @@ Actions live in the `app/actions` directory.
   <Folder name="app" defaultOpen>
     <File name="app.js" />
     <Folder name="actions" defaultOpen>
-      <File name="getUser.js" />
+      <File name="getUser.ts" />
       <File name="compute.rs" />
       <File name="login.js" />
     </Folder>
@@ -143,7 +179,7 @@ Actions live in the `app/actions` directory.
 </Files>
 
 
-Each file exports a single function. In JavaScript, it's the `run` or default function. In Rust, it's the `run` function.
+Each file exports a single function. In JavaScript/TypeScript, it's the `run` or default export. In Rust, it's the `run` function.
 
 ---
 
@@ -151,8 +187,8 @@ Each file exports a single function. In JavaScript, it's the `run` or default fu
 
 Typed route parameters are validated before the action runs.
 
-```js title="app/actions/getUser.js"
-export function getUser(req) {
+```typescript title="app/actions/getUser.ts"
+export function run(req: Context) {
   return {
     userId: req.params.id,
   }
@@ -168,8 +204,8 @@ export function getUser(req) {
 
 Query strings are parsed automatically.
 
-```js title="app/actions/search.js"
-export function search(req) {
+```javascript title="app/actions/search.js"
+export function run(req) {
   return {
     q: req.query.q,
   }
@@ -177,16 +213,10 @@ export function search(req) {
 ```
 
 Request:
-
-```
-GET /search?q=titan
-```
+`GET /search?q=titan`
 
 Result:
-
-```json
-{ "q": "titan" }
-```
+`{ "q": "titan" }`
 
 ---
 
@@ -194,11 +224,10 @@ Result:
 
 Titan parses request bodies based on content type.
 
-```js title="app/actions/login.js"
-export function login(req) {
-  return {
-    email: req.body.email,
-  }
+```typescript title="app/actions/login.ts"
+export function run(req: Context) {
+  const { email } = req.body as { email: string };
+  return { email };
 }
 ```
 
@@ -209,10 +238,10 @@ export function login(req) {
 
 ## Returning responses
 
-Actions return plain JavaScript values (JS) or `IntoResponse` (Rust).
+Actions return plain JavaScript objects (JS/TS) or `IntoResponse` (Rust).
 
-```js title="app/actions/example.js"
-export function example(req) {
+```javascript title="app/actions/example.js"
+export function run(req) {
   return {
     success: true,
   }

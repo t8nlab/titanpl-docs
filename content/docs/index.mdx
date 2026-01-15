@@ -82,8 +82,30 @@ Create your fist titan server using ```titan init```
 
 ```bash
 titan init my-app
+# Follow the interactive prompt to choose:
+# - JavaScript (Standard)
+# - TypeScript (Beta)
+# - Rust + JavaScript (Beta)
+# - Rust + TypeScript (Beta)
+```
+
+Inside your project:
+```bash
 cd my-app
 titan dev
+```
+
+You'll see the Titan Dev Server spin up:
+```
+  Titan Planet   v26.9.0   [ Dev Mode ]
+
+  Type:        Rust + TS Actions
+  Hot Reload:  Enabled
+  Strict Mode: Active 🛡️
+
+  • Preparing runtime... Done
+  • A new orbit is ready for your app in 0.9s
+  • Your app is now orbiting Titan Planet
 ```
 
 Titan will:
@@ -92,6 +114,7 @@ Titan will:
 * Bundle actions
 * Start Rust dev server
 * Trigger instant reload
+
 
 > **Note:** Titan automatically generates a `.gitignore` during `titan init` with all the necessary exclusions (like `node_modules`, `.titan_test_run`, and your native build artifacts), so you don't need to add them manually.
 

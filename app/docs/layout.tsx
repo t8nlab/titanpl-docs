@@ -1,7 +1,7 @@
 import { source } from '@/lib/source'
 import { DocsLayout } from 'fumadocs-ui/layouts/docs'
 import { baseOptions } from '@/lib/layout.shared'
-import { Package } from 'lucide-react'
+import SidebarBanner from '@/app/components/SidebarBanner'
 
 export default function Layout({
   children,
@@ -50,11 +50,7 @@ export default function Layout({
       tree={tree}
       {...base}
       sidebar={{
-        banner: (
-          <div className="p-2 font-medium flex gap-2 items-center bg-blue-600/20 border border-blue-600/60 text-blue-600 rounded-md">
-            <Package color='#155dfc' size={20} /> Stable · v26.8.3
-          </div>
-        )
+        banner: <SidebarBanner />
       }}
     >
       {children}

@@ -33,7 +33,7 @@ This confirms that:
 During development, Titan automatically bundles actions and regenerates metadata when files change.
 
 ```bash
-  Titan Planet   v26.8.0   [ Dev Mode ]
+  Titan Planet   v26.9.0   [ Dev Mode ]
 
   Type:        Rust + JS Actions
   Hot Reload:  Enabled
@@ -68,6 +68,30 @@ This ensures:
 * No manual restarts are required
 * The running server always reflects current code
 * Development feedback is fast and deterministic
+
+---
+
+## 🛡️ Strict Type Safety Errors
+
+Titan prioritizes code quality by enforcing **Strict TypeScript** (Beta) logic during development.
+If `titan dev` detects a type error, the server **will not run**. This ensures you never ship or test broken code.
+
+### Sample Error Output
+When a type error occurs, Titan pauses execution and provides a clear, actionable log:
+
+```bash
+[Titan] ❌ TypeScript Error:
+app/actions/payment.ts(12,5): error TS2322: Type 'string' is not assignable to type 'number'.
+
+    10 |    const amount: number = req.body.amount;
+    11 |    
+  > 12 |    processPayment( "100" ); // Error here
+       |    ^^^^^^^^^^^^^^^^^^^^^^^
+
+[Titan] 🛑 Server paused due to type errors. Fix them to resume.
+```
+
+Once fixed, the server automatically resumes.
 
 ---
 
@@ -107,7 +131,8 @@ These logs appear in the terminal as structured output:
   method: "GET",
   path: "/hii",
   params: {},
-  query: {}
+  query: {},
+  headers: {}
 }
 ```
 

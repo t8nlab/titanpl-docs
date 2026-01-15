@@ -4,6 +4,7 @@ const withMDX = createMDX();
 
 /** @type {import('next').NextConfig} */
 const config = {
+  // Trigger restart for version update
   reactStrictMode: true,
   images: {
     remotePatterns: [
