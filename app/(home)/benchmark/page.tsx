@@ -31,15 +31,15 @@ import Link from 'next/link';
 import VideoLoader from '@/app/components/VideoLoader';
 
 const throughputData = [
-    { name: 'Express', value: 93000, color: '#666' },
-    { name: 'Titan Planet', value: 131000, color: '#3b82f6' },
+    { name: 'Express', value: 102380, color: '#666' },
+    { name: 'Titan Planet', value: 144370, color: '#3b82f6' },
 ];
 
 const scaleData = [
     { name: '10 Routes', titan: 12, express: 20 },
     { name: '500 Routes', titan: 22, express: 120 },
     { name: '1k Routes', titan: 35, express: 280 },
-    { name: '2k Routes', titan: 48, express: 535 },
+    { name: '2k Routes', titan: 35, express: 546 },
 ];
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -108,7 +108,7 @@ const BenchmarkPage = () => {
                         className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-[10px] md:text-sm font-medium mb-6"
                     >
                         <Activity size={12} />
-                        <span>Updated Jan 14, 2026</span>
+                        <span>Updated Jan 16, 2026</span>
                     </motion.div>
 
                     <motion.h1
@@ -124,6 +124,17 @@ const BenchmarkPage = () => {
                     >
                         Performance testing conducted to compare Titan Planet ({titanVersion}) against Express ({expressVersion}) under realistic high-pressure scenarios.
                     </motion.p>
+
+                    <motion.div
+                        variants={fadeIn}
+                        className="mt-8 flex flex-wrap justify-center gap-3"
+                    >
+                        {['Windows', '16GB RAM', 'Autocannon', '500 Connections'].map((spec, i) => (
+                            <span key={i} className="px-3 py-1 text-xs font-medium rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-700">
+                                {spec}
+                            </span>
+                        ))}
+                    </motion.div>
                 </motion.div>
 
                 {/* Test 1: Concurrency */}
@@ -143,7 +154,7 @@ const BenchmarkPage = () => {
                                     <h2 className="text-2xl md:text-3xl font-bold transition-colors">High Pressure Concurrency</h2>
                                 </div>
                                 <p className="text-sm md:text-base text-neutral-600 dark:text-neutral-400 mb-8 leading-relaxed">
-                                    Measuring raw throughput and latency with 200 concurrent connections using a minimal "Hello World" payload.
+                                    Measuring raw throughput and latency with 500 concurrent connections using a minimal "Hello World" payload.
                                 </p>
                             </div>
 
@@ -152,9 +163,9 @@ const BenchmarkPage = () => {
                                     <div className="flex justify-between items-end mb-4">
                                         <div>
                                             <p className="text-[10px] md:text-sm text-neutral-500 mb-1">Total Requests</p>
-                                            <h3 className="text-xl md:text-2xl font-bold transition-colors">131,000</h3>
+                                            <h3 className="text-xl md:text-2xl font-bold transition-colors">144,370</h3>
                                         </div>
-                                        <span className="text-blue-600 dark:text-blue-400 font-bold text-xs md:text-base">+40.3%</span>
+                                        <span className="text-blue-600 dark:text-blue-400 font-bold text-xs md:text-base">+41%</span>
                                     </div>
                                     <div className="h-2 w-full bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
                                         <motion.div
@@ -171,13 +182,13 @@ const BenchmarkPage = () => {
                                     <div className="flex justify-between items-end mb-4">
                                         <div>
                                             <p className="text-[10px] md:text-sm text-neutral-500 mb-1">Total Requests</p>
-                                            <h3 className="text-xl md:text-2xl font-bold text-neutral-700 dark:text-neutral-500 transition-colors">93,000</h3>
+                                            <h3 className="text-xl md:text-2xl font-bold text-neutral-700 dark:text-neutral-500 transition-colors">102,380</h3>
                                         </div>
                                     </div>
                                     <div className="h-2 w-full bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
                                         <motion.div
                                             initial={{ width: 0 }}
-                                            whileInView={{ width: '71%' }}
+                                            whileInView={{ width: '70.9%' }}
                                             transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
                                             className="h-full bg-neutral-600"
                                         />
@@ -189,12 +200,12 @@ const BenchmarkPage = () => {
 
                         <div className="flex-1 grid grid-cols-2 md:grid-cols-3 gap-4 w-full pt-1">
                             {[
-                                { label: 'Req/Sec', value: '12,931', sub: 'Titan', icon: Gauge, color: 'text-blue-600 dark:text-blue-400' },
+                                { label: 'Req/Sec', value: '14,437', sub: 'Titan', icon: Gauge, color: 'text-blue-600 dark:text-blue-400' },
                                 { label: 'Latency', value: '14.9ms', sub: 'Titan', icon: Clock, color: 'text-blue-600 dark:text-blue-400' },
-                                { label: 'Memory', value: '≈ 7.5MB', sub: 'Titan', icon: Cpu, color: 'text-blue-600 dark:text-blue-400' },
-                                { label: 'Req/Sec', value: '9,217', sub: 'Express', icon: ZapOff, color: 'text-neutral-500 uppercase text-[10px] font-bold' },
+                                { label: 'Memory', value: '≈ 60.5MB', sub: 'Titan', icon: Cpu, color: 'text-blue-600 dark:text-blue-400' },
+                                { label: 'Req/Sec', value: '10,238', sub: 'Express', icon: ZapOff, color: 'text-neutral-500 uppercase text-[10px] font-bold' },
                                 { label: 'Latency', value: '21.1ms', sub: 'Express', icon: Clock, color: 'text-neutral-500 uppercase text-[10px] font-bold' },
-                                { label: 'Memory', value: '≈ 500 MB', sub: 'Express', icon: Cpu, color: 'text-neutral-500 uppercase text-[10px] font-bold' },
+                                { label: 'Memory', value: '≈ 65.2 MB', sub: 'Express', icon: Cpu, color: 'text-neutral-500 uppercase text-[10px] font-bold' },
                             ].map((stat, i) => (
                                 <motion.div
                                     key={i}
@@ -239,25 +250,25 @@ const BenchmarkPage = () => {
                             <div className="flex flex-col gap-8">
                                 <div>
                                     <div className="flex justify-between items-center mb-4">
-                                        <span className="text-lg md:text-xl font-medium transition-colors">Titan Planet (Dev)</span>
-                                        <span className="text-3xl md:text-4xl font-bold text-blue-600 dark:text-blue-400 transition-colors">11x Faster</span>
+                                        <span className="text-lg md:text-xl font-medium transition-colors">Titan Planet</span>
+                                        <span className="text-3xl md:text-4xl font-bold text-blue-600 dark:text-blue-400 transition-colors">16x Faster</span>
                                     </div>
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                                         <div>
                                             <p className="text-[10px] md:text-sm text-neutral-500 mb-1 font-mono uppercase transition-colors">Throughput</p>
-                                            <p className="text-xl md:text-2xl font-bold transition-colors">101,000</p>
+                                            <p className="text-xl md:text-2xl font-bold transition-colors">144,000</p>
                                         </div>
                                         <div>
                                             <p className="text-[10px] md:text-sm text-neutral-500 mb-1 font-mono uppercase transition-colors">Avg Speed</p>
-                                            <p className="text-xl md:text-2xl font-bold transition-colors">10,054 Req/s</p>
+                                            <p className="text-xl md:text-2xl font-bold transition-colors">14,400 Req/s</p>
                                         </div>
                                         <div>
                                             <p className="text-[10px] md:text-sm text-neutral-500 mb-1 font-mono uppercase transition-colors">Latency</p>
-                                            <p className="text-xl md:text-2xl font-bold transition-colors">48.82ms</p>
+                                            <p className="text-xl md:text-2xl font-bold transition-colors">35ms</p>
                                         </div>
                                         <div>
                                             <p className="text-[10px] md:text-sm text-neutral-500 mb-1 font-mono uppercase transition-colors">Memory</p>
-                                            <p className="text-xl md:text-2xl font-bold transition-colors">≈ 19.1MB</p>
+                                            <p className="text-xl md:text-2xl font-bold transition-colors">≈ 60.5MB</p>
                                         </div>
                                     </div>
                                 </div>
@@ -272,19 +283,19 @@ const BenchmarkPage = () => {
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-neutral-600 dark:text-neutral-400 transition-colors">
                                         <div>
                                             <p className="text-[10px] md:text-sm text-neutral-700 dark:text-neutral-500 mb-1 font-mono uppercase">Throughput</p>
-                                            <p className="text-xl md:text-2xl font-bold">10,000</p>
+                                            <p className="text-xl md:text-2xl font-bold">8,995</p>
                                         </div>
                                         <div>
                                             <p className="text-[10px] md:text-sm text-neutral-700 dark:text-neutral-500 mb-1 font-mono uppercase">Avg Speed</p>
-                                            <p className="text-xl md:text-2xl font-bold">917 Req/s</p>
+                                            <p className="text-xl md:text-2xl font-bold">899.5 Req/s</p>
                                         </div>
                                         <div>
                                             <p className="text-[10px] md:text-sm text-neutral-700 dark:text-neutral-500 mb-1 font-mono uppercase">Latency</p>
-                                            <p className="text-xl md:text-2xl font-bold">535.79ms</p>
+                                            <p className="text-xl md:text-2xl font-bold">546ms</p>
                                         </div>
                                         <div>
                                             <p className="text-[10px] md:text-sm text-neutral-700 dark:text-neutral-500 mb-1 font-mono uppercase">Memory</p>
-                                            <p className="text-xl md:text-2xl font-bold">≈ 60MB</p>
+                                            <p className="text-xl md:text-2xl font-bold">≈ 65.2MB</p>
                                         </div>
                                     </div>
                                 </div>
