@@ -353,7 +353,7 @@ const BenchmarkPage = () => {
                     {[
                         {
                             title: "Smart Routing",
-                            desc: "Express uses linear routing. Titan uses a Rust-powered Prefix Tree (Trie). 10 or 10,000 routes – it doesn't matter.",
+                            desc: "Express uses linear routing. TitanPL’s Orbit System delivers constant-time routing, 10 or 10,000 routes – it doesn't matter.",
                             icon: MousePointer2
                         },
                         {

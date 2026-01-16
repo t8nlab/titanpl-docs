@@ -1,0 +1,175 @@
+---
+title: TitanPL Orbit System Routing
+description: A high-performance routing engine built for predictable speed at any scale.
+---
+
+## Overview
+
+The **TitanPl Orbit System** is TitanPL’s routing architecture designed to deliver **stable, constant-time routing performance** across applications of any size — from 10 routes to 10,000 routes.
+
+Unlike frameworks that rely on linear route scans or deep middleware chains, TitanPL uses a **Rust-powered routing engine** optimized for speed, memory efficiency, and consistency.
+
+---
+
+## Core Principles
+
+The Orbit System is built on three pillars:
+
+1. **Constant-time exact route resolution (O(1))**
+2. **Lightweight dynamic route matching**
+3. **Stable performance regardless of route count**
+
+Together, these components create a routing layer that stays fast under heavy load, large route tables, and high concurrency.
+
+---
+
+## Exact Route Matching (HashMap)
+
+Exact (static) routes are stored in a Rust `HashMap` using the format:
+
+```
+METHOD:/path
+```
+
+Example:
+
+```
+GET:/users
+POST:/auth/login
+```
+
+A HashMap provides **O(1) average lookup time**, enabling TitanPL to achieve:
+
+* Consistent routing speed
+* No performance degradation as routes grow
+* Predictable server behavior under high traffic
+
+### Why this matters
+
+Even with thousands of endpoints, TitanPL resolves exact routes in effectively the same time as a single-route application.
+
+---
+
+## Dynamic Route Matching
+
+Dynamic routes (e.g., `/users/:id`) use a **lightweight Rust matcher** that performs:
+
+1. Method comparison
+2. Path segment comparison
+3. Parameter extraction
+
+Dynamic routes are stored in a compact list and matched using efficient Rust logic. While this is linear over dynamic routes, it is fast in practice because:
+
+* Dynamic route counts are usually small
+* Rust handles string/segment operations efficiently
+* The matcher runs before V8 execution, minimizing overall overhead
+
+### Real-world note
+
+Even with heavy dynamic routing, TitanPL maintains stable latencies because dynamic matching occurs within Rust — not within JavaScript.
+
+---
+
+## Orbit System Behavior
+
+The routing engine is called the **Orbit System** because every TitanPL app/server forms a “stable orbit” around the TitanPl runtime:
+
+* Routing events follow a predictable path
+* Exact and dynamic routes resolve through consistent logic
+* No slowdown occurs as the route map expands
+* No route-level middleware chain adds overhead
+
+This creates a dependable, high-performance routing layer suitable for both small APIs and large-scale distributed systems.
+
+---
+
+## Why TitanPL Does Not Slow Down
+
+Frameworks like Express.js use linear routing:
+
+```
+Check route 1 → route 2 → route 3 → ...
+```
+
+As the number of routes increases, performance drops.
+
+TitanPL avoids this problem:
+
+### Static routes
+
+**O(1) HashMap lookups**
+
+### Dynamic routes
+
+**Rust-based matcher optimized for low overhead**
+
+### No JavaScript overhead
+
+The routing logic runs **before** entering V8, ensuring minimal JS cost.
+
+---
+
+## Routing Flow Overview
+
+```
+Incoming Request
+        ↓
+Build route key: METHOD:/path
+        ↓
+Check exact route in HashMap (O(1))
+        ↓     ↘
+Matched?        No → Try dynamic matcher
+        ↓
+Load action bundle → Execute in V8 → Return response
+```
+
+This pipeline ensures routing is fast, predictable, and unaffected by scale.
+
+---
+
+## Performance Characteristics
+
+### Exact Routes
+
+* O(1) resolution
+* Stable performance even at 10,000+ routes
+* Zero GC pressure
+* Minimal memory footprint
+
+### Dynamic Routes
+
+* Segment-based matching in Rust
+* Efficient parameter extraction
+* Minimal overhead before action dispatch
+
+### Result
+
+TitanPL maintains:
+
+* Low latency
+* High request throughput
+* Stable memory usage
+* Minimal routing variance across route sizes
+
+---
+
+## Summary
+
+The **TitanPl Orbit System** ensures that:
+
+* Exact routing is **constant-time**
+* Dynamic routing is **lightweight and efficient**
+* Performance remains stable from **small apps to massive APIs**
+* Routing overhead is **significantly lower** than traditional JavaScript frameworks
+
+TitanPL's routing engine is designed to meet modern performance requirements without complexity, providing a seamless and predictable developer experience.
+
+---
+
+## Key Benefits
+
+* High-performance routing at any scale
+* Predictable latency and throughput
+* Rust-level efficiency with JavaScript developer experience
+* No slowdown as routes grow
+* Perfect for high-concurrency APIs and microservices

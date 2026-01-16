@@ -4,10 +4,13 @@ import { useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion, useScroll, useTransform } from "framer-motion"
-import { Terminal, Zap, Cpu, Rocket, Binary } from "lucide-react"
+import { Terminal, Zap, Cpu, Rocket, Binary, MessageSquareQuote } from "lucide-react"
 import VideoLoader from "@/app/components/VideoLoader"
 import StatusBadge from "@/app/components/StatusBadge"
-import { RiJavascriptFill } from "@remixicon/react"
+import { RiJavascriptFill, RiTwitterXFill, RiLinkedinFill, RiGithubFill } from "@remixicon/react"
+import { Feature } from "@/app/components/Feature"
+import { FeedbackCard } from "@/app/components/FeedbackCard"
+import { feedbacks } from "@/app/data/feedbacks"
 
 export default function HomePage() {
   const videoContainerRef = useRef<HTMLDivElement>(null)
@@ -142,6 +145,8 @@ export default function HomePage() {
         {/* Ecosystem Section */}
         <div className="mt-32 w-full max-w-5xl space-y-16 px-6">
 
+
+
           {/* SDK Section */}
           <div className="group relative grid gap-8 overflow-hidden rounded-2xl border bg-background/40 p-6 backdrop-blur-sm transition-all hover:bg-background/60 md:grid-cols-2 md:items-center md:gap-12 md:p-10">
             <div className="relative aspect-square w-full overflow-hidden rounded-xl border shadow-2xl">
@@ -252,30 +257,84 @@ export default function HomePage() {
             </div>
           </div>
 
+          {/* Orbit System Section */}
+          <div className="group relative grid gap-8 overflow-hidden rounded-2xl border bg-background/40 p-6 backdrop-blur-sm transition-all hover:bg-background/60 md:grid-cols-2 md:items-center md:gap-12 md:p-10">
+            <div className="order-last md:order-first text-left">
+              <div className="flex flex-wrap items-center gap-3 mb-6">
+                <div className="inline-flex items-center rounded-full border bg-emerald-500/10 border-emerald-500/20 px-3 py-1 text-xs font-medium text-emerald-500">
+                  Core Architecture
+                </div>
+                <StatusBadge status="STABLE" />
+                <div className="inline-flex items-center gap-1 rounded-full border bg-orange-500/10 border-orange-500/20 px-3 py-1 text-xs font-medium text-orange-500">
+                  <Binary size={12} strokeWidth={2.5} /> Rust
+                </div>
+              </div>
+              <h2 className="text-3xl font-bold tracking-tight">TitanPl Orbit System</h2>
+              <p className="mt-4 text-lg leading-relaxed text-muted-foreground text-black/70 dark:text-white/70">
+                A high-performance routing engine built for predictable speed at any scale. Constant-time resolution (O(1)) and zero degradation regardless of route count.
+              </p>
+              <div className="mt-8 flex gap-4">
+                <Link
+                  href="/docs/orbit-system"
+                  className="inline-flex items-center rounded-lg border bg-background px-5 py-2.5 text-sm font-semibold transition hover:bg-muted"
+                >
+                  Learn about Orbit
+                </Link>
+              </div>
+            </div>
+            <div className="relative aspect-square w-full overflow-hidden rounded-xl border shadow-2xl">
+              <Image
+                src="/images/orbit-system.png"
+                alt="Titan Orbit System Visualization"
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+            </div>
+          </div>
+
+
+        </div>
+
+        {/* Community Feedback Section */}
+        <div className="mt-32 w-full max-w-7xl px-6 text-center mb-32">
+          <div className="mb-16">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-5xl mb-6 bg-clip-text text-transparent bg-linear-to-b from-foreground to-foreground/70">
+              Community Feedback
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Join the conversation about the future of JavaScript and Rust.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
+            {feedbacks.map((feedback, index) => (
+              <FeedbackCard
+                key={index}
+                {...feedback}
+              />
+            ))}
+            <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border bg-background/40 p-8 backdrop-blur-sm transition-all hover:bg-background/60 hover:-translate-y-1 duration-300">
+              <div className={`absolute -right-10 -top-10 h-40 w-40 rounded-full bg-linear-to-br from-green-500/20 to-transparent blur-3xl`} />
+              <div>
+                <div className="mb-4 flex items-center gap-2 text-green-500">
+                  <MessageSquareQuote className="h-5 w-5" />
+                  <span className="text-xs font-medium uppercase tracking-wider">Your Feedback</span>
+                </div>
+                <p className="text-xl font-medium leading-relaxed text-foreground/90">
+                  "Have you tried TitanPL? We'd love to hear your thoughts."
+                </p>
+              </div>
+              <div className="mt-8 pt-6 border-t border-border/50">
+                <Link href="/community" className="text-sm font-semibold text-green-500 hover:underline">
+                  Join the Discussion →
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
       </main>
     </>
   )
 }
 
-function Feature({
-  title,
-  description,
-  icon,
-}: {
-  title: string
-  description: string
-  icon?: React.ReactNode
-}) {
-  return (
-    <div className="group rounded-lg border bg-card p-5 text-left transition-all hover:bg-accent/50 hover:border-foreground/20">
-      <div className="mb-3 inline-flex text-foreground/80 group-hover:text-foreground transition-colors">
-        {icon}
-      </div>
-      <h3 className="text-sm font-semibold text-foreground tracking-tight">{title}</h3>
-      <p className="mt-1 text-sm leading-relaxed text-muted-foreground group-hover:text-foreground/80 transition-colors">
-        {description}
-      </p>
-    </div>
-  )
-}
+
