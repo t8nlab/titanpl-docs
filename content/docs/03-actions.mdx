@@ -26,17 +26,22 @@ Fully typed, strict, and auto-compiled. Titan enforces zero type errors before r
 
 ```typescript title="app/actions/hello.ts"
 
-export function run(req:any) {
+import { defineAction } from "../../titan/titan";
+
+interface HelloResponse {
+    message: string;
+    user_name: string;
+}
+
+// "defineAction" provides automatic type inference for "req"
+export const hello = defineAction((req): HelloResponse => {
     t.log("Handling request with strict types...");
-    
-    // Type checking allows safe property access
-    const user = req.body as { name: string };
-    
+
     return { 
         message: "Hello from TypeScript!",
-        user_name: user.name 
+        user_name: req.body.name || "Guest"
     };
-}
+});
 ```
 
 ### Strict Type Safety

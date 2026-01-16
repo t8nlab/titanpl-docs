@@ -63,7 +63,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <RootProvider>
           <AuthProvider>
             <VersionProvider>
-              <Notice title='Titan v26.9.0 is Live' variant='success'>
+              <Notice title='Titan v26.9.1 is Live' variant='success'>
                 <p> Now with Strict TypeScript (Beta) & Hybrid Rust Actions!</p>
               </Notice>
               {children}

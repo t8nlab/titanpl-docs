@@ -6,7 +6,6 @@ import Image from "next/image"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { Terminal, Zap, Cpu, Rocket, Binary } from "lucide-react"
 import VideoLoader from "@/app/components/VideoLoader"
-import Footer from "@/app/components/Footer"
 import StatusBadge from "@/app/components/StatusBadge"
 import { RiJavascriptFill } from "@remixicon/react"
 
@@ -158,7 +157,7 @@ export default function HomePage() {
                 <div className="inline-flex items-center rounded-full border bg-blue-500/10 border-blue-500/20 px-3 py-1 text-xs font-medium text-blue-500">
                   Core Toolkit
                 </div>
-                <StatusBadge status="BETA" />
+                <StatusBadge status="STABLE" />
                 <div className="inline-flex items-center gap-1 rounded-full border bg-yellow-400/10 border-yellow-400/20 px-3 py-1 text-xs font-medium text-yellow-500">
                   <RiJavascriptFill className="h-3.5 w-3.5" /> JS
                 </div>
@@ -186,7 +185,7 @@ export default function HomePage() {
                 <div className="inline-flex items-center rounded-full border bg-purple-500/10 border-purple-500/20 px-3 py-1 text-xs font-medium text-purple-500">
                   Modular Architecture
                 </div>
-                <StatusBadge status="ALPHA" />
+                <StatusBadge status="BETA" />
                 <div className="inline-flex items-center gap-1 rounded-full border bg-yellow-400/10 border-yellow-400/20 px-3 py-1 text-xs font-medium text-yellow-500">
                   <RiJavascriptFill className="h-3.5 w-3.5" /> JS
                 </div>
