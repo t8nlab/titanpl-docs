@@ -85,6 +85,16 @@ export default function Footer() {
                                         </Link>
                                     </li>
                                     <li>
+                                        <Link href="https://github.com/shoya-129/-titanpl-valid" target="_blank" className="block text-sm text-black/90 dark:text-white/90 transition-colors hover:text-foreground">
+                                            -titanpl-core
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href="https://github.com/David200197/eslint-plugin-titanpl" target="_blank" className="block text-sm text-black/90 dark:text-white/90 transition-colors hover:text-foreground">
+                                            eslint-plugin-titanpl
+                                        </Link>
+                                    </li>
+                                    <li>
                                         <Link href="https://github.com/ezet-galaxy/titanpl/tree/main/templates/extension" target="_blank" className="block text-sm text-black/90 dark:text-white/90 transition-colors hover:text-foreground">
                                             titanpl-ext-template
                                         </Link>
@@ -112,6 +122,16 @@ export default function Footer() {
                                     <li>
                                         <Link href="https://www.npmjs.com/package/@titanpl/valid" target="_blank" className="block text-sm text-black/90 dark:text-white/90 transition-colors hover:text-foreground">
                                             @titanpl/valid
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href="https://www.npmjs.com/package/@titanpl/core" target="_blank" className="block text-sm text-black/90 dark:text-white/90 transition-colors hover:text-foreground">
+                                            @titanpl/core
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href="https://www.npmjs.com/package/eslint-plugin-titanpl" target="_blank" className="block text-sm text-black/90 dark:text-white/90 transition-colors hover:text-foreground">
+                                            eslint-plugin-titanpl
                                         </Link>
                                     </li>
                                 </ul>

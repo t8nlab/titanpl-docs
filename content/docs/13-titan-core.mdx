@@ -1,0 +1,178 @@
+---
+title: "@titanpl/core"
+description: "The official Core Standard Library for Titan Planet - a high-performance JavaScript runtime extension."
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+## Overview
+
+`@titanpl/core` provides essential standard library modules for Titan applications, bridging high-performance Rust native implementations with an easy-to-use JavaScript API.
+
+## Installation
+
+```bash
+npm install @titanpl/core
+```
+
+## Usage
+
+The extension automatically attaches to the Titan runtime. You can access it via `t.core` or the `t` global object alias.
+
+```javascript
+// Access via t.core (Recommended)
+const { fs, crypto, os } = t.core;
+
+// Read a file
+const content = fs.readFile("config.json");
+
+// Generate UUID
+const id = crypto.uuid();
+```
+
+## API Reference
+
+### fs (File System)
+
+Perform synchronous file system operations.
+
+- `fs.readFile(path: string): string` - Read file content as UTF-8 string.
+- `fs.writeFile(path: string, content: string): void` - Write string content to file.
+- `fs.exists(path: string): boolean` - Check if path exists.
+- `fs.mkdir(path: string): void` - Create a directory (recursive).
+- `fs.remove(path: string): void` - Remove file or directory.
+- `fs.readdir(path: string): string[]` - List directory contents.
+- `fs.stat(path: string): object` - Get file statistics.
+
+**File Statistics Object Properties:**
+
+<TypeTable
+  type={{
+    type: {
+      description: 'The type of the filesystem entry',
+      type: '"file" | "directory"',
+    },
+    size: {
+      description: 'Size of the file in bytes',
+      type: 'number',
+    },
+  }}
+/>
+
+### path (Path Manipulation)
+
+Utilities for handling file paths.
+
+- `path.join(...parts: string[]): string` - Join path segments.
+- `path.resolve(...parts: string[]): string` - Resolve path to absolute.
+- `path.dirname(path: string): string` - Get directory name.
+- `path.basename(path: string): string` - Get base file name.
+- `path.extname(path: string): string` - Get file extension.
+
+### crypto (Cryptography)
+
+Cryptographic utilities using native Rust implementations.
+
+- `crypto.hash(algo: string, data: string): string` - Hash data. Supported algos: `sha256`, `sha512`, `md5`.
+- `crypto.randomBytes(size: number): string` - Generate random bytes as hex string.
+- `crypto.uuid(): string` - Generate a UUID v4.
+- `crypto.compare(hash: string, target: string): boolean` - Constant-time comparison.
+
+**Example:**
+
+```javascript
+const hash = t.core.crypto.hash("sha256", "hii");
+const valid = t.core.crypto.compare(
+    "a1a3b09875f9e9acade5623e1cca680009a6c9e0452489931cfa5b0041f4d290", 
+    hash
+);
+```
+
+### os (Operating System)
+
+Get system information.
+
+- `os.platform(): string` - OS platform (e.g., `linux`, `windows`).
+- `os.cpus(): number` - Number of CPU cores.
+- `os.totalMemory(): number` - Total system memory in bytes.
+- `os.freeMemory(): number` - Free system memory in bytes.
+- `os.tmpdir(): string` - Temporary directory path.
+
+### net (Network)
+
+Network utilities.
+
+- `net.resolveDNS(hostname: string): string[]` - Resolve hostname to IP addresses.
+- `net.ip(): string` - Get local IP address.
+
+### proc (Process)
+
+Current process information.
+
+- `proc.pid(): number` - Process ID.
+- `proc.uptime(): number` - System uptime in seconds.
+
+### time (Time)
+
+Time utilities.
+
+- `time.sleep(ms: number): void` - Sleep for specified milliseconds.
+- `time.now(): number` - Current timestamp (ms).
+- `time.timestamp(): string` - Current ISO timestamp.
+
+### url (URL)
+
+URL parsing and manipulation.
+
+- `url.parse(urlString: string): URLObject` - Parse URL string.
+- `url.format(urlObject: object): string` - Format URL object.
+- `new url.SearchParams(query: string|object)` - Handle query strings.
+
+**URLObject Properties:**
+
+<TypeTable
+  type={{
+    href: {
+        description: 'The full URL string',
+        type: 'string'
+    },
+    protocol: {
+        description: 'The protocol scheme',
+        type: 'string'
+    },
+    host: {
+        description: 'The full host portion',
+        type: 'string'
+    },
+    hostname: {
+        description: 'The host name without port',
+        type: 'string'
+    },
+    port: {
+        description: 'The port number',
+        type: 'string'
+    },
+    pathname: {
+        description: 'The path section',
+        type: 'string'
+    },
+    search: {
+        description: 'The search query string',
+        type: 'string'
+    },
+    hash: {
+        description: 'The fragment identifier',
+        type: 'string'
+    }
+  }}
+/>
+
+## Native Bindings & Node.js Compatibility
+
+The `@titanpl/core` extension serves as the backbone of the Titan ecosystem, providing a robust set of standard library modules that mirror Node.js APIs. It leverages high-performance Rust native bindings to ensure optimal speed and efficiency for system-level operations.
+
+### Key Features
+
+*   **Pre-installed & Ready**: `@titanpl/core` comes pre-installed with every new Titan project, giving you immediate access to essential tools like file system operations, cryptography, and networking without any setup.
+*   **Modular & Optional**: While it is a core part of the experience, it is built as an extension. If your project has specific needs or you wish to maintain an ultra-lightweight runtime, you can uninstall it.
+*   **Foundation for Extensions**: This library exemplifies the power of Titan's extension system. Developers can use it as a reference or a foundation to build their own high-performance, JS-only or hybrid extensions, expanding the capabilities of the Titan Runtime.

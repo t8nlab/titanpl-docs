@@ -190,9 +190,11 @@ export default function HomePage() {
                 <div className="inline-flex items-center rounded-full border bg-purple-500/10 border-purple-500/20 px-3 py-1 text-xs font-medium text-purple-500">
                   Modular Architecture
                 </div>
-                <StatusBadge status="BETA" />
                 <div className="inline-flex items-center gap-1 rounded-full border bg-yellow-400/10 border-yellow-400/20 px-3 py-1 text-xs font-medium text-yellow-500">
                   <RiJavascriptFill className="h-3.5 w-3.5" /> JS
+                </div>
+                <div className="inline-flex items-center gap-1 rounded-full border bg-blue-500/10 border-blue-500/20 px-3 py-1 text-xs font-medium text-blue-500">
+                  TS
                 </div>
               </div>
               <h2 className="text-3xl font-bold tracking-tight">TitanPL Extensions</h2>
