@@ -3,11 +3,9 @@ import { AuthProvider } from '@/context/AuthContext';
 import './global.css';
 import { Inter } from 'next/font/google';
 import type { Metadata } from 'next';
-import Notice from './components/Notice';
 import { Toaster } from 'react-hot-toast';
 import { Analytics } from "@vercel/analytics/next"
 import Footer from './components/Footer';
-import StatusBadge from './components/StatusBadge';
 import { VersionProvider } from '@/context/VersionContext';
 
 const inter = Inter({
@@ -63,9 +61,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <RootProvider>
           <AuthProvider>
             <VersionProvider>
-              <Notice title='Titan v26.9.1 is Live' variant='success'>
-                <p> Now with Strict TypeScript (Beta) & Hybrid Rust Actions!</p>
-              </Notice>
               {children}
               <Footer />
               <Analytics />
