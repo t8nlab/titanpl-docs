@@ -4,6 +4,7 @@ description: "The official Core Standard Library for Titan Planet - a high-perfo
 ---
 
 import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
 
 ## Overview
 
@@ -32,17 +33,84 @@ const id = crypto.uuid();
 
 ## API Reference
 
-### fs (File System)
+### `fs` (File System)
 
 Perform synchronous file system operations.
 
-- `fs.readFile(path: string): string` - Read file content as UTF-8 string.
-- `fs.writeFile(path: string, content: string): void` - Write string content to file.
-- `fs.exists(path: string): boolean` - Check if path exists.
-- `fs.mkdir(path: string): void` - Create a directory (recursive).
-- `fs.remove(path: string): void` - Remove file or directory.
-- `fs.readdir(path: string): string[]` - List directory contents.
-- `fs.stat(path: string): object` - Get file statistics.
+<Callout title="File System Root" type="info">
+  The file system root directory is always the `server` folder. To access files in the `app` folder, you must use relative paths like `../app/filename`.
+</Callout>
+
+#### `fs.readFile`
+Read file content as UTF-8 string.
+
+<TypeTable
+  type={{
+    path: { type: 'string', description: 'Path to file' }
+  }}
+/>
+**Returns:** `string`
+
+#### `fs.writeFile`
+Write string content to file.
+
+<TypeTable
+  type={{
+    path: { type: 'string', description: 'File path' },
+    content: { type: 'string', description: 'Content to write' }
+  }}
+/>
+**Returns:** `void`
+
+#### `fs.exists`
+Check if path exists.
+
+<TypeTable
+  type={{
+    path: { type: 'string', description: 'Path to check' }
+  }}
+/>
+**Returns:** `boolean`
+
+#### `fs.mkdir`
+Create a directory (recursive).
+
+<TypeTable
+  type={{
+    path: { type: 'string', description: 'Directory path' }
+  }}
+/>
+**Returns:** `void`
+
+#### `fs.remove`
+Remove file or directory.
+
+<TypeTable
+  type={{
+    path: { type: 'string', description: 'Path to remove' }
+  }}
+/>
+**Returns:** `void`
+
+#### `fs.readdir`
+List directory contents.
+
+<TypeTable
+  type={{
+    path: { type: 'string', description: 'Directory path' }
+  }}
+/>
+**Returns:** `string[]`
+
+#### `fs.stat`
+Get file statistics.
+
+<TypeTable
+  type={{
+    path: { type: 'string', description: 'Path to file/directory' }
+  }}
+/>
+**Returns:** `Object`
 
 **File Statistics Object Properties:**
 
@@ -59,74 +127,440 @@ Perform synchronous file system operations.
   }}
 />
 
-### path (Path Manipulation)
+### `path` (Path Manipulation)
 
 Utilities for handling file paths.
 
-- `path.join(...parts: string[]): string` - Join path segments.
-- `path.resolve(...parts: string[]): string` - Resolve path to absolute.
-- `path.dirname(path: string): string` - Get directory name.
-- `path.basename(path: string): string` - Get base file name.
-- `path.extname(path: string): string` - Get file extension.
+#### `path.join`
+Join path segments.
 
-### crypto (Cryptography)
+<TypeTable
+  type={{
+    parts: { type: '...string[]', description: 'Path segments to join' }
+  }}
+/>
+**Returns:** `string`
+
+#### `path.resolve`
+Resolve path to absolute.
+
+<TypeTable
+  type={{
+    parts: { type: '...string[]', description: 'Path segments with relative paths' }
+  }}
+/>
+**Returns:** `string`
+
+#### `path.dirname`
+Get directory name.
+
+<TypeTable
+  type={{
+    path: { type: 'string', description: 'Input path' }
+  }}
+/>
+**Returns:** `string`
+
+#### `path.basename`
+Get base file name.
+
+<TypeTable
+  type={{
+    path: { type: 'string', description: 'Input path' }
+  }}
+/>
+**Returns:** `string`
+
+#### `path.extname`
+Get file extension.
+
+<TypeTable
+  type={{
+    path: { type: 'string', description: 'Input path' }
+  }}
+/>
+**Returns:** `string`
+
+### `crypto` (Cryptography)
 
 Cryptographic utilities using native Rust implementations.
 
-- `crypto.hash(algo: string, data: string): string` - Hash data. Supported algos: `sha256`, `sha512`, `md5`.
-- `crypto.randomBytes(size: number): string` - Generate random bytes as hex string.
-- `crypto.uuid(): string` - Generate a UUID v4.
-- `crypto.compare(hash: string, target: string): boolean` - Constant-time comparison.
+#### `crypto.hash`
+Hash data. supported algos: `sha256`, `sha512`, `md5`.
 
-**Example:**
+<TypeTable
+  type={{
+    algo: { type: 'string', description: 'Algorithm name' },
+    data: { type: 'string', description: 'Data to hash' }
+  }}
+/>
+**Returns:** `string`
 
-```javascript
-const hash = t.core.crypto.hash("sha256", "hii");
-const valid = t.core.crypto.compare(
-    "a1a3b09875f9e9acade5623e1cca680009a6c9e0452489931cfa5b0041f4d290", 
-    hash
-);
-```
+#### `crypto.randomBytes`
+Generate random bytes as hex string.
 
-### os (Operating System)
+<TypeTable
+  type={{
+    size: { type: 'number', description: 'Number of bytes' }
+  }}
+/>
+**Returns:** `string`
+
+#### `crypto.uuid`
+Generate a UUID v4.
+**Returns:** `string`
+
+#### `crypto.compare`
+Constant-time comparison.
+
+<TypeTable
+  type={{
+    hash: { type: 'string', description: 'Source hash' },
+    target: { type: 'string', description: 'Target to compare against' }
+  }}
+/>
+**Returns:** `boolean`
+
+#### `crypto.encrypt`
+AES-256-GCM Encrypt (Returns Base64).
+
+<TypeTable
+  type={{
+    algorithm: { type: 'string', description: 'Encryption algorithm' },
+    key: { type: 'string', description: 'Encryption key' },
+    plaintext: { type: 'string', description: 'Text to encrypt' }
+  }}
+/>
+**Returns:** `string`
+
+#### `crypto.decrypt`
+AES-256-GCM Decrypt.
+
+<TypeTable
+  type={{
+    algorithm: { type: 'string', description: 'Encryption algorithm' },
+    key: { type: 'string', description: 'Decryption key' },
+    ciphertext: { type: 'string', description: 'Text to decrypt' }
+  }}
+/>
+**Returns:** `string`
+
+#### `crypto.hashKeyed`
+HMAC-SHA256/512.
+
+<TypeTable
+  type={{
+    algo: { type: 'string', description: 'Algorithm' },
+    key: { type: 'string', description: 'Secret key' },
+    message: { type: 'string', description: 'Message to hash' }
+  }}
+/>
+**Returns:** `string`
+
+
+### `buffer` (Buffer Utilities)
+
+Utilities for binary data manipulation.
+
+#### `buffer.fromBase64`
+Decode Base64 string.
+
+<TypeTable
+  type={{
+    str: { type: 'string', description: 'Base64 string' }
+  }}
+/>
+**Returns:** `Uint8Array`
+
+#### `buffer.toBase64`
+Encode to Base64.
+
+<TypeTable
+  type={{
+    bytes: { type: 'Uint8Array | string', description: 'Data to encode' }
+  }}
+/>
+**Returns:** `string`
+
+#### `buffer.fromHex`
+Decode Hex string.
+
+<TypeTable
+  type={{
+    str: { type: 'string', description: 'Hex string' }
+  }}
+/>
+**Returns:** `Uint8Array`
+
+#### `buffer.toHex`
+Encode to Hex.
+
+<TypeTable
+  type={{
+    bytes: { type: 'Uint8Array | string', description: 'Data to encode' }
+  }}
+/>
+**Returns:** `string`
+
+#### `buffer.fromUtf8`
+Encode UTF-8 string to bytes.
+
+<TypeTable
+  type={{
+    str: { type: 'string', description: 'Input string' }
+  }}
+/>
+**Returns:** `Uint8Array`
+
+#### `buffer.toUtf8`
+Decode bytes to UTF-8 string.
+
+<TypeTable
+  type={{
+    bytes: { type: 'Uint8Array', description: 'Input bytes' }
+  }}
+/>
+**Returns:** `string`
+
+### `ls` / `localStorage` (Persistent Storage)
+
+Key-value storage persisted to disk (via Sled).
+
+#### `ls.get`
+Get value.
+
+<TypeTable
+  type={{
+      key: { type: 'string', description: 'Storage key' }
+  }}
+/>
+**Returns:** `string | null`
+
+#### `ls.set`
+Set value.
+
+<TypeTable
+  type={{
+      key: { type: 'string', description: 'Storage key' },
+      value: { type: 'string', description: 'Value to store' }
+  }}
+/>
+**Returns:** `void`
+
+#### `ls.remove`
+Remove key.
+
+<TypeTable
+  type={{
+      key: { type: 'string', description: 'Key to remove' }
+  }}
+/>
+**Returns:** `void`
+
+#### `ls.clear`
+Clear all storage.
+**Returns:** `void`
+
+#### `ls.keys`
+List all keys.
+**Returns:** `string[]`
+
+### `session` (Server-side Sessions)
+
+Session management backed by persistent storage.
+
+#### `session.get`
+Get session value.
+
+<TypeTable
+  type={{
+      sessionId: { type: 'string', description: 'Session ID' },
+      key: { type: 'string', description: 'Key' }
+  }}
+/>
+**Returns:** `string | null`
+
+#### `session.set`
+Set session value.
+
+<TypeTable
+  type={{
+      sessionId: { type: 'string', description: 'Session ID' },
+      key: { type: 'string', description: 'Key' },
+      value: { type: 'string', description: 'Value to set' }
+  }}
+/>
+**Returns:** `void`
+
+#### `session.delete`
+Delete session value.
+
+<TypeTable
+  type={{
+      sessionId: { type: 'string', description: 'Session ID' },
+      key: { type: 'string', description: 'Key to delete' }
+  }}
+/>
+**Returns:** `void`
+
+#### `session.clear`
+Clear entire session.
+
+<TypeTable
+  type={{
+      sessionId: { type: 'string', description: 'Session ID' }
+  }}
+/>
+**Returns:** `void`
+
+### `cookies` (HTTP Cookies)
+
+Cookie parsing and serialization.
+
+#### `cookies.get`
+Parse cookie from request headers.
+
+<TypeTable
+  type={{
+      req: { type: 'object', description: 'Request object' },
+      name: { type: 'string', description: 'Cookie name' }
+  }}
+/>
+**Returns:** `string | null`
+
+#### `cookies.set`
+Set `Set-Cookie` header on response.
+
+<TypeTable
+  type={{
+      res: { type: 'object', description: 'Response object' },
+      name: { type: 'string', description: 'Cookie name' },
+      value: { type: 'string', description: 'Cookie value' },
+      options: { type: 'object', description: '{ httpOnly, secure, sameSite, path, maxAge }' }
+  }}
+/>
+**Returns:** `void`
+
+#### `cookies.delete`
+Delete cookie (expire).
+
+<TypeTable
+  type={{
+      res: { type: 'object', description: 'Response object' },
+      name: { type: 'string', description: 'Cookie name' }
+  }}
+/>
+**Returns:** `void`
+
+### `os` (Operating System)
 
 Get system information.
 
-- `os.platform(): string` - OS platform (e.g., `linux`, `windows`).
-- `os.cpus(): number` - Number of CPU cores.
-- `os.totalMemory(): number` - Total system memory in bytes.
-- `os.freeMemory(): number` - Free system memory in bytes.
-- `os.tmpdir(): string` - Temporary directory path.
+#### `os.platform`
+OS platform (e.g., `linux`, `windows`).
+**Returns:** `string`
 
-### net (Network)
+#### `os.cpus`
+Number of CPU cores.
+**Returns:** `number`
+
+#### `os.totalMemory`
+Total system memory in bytes.
+**Returns:** `number`
+
+#### `os.freeMemory`
+Free system memory in bytes.
+**Returns:** `number`
+
+#### `os.tmpdir`
+Temporary directory path.
+**Returns:** `string`
+
+### `net` (Network)
 
 Network utilities.
 
-- `net.resolveDNS(hostname: string): string[]` - Resolve hostname to IP addresses.
-- `net.ip(): string` - Get local IP address.
+#### `net.resolveDNS`
+Resolve hostname to IP addresses.
 
-### proc (Process)
+<TypeTable
+  type={{
+      hostname: { type: 'string', description: 'Hostname to resolve' }
+  }}
+/>
+**Returns:** `string[]`
+
+#### `net.ip`
+Get local IP address.
+**Returns:** `string`
+
+### `proc` (Process)
 
 Current process information.
 
-- `proc.pid(): number` - Process ID.
-- `proc.uptime(): number` - System uptime in seconds.
+#### `proc.pid`
+Process ID.
+**Returns:** `number`
 
-### time (Time)
+#### `proc.uptime`
+System uptime in seconds.
+**Returns:** `number`
+
+### `time` (Time)
 
 Time utilities.
 
-- `time.sleep(ms: number): void` - Sleep for specified milliseconds.
-- `time.now(): number` - Current timestamp (ms).
-- `time.timestamp(): string` - Current ISO timestamp.
+#### `time.sleep`
+Sleep for specified milliseconds.
 
-### url (URL)
+<TypeTable
+  type={{
+      ms: { type: 'number', description: 'Milliseconds to sleep' }
+  }}
+/>
+**Returns:** `void`
+
+#### `time.now`
+Current timestamp (ms).
+**Returns:** `number`
+
+#### `time.timestamp`
+Current ISO timestamp.
+**Returns:** `string`
+
+### `url` (URL)
 
 URL parsing and manipulation.
 
-- `url.parse(urlString: string): URLObject` - Parse URL string.
-- `url.format(urlObject: object): string` - Format URL object.
-- `new url.SearchParams(query: string|object)` - Handle query strings.
+#### `url.parse`
+Parse URL string.
+
+<TypeTable
+  type={{
+      urlString: { type: 'string', description: 'URL string to parse' }
+  }}
+/>
+**Returns:** `URLObject`
+
+#### `url.format`
+Format URL object.
+
+<TypeTable
+  type={{
+      urlObject: { type: 'object', description: 'URL object to format' }
+  }}
+/>
+**Returns:** `string`
+
+#### `new url.SearchParams`
+Handle query strings.
+
+<TypeTable
+  type={{
+      query: { type: 'string | object', description: 'Query string or object' }
+  }}
+/>
+**Returns:** `URLSearchParams`
 
 **URLObject Properties:**
 
