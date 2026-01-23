@@ -10,7 +10,7 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <HomeLayout {...baseOptions()}>
       <Notice title='Titan v26.11.0 is Live' variant='success'>
-        <p> Now with t.core!</p>
+        <p> Now new with Runtime Architecture!</p>
       </Notice>
       {children}
     </HomeLayout>

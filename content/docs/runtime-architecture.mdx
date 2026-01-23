@@ -24,13 +24,27 @@ Every worker in the pool owns its own:
 - **Dedicated V8 Isolate**: A completely independent instance of the V8 engine.
 - **Isolate Context**: A unique global scope for JavaScript execution.
 - **Compiled Actions**: Pre-compiled bytecode ready for instant execution.
-- **Independent Event Loop**: A dedicated loop for handling per-worker asynchronous tasks.
+- **Synchronous Execution**: JS and native functions execute synchronously for extreme speed and predictability.
+
+<Callout type="warning">
+**Note on Event Loops**: While the architecture allows for it, workers do not currently embed an internal event loop (like Tokio or libuv). Async behavior is managed by the host Rust runtime, keeping the worker loop extremely fast.
+</Callout>
 
 ### Architecture Layout
 
 Workers never share a lock, never block each other, and never wait for global state. This design is inspired by high-performance systems like **Chrome's process-per-tab architecture** and **Deno’s multi-isolate approach**, but optimized for server-side action execution.
 
 ![TitanPL Architecture](/architecture.png)
+
+---
+
+## Zero-Copy Request Pipeline
+
+To maximize throughput and minimize CPU overhead, TitanPL utilizes a zero-copy data pipeline from the network to the worker:
+
+- **Ref-counted Memory**: Request bodies use `Bytes`, allowing data to be shared across threads without expensive copying.
+- **Stack Allocation**: Headers, parameters, and query data use `SmallVec`, keeping small data sets on the CPU stack for rapid access.
+- **Deferred Parsing**: JSON parsing happens exclusively within the worker's isolate, never on the main server thread, eliminating bottlenecks during request dispatch.
 
 ---
 
