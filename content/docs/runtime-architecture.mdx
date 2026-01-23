@@ -1,0 +1,80 @@
+---
+title: "Runtime Architecture: How it Works"
+description: "A deep dive into TitanPL’s native worker pool, V8 isolates, and multi-threaded execution model."
+---
+
+import { Callout } from "fumadocs-ui/components/callout"
+
+## The Concurrency Revolution
+
+TitanPL introduces a **true multi-threaded architecture** that breaks the single-threaded limitations of traditional JavaScript runtimes. By leveraging Rust’s safety and performance, TitanPL executes JavaScript across multiple CPU cores simultaneously with zero lock contention.
+
+<Callout type="info">
+TitanPL doesn't "fake" concurrency with async I/O alone. It utilizes native hardware threads to run multiple JavaScript execution environments in parallel.
+</Callout>
+
+---
+
+## How It Works: The Worker Pool
+
+At its core, TitanPL spins up a high-performance **Worker Pool**. Each worker is a dedicated unit of execution that operates independently.
+
+### The Anatomy of a Worker
+Every worker in the pool owns its own:
+- **Dedicated V8 Isolate**: A completely independent instance of the V8 engine.
+- **Isolate Context**: A unique global scope for JavaScript execution.
+- **Compiled Actions**: Pre-compiled bytecode ready for instant execution.
+- **Independent Event Loop**: A dedicated loop for handling per-worker asynchronous tasks.
+
+### Architecture Layout
+
+Workers never share a lock, never block each other, and never wait for global state. This design is inspired by high-performance systems like **Chrome's process-per-tab architecture** and **Deno’s multi-isolate approach**, but optimized for server-side action execution.
+
+![TitanPL Architecture](/architecture.png)
+
+---
+
+## Key Benefits
+
+### 1. Zero Lock Contention
+Since workers never share state or locks, they never block each other. This eliminates the "Stop-the-World" issues often seen in shared-memory architectures during garbage collection or state synchronization.
+
+### 2. Linear Scaling
+As you add more CPU cores, TitanPL’s throughput increases linearly. On an 8-core machine, TitanPL can handle over **10k–12k+ req/sec**, a massive increase compared to single-threaded bottlenecks.
+
+### 3. Native Parallelism
+Traditional runtimes run user code on one thread and rely on async I/O to mask concurrency. TitanPL eliminates this: every worker can execute **CPU-bound JavaScript simultaneously** across all cores.
+
+---
+
+## Real Performance Gains
+
+TitanPL demonstrates massive improvements under real-world traffic:
+
+- **10× Lower Contention**: Minimal overhead when switching between concurrent requests.
+- **2× Higher Throughput**: True utilization of multi-core systems.
+- **Stable Latency**: Consistent 500–800ms response times even under high concurrent load.
+
+| Feature | Traditional JS Runtimes | TitanPL |
+| :--- | :--- | :--- |
+| **Concurrency** | Async I/O (Single Main Thread) | Native Multi-threading |
+| **Scaling** | Vertical scaling is limited | Linear scaling with cores |
+| **Memory** | Shared Heap (GC blocks all) | Isolated Heap per Worker |
+| **Utilization** | Single-core bottleneck | Full Hardware Utilization |
+
+---
+
+## Why Multi-Threading Matters
+
+Traditional JavaScript runtimes:
+* Run user code on one thread.
+* Rely heavily on async I/O to “fake” concurrency.
+* Collapse under CPU-heavy workloads.
+
+TitanPL eliminates this limitation, making it ideal for:
+
+* 🤖 **AI Systems**: Parallel processing of heavy logic and data.
+* 🎮 **Gaming Backends**: Low-latency, real-time state synchronization.
+* 📈 **Real-time Analytics**: High-frequency data transformations.
+* ⚡ **Compute-heavy Actions**: Multi-user concurrency without blocking.
+

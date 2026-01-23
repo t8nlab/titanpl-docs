@@ -9,7 +9,7 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   return (
     <HomeLayout {...baseOptions()}>
-      <Notice title='Titan v26.10.0 is Live' variant='success'>
+      <Notice title='Titan v26.11.0 is Live' variant='success'>
         <p> Now with t.core!</p>
       </Notice>
       {children}
