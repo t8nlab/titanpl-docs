@@ -15,7 +15,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'Titan Planet Framework Docs',
   description:
-    'Official documentation for Titan Planet Framework — a JavaScript-first backend framework that compiles JS into a native Rust + Axum server powered by the Boa JavaScript engine.',
+    'Official documentation for Titan Planet Framework — a JavaScript-first backend framework that compiles JS into a native Rust + Axum server powered by the V8 JavaScript engine.',
   keywords: [
     'Ezet Galaxy Titan',
     'EzetGalaxyTitanPlanet',
@@ -24,10 +24,14 @@ export const metadata: Metadata = {
     'Rust backend',
     'JavaScript backend',
     'Rust Axum',
-    'Boa JavaScript engine',
+    'V8 JavaScript engine',
     'Backend framework',
     'Zero config backend',
     'JS to Rust',
+    'TitanPl',
+    'Gravity Runtime',
+    'TitanPl Runtime',
+    'TitanPl Core'
   ],
   authors: [{ name: 'Ezet Galaxy' }],
   creator: 'Titan Planet',
@@ -47,7 +51,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Titan Planet Framework Docs',
     description:
-      'JavaScript simplicity. Rust power. Native backends powered by the Boa engine.',
+      'JavaScript simplicity. Rust power. Native backends powered by the V8 engine.',
   },
   verification: {
     google: "hMltFPqeOSHo-jwT47ISZC7XQWiYOWQE6pcUepmxeFk",
