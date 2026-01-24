@@ -1,94 +1,365 @@
 ---
-title: "Runtime Architecture: How it Works"
-description: "A deep dive into TitanPL’s native worker pool, V8 isolates, and multi-threaded execution model."
+title: "Gravity Runtime: Multi Threaded, Strictly Synchronous V8"
+description: "Understanding Gravity - TitanPL's strictly synchronous V8 runtime with multi-threaded execution."
 ---
 
 import { Callout } from "fumadocs-ui/components/callout"
 
-## The Concurrency Revolution
+## 🌌 Introducing Gravity
 
-TitanPL introduces a **true multi-threaded architecture** that breaks the single-threaded limitations of traditional JavaScript runtimes. By leveraging Rust’s safety and performance, TitanPL executes JavaScript across multiple CPU cores simultaneously with zero lock contention.
+**Gravity** is the core force that holds the entire TitanPL system together. 
+
+It's TitanPL's strictly synchronous V8 runtime engine — a fundamental departure from traditional JavaScript runtimes. While Node.js, Bun, and Deno rely on event loops for concurrency, Gravity achieves massive parallelism through **native multi-threading** and **synchronous execution**.
+
+Think of Gravity as the gravitational force in the Titan ecosystem:
+- It **binds** your JavaScript code to native Rust performance
+- It **grounds** execution in predictable, deterministic patterns
+- It **pulls** everything together with zero lock contention
+
+---
+
+## 🧱 What TitanPL Is Not
+
+TitanPL is **not a Node.js framework**. It is fundamentally different.
+
+TitanPL is a **Rust server with embedded V8 engines** that executes JavaScript/TypeScript **synchronously** in isolated worker threads.
 
 <Callout type="info">
-TitanPL doesn't "fake" concurrency with async I/O alone. It utilizes native hardware threads to run multiple JavaScript execution environments in parallel.
+  Unlike Node.js, Bun, or Deno, **Gravity** does not run an event loop. Code executes synchronously from request entry to response exit — making execution deterministic, predictable, and exceptionally fast for compute-bound workloads.
 </Callout>
 
 ---
 
-## How It Works: The Worker Pool
+## 🎯 Key Architectural Principles
 
-At its core, TitanPL spins up a high-performance **Worker Pool**. Each worker is a dedicated unit of execution that operates independently.
+### 1. No Event Loop in Workers
 
-### The Anatomy of a Worker
-Every worker in the pool owns its own:
-- **Dedicated V8 Isolate**: A completely independent instance of the V8 engine.
-- **Isolate Context**: A unique global scope for JavaScript execution.
-- **Compiled Actions**: Pre-compiled bytecode ready for instant execution.
-- **Synchronous Execution**: JS and native functions execute synchronously for extreme speed and predictability.
+Unlike Node.js which uses libuv's event loop, or Deno/Bun which use Tokio's async runtime, **TitanPL workers execute synchronously**.
 
-<Callout type="warning">
-**Note on Event Loops**: While the architecture allows for it, workers do not currently embed an internal event loop (like Tokio or libuv). Async behavior is managed by the host Rust runtime, keeping the worker loop extremely fast.
-</Callout>
+- **No event queue**
+- **No microtask queue**
+- **No async callbacks**
+- **No `setTimeout`, `setInterval`, or `Promise` chains**
 
-### Architecture Layout
+### 2. Request-Driven Execution
 
-Workers never share a lock, never block each other, and never wait for global state. This design is inspired by high-performance systems like **Chrome's process-per-tab architecture** and **Deno’s multi-isolate approach**, but optimized for server-side action execution.
+Each worker processes one request at a time:
 
-![TitanPL Architecture](/architecture.png)
+1. Worker receives request from Rust dispatcher
+2. Worker blocks and executes the action synchronously
+3. Worker returns response
+4. Worker awaits next request
+
+**No concurrency within a single worker.** Scaling happens by adding more workers, not through async I/O.
+
+### 3. Blocking I/O
+
+All I/O operations block the worker thread:
+
+```javascript
+// ❌ This will NOT work (no async/await support)
+export const fetchUser = defineAction(async (req) => {
+  const response = await t.fetch("https://api.example.com/user");
+  return response;
+});
+
+// ✅ Use synchronous blocking calls instead
+export const fetchUser = defineAction((req) => {
+  // This blocks the worker until the HTTP response arrives
+  const response = t.fetch("https://api.example.com/user");
+  return response;
+});
+```
+
+The Rust runtime handles the async I/O under the hood, but to JavaScript, it appears completely synchronous.
+
+### 4. Deterministic Execution
+
+All code runs **linearly**, top to bottom:
+
+- Easier debugging (no callback hell)
+- Predictable stack traces
+- No race conditions within a single request
+- Reproducible behavior
+
+### 5. True Isolation
+
+Each worker owns an **independent V8 isolate** with:
+
+- Zero shared state
+- No cross-worker communication
+- Isolated heap and garbage collection
+- Crash isolation (one worker crash doesn't affect others)
+
+### 6. No `require` or `import.meta`
+
+- **ES6 imports only** (`import`/`export`)
+- Dependencies are bundled with esbuild
+- No dynamic `require()` at runtime
+- No Node.js module resolution
+
+### 7. No Async/Await
+
+JavaScript actions **cannot use**:
+
+- `async`/`await`
+- `Promise` chains
+- `setTimeout` / `setInterval`
+- `process.nextTick`
+- Any other asynchronous primitives
 
 ---
 
-## Zero-Copy Request Pipeline
+## 🔄 Synchronous Execution Model
 
-To maximize throughput and minimize CPU overhead, TitanPL utilizes a zero-copy data pipeline from the network to the worker:
+Here's how a request flows through TitanPL:
 
-- **Ref-counted Memory**: Request bodies use `Bytes`, allowing data to be shared across threads without expensive copying.
-- **Stack Allocation**: Headers, parameters, and query data use `SmallVec`, keeping small data sets on the CPU stack for rapid access.
-- **Deferred Parsing**: JSON parsing happens exclusively within the worker's isolate, never on the main server thread, eliminating bottlenecks during request dispatch.
+![Synchronous Execution Flow](/synchronous_execution_flow.png)
+
+### Step-by-Step Breakdown
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Incoming HTTP Request                        │
+└─────────────────────┬───────────────────────────────────────────┘
+                      │
+                      ▼
+         ┌────────────────────────┐
+         │   Axum HTTP Server     │
+         │    (Rust, async)       │
+         └────────┬───────────────┘
+                  │
+                  │ Dispatch to Worker
+                  ▼
+    ┌──────────────────────────────────┐
+    │      Worker Thread (Rust)        │
+    │  ┌────────────────────────────┐  │
+    │  │   V8 Isolate               │  │
+    │  │  ┌──────────────────────┐  │  │
+    │  │  │  Execute Action      │  │  │ ◄── Synchronous, blocking
+    │  │  │  (JavaScript/TS)     │  │  │
+    │  │  │                      │  │  │
+    │  │  │  t.fetch() ──────────┼──┼──┼──► Blocks until HTTP response
+    │  │  │         │            │  │  │
+    │  │  │         ▼            │  │  │
+    │  │  │  return { ... }      │  │  │
+    │  │  └──────────────────────┘  │  │
+    │  └────────────────────────────┘  │
+    └──────────┬───────────────────────┘
+               │
+               │ Return response
+               ▼
+    ┌─────────────────────────┐
+    │   HTTP Response Sent    │
+    └─────────────────────────┘
+```
+
+**Key Points:**
+
+- The Rust Axum server is async (for network I/O efficiency)
+- Each worker executes JavaScript **synchronously**
+- Blocking calls (like `t.fetch()`) pause the worker until complete
+- The worker returns a response and becomes available for the next request
 
 ---
 
-## Key Benefits
+## 🚀 Multi-Threaded Architecture
 
-### 1. Zero Lock Contention
-Since workers never share state or locks, they never block each other. This eliminates the "Stop-the-World" issues often seen in shared-memory architectures during garbage collection or state synchronization.
+TitanPL achieves massive concurrency through **native multi-threading**, not async I/O.
 
-### 2. Linear Scaling
-As you add more CPU cores, TitanPL’s throughput increases linearly. On an 8-core machine, TitanPL can handle over **10k–12k+ req/sec**, a massive increase compared to single-threaded bottlenecks.
+![Multi-Threaded Architecture](/multi_threaded_architecture.png)
 
-### 3. Native Parallelism
-Traditional runtimes run user code on one thread and rely on async I/O to mask concurrency. TitanPL eliminates this: every worker can execute **CPU-bound JavaScript simultaneously** across all cores.
+### How It Works
+
+TitanPL spins up a **worker pool**, where each worker owns:
+
+- **Its own V8 isolate** (completely independent JavaScript runtime)
+- **Its own context** (global scope, compiled actions)
+- **Its own compiled actions** (pre-compiled bytecode)
+- **No event loop** (synchronous execution only)
+
+Workers **never share locks**, **never block each other**, and **never wait for global state**.
+
+### Concurrency Model
+
+```
+HTTP Requests → Rust Load Balancer → Workers (parallel execution)
+                                      ├─ Worker 1 (V8 Isolate, Context, Actions)
+                                      ├─ Worker 2 (V8 Isolate, Context, Actions)
+                                      ├─ Worker 3 (V8 Isolate, Context, Actions)
+                                      └─ Worker N (V8 Isolate, Context, Actions)
+```
+
+**Each CPU core runs JavaScript independently:**
+
+- Zero lock contention
+- Linear scaling with core count
+- Massive throughput under real traffic
+- No "Stop-the-World" garbage collection across workers
 
 ---
 
-## Real Performance Gains
+## 🆚 TitanPL vs. Traditional JavaScript Runtimes
 
-TitanPL demonstrates massive improvements under real-world traffic:
-
-- **10× Lower Contention**: Minimal overhead when switching between concurrent requests.
-- **2× Higher Throughput**: True utilization of multi-core systems.
-- **Stable Latency**: Consistent 500–800ms response times even under high concurrent load.
+![TitanPL vs Node.js](/titanpl_vs_nodejs.png)
 
 | Feature | Traditional JS Runtimes | TitanPL |
 | :--- | :--- | :--- |
+| **Execution Model** | Event Loop (libuv/Tokio) | Synchronous Workers |
 | **Concurrency** | Async I/O (Single Main Thread) | Native Multi-threading |
-| **Scaling** | Vertical scaling is limited | Linear scaling with cores |
+| **Scaling** | Vertical (limited by event loop) | Linear (scales with cores) |
 | **Memory** | Shared Heap (GC blocks all) | Isolated Heap per Worker |
-| **Utilization** | Single-core bottleneck | Full Hardware Utilization |
+| **CPU Utilization** | Single-core bottleneck | Full Hardware Utilization |
+| **Async/Await** | ✅ Required for I/O | ❌ Not Supported |
+| **Promises** | ✅ Yes | ❌ No |
+| **Event Loop** | ✅ Yes | ❌ No |
+
+### Traditional Runtimes (Node.js, Bun, Deno)
+
+**Strengths:**
+- Excellent for I/O-heavy workloads
+- Non-blocking async operations
+- Rich ecosystem of async libraries
+
+**Limitations:**
+- Single-threaded execution for user code
+- Event loop can become bottleneck
+- Async overhead for CPU-bound tasks
+
+### TitanPL
+
+**Strengths:**
+- True multi-threaded JavaScript execution
+- Linear scaling with CPU cores
+- Deterministic, predictable execution
+- No async overhead
+
+**Limitations:**
+- Cannot use async/await or Promises
+- Not ideal for I/O-heavy services with high concurrency
+- Requires more workers to scale (trades memory for performance)
 
 ---
 
-## Why Multi-Threading Matters
+## ⚡ When to Use TitanPL
+
+### ✅ Perfect For
+
+- **CPU-bound or compute-heavy services**
+  - AI/ML inference
+  - Data transformations
+  - Complex business logic
+  - Cryptography
+
+- **Deterministic execution requirements**
+  - Financial calculations
+  - Gaming backends with tick-based logic
+  - Reproducible computations
+
+- **Linear debugging workflows**
+  - Simple stack traces
+  - No callback hell
+  - Predictable execution order
+
+- **Predictable memory usage per worker**
+  - Isolated heaps
+  - No shared state management
+
+- **Crash isolation**
+  - One worker crash doesn't affect others
+  - Easy recovery and error handling
+
+### ❌ Not Ideal For
+
+- **I/O-heavy services with high concurrency**
+  - Use Node.js, Deno, or Bun instead
+  - Async I/O is more efficient for these workloads
+
+- **Applications requiring `setTimeout`, Promises, or async/await**
+  - TitanPL does not support async primitives
+
+- **Real-time event-driven architectures**
+  - Event loops are better suited for this
+
+---
+
+## 🔧 Migration from Async Patterns
+
+If you're coming from Node.js, **do not** try to use async patterns.
+
+### ❌ This Will NOT Work
+
+```javascript
+export const processData = defineAction(async (req) => {
+  const data = await fetchFromDatabase();
+  const result = await processWithAI(data);
+  return { result };
+});
+```
+
+### ✅ Use Synchronous Blocking Calls
+
+```javascript
+export const processData = defineAction((req) => {
+  // These calls block until complete
+  const data = t.db.query("SELECT * FROM users");
+  const result = processWithAI(data); // Synchronous function
+  return { result };
+});
+```
+
+### Chaining Operations
+
+Instead of Promise chains:
+
+```javascript
+// ❌ Node.js style
+const result = await fetch(url1)
+  .then(res => res.json())
+  .then(data => fetch(url2, { body: data }))
+  .then(res => res.json());
+
+// ✅ TitanPL style
+const res1 = t.fetch(url1);
+const data = JSON.parse(res1.body);
+const res2 = t.fetch(url2, { body: JSON.stringify(data) });
+const result = JSON.parse(res2.body);
+```
+
+---
+
+## 🎯 Why Multi-Threading Matters
 
 Traditional JavaScript runtimes:
-* Run user code on one thread.
-* Rely heavily on async I/O to “fake” concurrency.
-* Collapse under CPU-heavy workloads.
 
-TitanPL eliminates this limitation, making it ideal for:
+- Run user code on **one thread**
+- Rely heavily on **async I/O** to "fake" concurrency
+- Collapse under CPU-heavy workloads
 
-* 🤖 **AI Systems**: Parallel processing of heavy logic and data.
-* 🎮 **Gaming Backends**: Low-latency, real-time state synchronization.
-* 📈 **Real-time Analytics**: High-frequency data transformations.
-* ⚡ **Compute-heavy Actions**: Multi-user concurrency without blocking.
+**TitanPL eliminates this limitation:**
+
+### Every worker can execute CPU-bound JavaScript simultaneously — **zero blocking**.
+
+This is ideal for:
+
+- 🤖 **AI Systems** — Parallel processing of heavy logic and data
+- 🎮 **Gaming Backends** — Low-latency, real-time state synchronization
+- 📈 **Real-time Analytics** — High-frequency data transformations
+- ⚡ **Compute-heavy Actions** — Multi-user concurrency without blocking
+
+---
+
+## 🌌 TitanPL: The Future of JavaScript Backend Engines
+
+With native Rust + V8 multi-threading, TitanPL becomes:
+
+- **Faster** for CPU-bound workloads
+- **More scalable** under load
+- **Safer and more predictable**
+- **Architecturally modern**
+- **Ready for enterprise-grade traffic**
+
+<Callout type="warn">
+  **Remember:** Gravity trades async flexibility for synchronous predictability and true multi-threaded performance. Choose the right tool for your workload.
+</Callout>
 

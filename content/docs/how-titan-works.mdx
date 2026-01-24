@@ -1,324 +1,318 @@
 ---
-title: How Titan Planet Works
-description: A step-by-step walkthrough of Titan’s build pipeline, runtime model, performance characteristics, and native execution flow
+title: "How Titan Works"
+description: "A visual deep dive into TitanPL's request lifecycle, compilation process, and Gravity Runtime execution."
 ---
 
 import { Callout } from "fumadocs-ui/components/callout"
-import { Steps, Step } from "fumadocs-ui/components/steps"
-import { File, Folder, Files } from 'fumadocs-ui/components/files';
 
-## Overview
+## 🔍 The Big Picture
 
-**Titan Planet** is a **JavaScript-first backend framework** where application logic is written in JavaScript, while **routing, concurrency, and execution are handled by a native Rust server**.
-
-You write JavaScript.  
-Titan builds Rust.  
-Production runs a **single native binary**.
-
-<Callout type="info">
-Titan does not run a JavaScript server in production.  
-JavaScript executes only as a controlled logic layer inside Rust.
-</Callout>
+Titan transforms your JavaScript/TypeScript code into a high-performance native Rust server. Here's how it all works together.
 
 ---
 
-## High-Level Idea
+## 🏗️ Build-Time: From Code to Binary
 
-Titan is designed around a **strict responsibility split**.
+### 1. Action Discovery
 
-### JavaScript Responsibility
+Titan scans your `app/` directory for action files:
 
-- Route declarations
-- Business logic (actions)
-- Validation and transformations
+```
+app/
+├── actions/
+│   ├── user.js          → /actions/user
+│   └── auth/
+│       └── login.js     → /actions/auth/login
+```
 
-### Rust Responsibility
+### 2. Bundling with esbuild
 
-- HTTP server (Axum)
-- Routing and method matching
-- Concurrency and async I/O
-- Process lifecycle and deployment
+Each action is bundled independently:
 
-<Callout type="note">
-JavaScript never owns the request lifecycle.  
-Rust always does.
-</Callout>
+- **Tree-shaking**: Only used code is included
+- **Dependency resolution**: All imports are inlined
+- **Type stripping**: TypeScript types are removed
+- **ES6 module output**: Clean, modern JavaScript
 
----
+```javascript
+// Before bundling (user.js)
+import { validateEmail } from '../../utils/validation';
+export const getUser = defineAction((req) => { ... });
 
-## Step 1 — Writing Routes
+// After bundling (optimized, dependencies inlined)
+const validateEmail = (email) => { ... };
+export const getUser = defineAction((req) => { ... });
+```
 
-Routes are declared using Titan’s DSL in:
+### 3. Rust Code Generation
 
+Titan generates Rust code that:
 
-```js title="app/app.js"
-t.post("/login").action("login")
-t.post("/ca").action("register")
-t.post("/").action("hello")
-````
+- Registers each action's route
+- Maps HTTP paths to action functions
+- Creates the routing table
 
-<Callout type="warning">
-This file is parsed at <strong>build time</strong>.  
-It is <strong>not executed per request</strong>.
-</Callout>
-
-At runtime, JavaScript never performs routing.
-
----
-
-## Step 2 — Action Authoring
-
-Each action lives in: `
-app/actions/
-`
-
-Example:
-
-```js title="app/actions/"
-export default function login(req) {
-  return { ok: true }
+```rust
+// Generated Rust (simplified)
+pub fn register_actions(router: Router) -> Router {
+    router
+        .route("/actions/user", post(execute_user_action))
+        .route("/actions/auth/login", post(execute_login_action))
 }
 ```
 
-These files contain **pure application logic only**.
+### 4. Compilation
 
-* No HTTP server
-* No routing
-* No async orchestration 
-* No event loop control
+The Rust server is compiled into a native binary:
 
-<Callout type="info">
-Actions run only after Rust has already resolved the request.
-</Callout>
-
-<Callout type="success">
-Titan does not expose an async runtime to JavaScript.  
-Rust (Tokio) owns all async I/O and scheduling; JavaScript executes synchronously inside that boundary.
-</Callout>
-
-
----
-
-## Step 3 — Build-Time Compilation
-
-When you run:
-
-```bash
-tit build
+```
+cargo build --release
+   Compiling titan-server v26.12.1
+   Finished release [optimized] target(s) in 12.3s
 ```
 
-Titan performs **deterministic compile-time steps**.
-
-<Steps>
-  <Step title="Generate routes.json">
-    A static routing table is generated for the Rust server.
-  </Step>
-
-  <Step title="Generate action_map.json">
-    Routes are mapped to action identifiers.
-  </Step>
-
-  <Step title="Bundle actions with esbuild">
-    Each action is bundled into a deterministic <code>.jsbundle</code> file, using ``esbuild``
-  </Step>
-
-  <Step title="Compile native Rust server">
-    Axum, runtime code, and the embedded JS engine are compiled into one binary.
-  </Step>
-</Steps>
-
-<Callout type="success">
-No routing logic, module resolution, or imports exist at runtime.
-</Callout>
+**Result:** A single binary executable with Gravity (embedded V8 runtime) and all actions.
 
 ---
 
-## Step 4 — Server Runtime Layout
+## ⚡ Gravity Runtime: Request to Response
 
-All production artifacts live inside the **server runtime boundary**.
+### Phase 1: HTTP Server (Rust Axum)
 
-  <Folder name="server" defaultOpen>
-    <Folder name="actions" defaultOpen>
-      <File name="hello.jsbundle" />
-      <File name="login.jsbundle" />
-      <File name="register.jsbundle" />
-    </Folder>
+When a request arrives at `http://localhost:3000/actions/user`:
 
-<File name="routes.json" />
-<File name="action_map.json" />
-<File name="Cargo.toml" />
-<File name="Cargo.lock" />
-<Folder name="target" />
+1. **Axum receives the HTTP request** (highly efficient Rust async I/O)
+2. **Router matches the path** to `/actions/user`
+3. **Request is dispatched** to an available worker
 
+### Phase 2: Worker Execution (V8 Isolate)
 
-  </Folder>
+![Synchronous Execution Flow](/synchronous_execution_flow.png)
 
+Each worker:
 
-<Callout type="warning">
-Everything inside <code>server/</code> belongs to the native execution layer.  
-JavaScript never reads or modifies these files at runtime.
-</Callout>
+1. **Receives the request** (headers, body, query params)
+2. **Enters V8 isolate** (isolated JavaScript environment)
+3. **Calls the action function** (pre-compiled bytecode)
+4. **Executes synchronously** (blocking until completion)
+5. **Returns the response** back to Axum
 
----
+```javascript
+// Your action code
+export const getUser = defineAction((req) => {
+  // This runs inside a V8 isolate
+  const userId = req.query.id;
+  
+  // Blocking call to database (synchronous from JS perspective)
+  const user = t.db.query(`SELECT * FROM users WHERE id = ?`, [userId]);
+  
+  return {
+    status: 200,
+    body: { user }
+  };
+});
+```
 
-## Step 5 — Runtime Execution Flow
+**From JavaScript's perspective:**
+- Everything is synchronous
+- No callbacks, no promises
+- Linear execution, top to bottom
 
-When a request hits production:
+**Behind the scenes (Rust):**
+- Async I/O for network and database
+- Efficient tokio runtime
+- But JavaScript sees only **synchronous blocking calls**
 
-1. HTTP request reaches the **native Rust server**
-2. Rust matches the route using `routes.json`
-3. Rust resolves the action using `action_map.json`
-4. The bundled JS action executes inside the embedded JS engine
-5. The result is returned to the client
+### Phase 3: Response
 
-<Callout type="info">
-Routing, concurrency, and I/O are completed <strong>before</strong> JavaScript runs.
-</Callout>
+The result flows back:
 
-
----
-
-## Performance & Speed
-
-### Does using V8 make Titan slow?
-
-**No — and this is by design.**
-
-Titan does **not** use JavaScript as a server runtime.
-
-V8 executes **only**:
-
-* Bundled action logic
-* Deterministic business rules
-* JSON parsing and transformations
-* Short-lived, bounded computation
-
-V8 does **not** execute:
-
-* HTTP servers
-* Event loops
-* Async schedulers
-* Threads
-* Networking
-* File I/O
-* System calls
-
-All performance-critical responsibilities are handled by **Rust + Axum + Tokio**.
-
-<Callout type="success">
-JavaScript is not in the hot path of networking, concurrency, or I/O.
-</Callout>
+```
+JavaScript Result → Rust Handler → Axum Router → HTTP Response
+```
 
 ---
 
-### Why this is fast in practice
+## 🧵 Worker Pool Architecture
 
-* Routing is static and Rust-owned
-* No JavaScript router
-* No dynamic module resolution
-* No runtime imports
-* No promise-driven request lifecycle
-* No Node.js runtime overhead
-* No garbage-heavy server abstractions
+![Multi-Threaded Architecture](/multi_threaded_architecture.png)
 
-JavaScript runs **only when business logic is required**, and only for a **short, strictly bounded duration**.
+### Initialization (Server Start)
 
----
+When the server starts:
 
-## JavaScript Engine Choice (V8, Not Node.js)
+1. **Worker pool is created** (e.g., 8 workers on an 8-core machine)
+2. **Each worker initializes:**
+   - Creates a V8 isolate
+   - Loads and compiles all action bundles
+   - Registers Gravity runtime APIs (`t.fetch`, `t.db`, etc.)
+3. **Workers enter idle state**, waiting for requests
 
-Titan Planet now uses the **V8 JavaScript engine** as its embedded runtime.
+### Request Distribution
 
-This does **not** mean Titan uses Node.js.
+```
+                    ┌─────────────────┐
+Incoming Requests → │ Rust Dispatcher │
+                    └────────┬────────┘
+                             │
+              ┌──────────────┼──────────────┐
+              ▼              ▼              ▼
+         ┌─────────┐   ┌─────────┐   ┌─────────┐
+         │Worker 1 │   │Worker 2 │   │Worker N │
+         │ [Busy]  │   │ [Idle]  │   │ [Idle]  │
+         └─────────┘   └─────────┘   └─────────┘
+```
 
-### What V8 Is (and What It Is Not)
+**Dispatcher Logic:**
+- Maintains a queue of available workers
+- Assigns requests to idle workers
+- If all workers are busy, request waits in queue
 
-**V8 is:**
-
-* A JavaScript execution engine
-* A bytecode interpreter + JIT compiler
-* A garbage-collected runtime core
-
-**V8 is not:**
-
-* Node.js
-* A web server
-* An event loop
-* A package manager
-* An async I/O runtime
-
-Node.js is a **platform built on top of V8**, not V8 itself.
-
-<Callout type="info">
-Using V8 does not imply Node.js.  
-Titan embeds V8 directly, without Node’s APIs, runtime, or event loop.
-</Callout>
+**Zero Lock Contention:**
+- Workers never share state
+- No global locks
+- No mutex contention
 
 ---
 
-### What Titan Explicitly Does *Not* Include
+## 🔄 Development Mode
 
-Even with V8, Titan intentionally does **not** include:
+In development (`titan dev`), Titan adds:
 
-* Node.js runtime
-* libuv
-* Node event loop
-* Node core modules (`fs`, `net`, `http`, etc.)
-* Node globals (`process`, `Buffer`, etc.)
+### Hot Reload
 
-JavaScript code in Titan **cannot** start servers, manage async I/O, or control scheduling.
+1. **File watcher** monitors `app/` directory
+2. **On change detected:**
+   - Re-bundle affected actions
+   - Reload action code in all workers
+   - No server restart needed
 
----
+### Error Reporting
 
-### Responsibility Boundary (Final Mental Model)
+Titan captures:
+- **Syntax errors** (esbuild compilation)
+- **Runtime errors** (JavaScript exceptions)
+- **Stack traces** (with source maps)
 
-* **Rust + Tokio** own:
-
-  * Concurrency
-  * Async scheduling
-  * Networking
-  * Timers
-  * File and system I/O
-
-* **JavaScript (V8)** owns:
-
-  * Application logic
-  * Validation
-  * Data transformation
-  * Pure computation
-
-<Callout type="success">
-V8 executes JavaScript.  
-Rust executes the server.
-</Callout>
+Displayed in a beautiful Next.js-style error overlay.
 
 ---
 
+## 🎯 Cold Start Characteristics
 
+**TitanPL Cold Start: ~3-5ms**
 
-## Final Output
+Why so fast?
 
-After a successful build, Titan produces a single binary: `
-server/target/titan-server
-`
+1. **No disk I/O**: Actions are pre-loaded in memory
+2. **No module resolution**: Everything is bundled
+3. **Pre-compiled bytecode**: V8 compiles on startup, not per-request
+4. **Gravity embedded**: No separate process spawning
 
-This binary contains:
-
-* Axum HTTP server
-* Routing metadata
-* Bundled JavaScript logic
-* Embedded JavaScript runtime
-
-<Callout type="success">
-No Node.js.  
-No runtime JS server.  
-One native binary: <strong>titan-server</strong>.
-</Callout>
+Compare to:
+- **AWS Lambda (Node.js)**: 100-500ms cold start
+- **Traditional Node.js server**: 50-200ms per worker spawn
 
 ---
 
-## One-Sentence Summary
+## 📊 Data Flow Diagram
 
-<Callout type="info">
-Titan Planet is a JavaScript-first backend framework that compiles routes and actions into static metadata and executes them inside a native Rust server, producing a single high-performance binary for production.
-</Callout>
+```
+┌─────────────┐
+│ Your Code   │
+│ (app/)      │
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│  esbuild    │ ← Bundle each action
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│ Rust Codegen│ ← Generate routing table
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│cargo build  │ ← Compile to native binary
+└──────┬──────┘
+       │
+       ▼
+┌─────────────────────────────────┐
+│   Native Binary (executable)    │
+│                                  │
+│  ┌────────────────────────────┐ │
+│  │  Axum HTTP Server (async)  │ │
+│  └───────────┬────────────────┘ │
+│              │                   │
+│  ┌───────────▼───────────────┐  │
+│  │   Worker Pool (V8s)       │  │
+│  │  ┌──────┐  ┌──────┐       │  │
+│  │  │Worker│  │Worker│  ...  │  │
+│  │  │  1   │  │  2   │       │  │
+│  │  └──────┘  └──────┘       │  │
+│  └───────────────────────────┘  │
+└─────────────────────────────────┘
+       │
+       ▼
+   HTTP Responses
+```
+
+---
+
+## 🧠 Memory Model
+
+### Per-Worker Memory
+
+Each worker owns:
+
+- **V8 Heap**: ~40-80MB (configurable)
+- **Compiled Actions**: Pre-compiled bytecode
+- **Gravity APIs**: Native bindings to Rust
+
+Workers are **completely isolated**:
+- No shared heap
+- No shared objects
+- Garbage collection is per-worker
+
+### Total Memory Usage
+
+For an 8-worker server:
+
+```
+Base Rust Server:     ~10-20 MB
+Worker 1-8 (V8):      ~320-640 MB (8 × 40-80 MB)
+Total:                ~330-660 MB
+```
+
+**Trade-off:**
+- More memory usage than single-threaded Node.js
+- But **true parallelism** and **zero lock contention**
+
+---
+
+## 🚀 Why This Architecture?
+
+### Design Goals
+
+1. **Performance**: Native Rust + V8 = maximum speed
+2. **Simplicity**: Synchronous code = easier debugging
+3. **Scalability**: Multi-threading = linear scaling
+4. **Isolation**: Per-worker isolates = crash safety
+5. **Developer Experience**: Hot reload + great errors
+
+### Inspired By
+
+- **Chrome's process-per-tab**: Isolation for stability
+- **Deno's multi-isolate approach**: Secure, sandboxed execution
+- **Actix/Hyper (Rust)**: High-performance HTTP servers
+- **V8 Engine**: Proven JavaScript performance
+
+
+---
+
+## 📚 Next Steps
+
+- [Gravity Runtime Architecture](/docs/runtime-architecture) — Deep dive into synchronous execution
+

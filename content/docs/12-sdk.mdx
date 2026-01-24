@@ -14,12 +14,12 @@ badge: STABLE
 
 - **💎 Blueprint Types (IntelliSense)**: Provides the full TypeScript `index.d.ts` for the global `t` object so you get autocomplete in VS Code and other editors.
 - **🛡️ Static Validation**: Catch parameter mismatches and typos in `t.log`, `t.fetch`, `t.db`, etc., during development.
-- **🔌 Extension Test Harness**: A "lite" version of the Titan runtime that simulates the native environment to test extensions in isolation.
+- **🔌 Extension Test Harness**: A "lite" version of Gravity that simulates the native environment to test extensions in isolation.
 - **🚀 Zero Production Trace**: This is a `devDependencies` package. It never ships with your binary, keeping your production footprint at literal zero.
 
 ---
 
-## 🚀 The Test Harness (Lite Runtime)
+## 🚀 The Test Harness (Lite Gravity)
 
 The SDK includes a specialized **Test Runner**. This is a "lite" version of the Titan ecosystem that acts as a bridge for developers.
 
@@ -41,7 +41,7 @@ titan run ext
 
 ## ⌨️ Enabling IntelliSense
 
-Since the `t` object is injected globally by the Titan engine at runtime, your IDE won't recognize it by default. The SDK fixes this.
+Since the `t` object is injected globally by Gravity at runtime, your IDE won't recognize it by default. The SDK fixes this.
 
 1.  **Install the SDK**:
     ```bash

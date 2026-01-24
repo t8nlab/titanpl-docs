@@ -9,7 +9,7 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   return (
     <HomeLayout {...baseOptions()}>
-      <Notice title='Titan v26.11.0 is Live' variant='success'>
+      <Notice title='Titan v26.12.1 is Live' variant='success'>
         <p> Now new with Runtime Architecture!</p>
       </Notice>
       {children}

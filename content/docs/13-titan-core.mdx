@@ -1,24 +1,26 @@
 ---
 title: "@titanpl/core"
-description: "The official Core Standard Library for Titan Planet - a high-performance JavaScript runtime extension."
+description: "The official Core Standard Library for Titan Planet - a high-performance JavaScript extension for Gravity Runtime."
 ---
 
-import { TypeTable } from 'fumadocs-ui/components/type-table';
 import { Callout } from 'fumadocs-ui/components/callout';
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# `@titanpl/core`
+
+**The official Core Standard Library for Titan Planet.**
+
+A high-performance JavaScript extension for Gravity Runtime, providing essential utilities including file system operations, cryptography, session management, URL parsing, and more — all built with native Rust for maximum speed.
 
 ## Overview
 
-`@titanpl/core` provides essential standard library modules for Titan applications, bridging high-performance Rust native implementations with an easy-to-use JavaScript API.
+`@titanpl/core` is a **comprehensive extension** for TitanPL that brings a suite of essential utilities directly to your V8 runtime. It provides file system access, cryptographic functions, session handling, and much more, all optimized at the native Rust level.
 
-## Installation
+Unlike traditional Node.js modules, these APIs are **compiled directly into Gravity**, ensuring zero dependency overhead and instant availability without any `require()` or `import` statements.
 
-```bash
-npm install @titanpl/core
-```
+### Auto-Loading
 
-## Usage
-
-The extension automatically attaches to the Titan runtime. You can access it via `t.core` or the `t` global object alias.
+The extension automatically attaches to Gravity. You can access it via `t.core` or the `t` global object alias.
 
 ```javascript
 // Access via t.core (Recommended)
@@ -609,4 +611,4 @@ The `@titanpl/core` extension serves as the backbone of the Titan ecosystem, pro
 
 *   **Pre-installed & Ready**: `@titanpl/core` comes pre-installed with every new Titan project, giving you immediate access to essential tools like file system operations, cryptography, and networking without any setup.
 *   **Modular & Optional**: While it is a core part of the experience, it is built as an extension. If your project has specific needs or you wish to maintain an ultra-lightweight runtime, you can uninstall it.
-*   **Foundation for Extensions**: This library exemplifies the power of Titan's extension system. Developers can use it as a reference or a foundation to build their own high-performance, JS-only or hybrid extensions, expanding the capabilities of the Titan Runtime.
+*   **Foundation for Extensions**: This library exemplifies the power of Titan's extension system. Developers can use it as a reference or a foundation to build their own high-performance, JS-only or hybrid extensions, expanding the capabilities of Gravity.

@@ -9,6 +9,7 @@ import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/mdx-components';
 import type { Metadata } from 'next';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
+import { DocActions } from '@/app/components/DocActions';
 
 export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const params = await props.params;
@@ -16,16 +17,22 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   if (!page) notFound();
 
   const MDX = page.data.body;
+  const processedMarkdown = await page.data.getText('processed');
 
   return (
-    <DocsPage tableOfContent={{
-      enabled: true,
-      style: 'clerk',
-    }}
-      toc={page.data.toc} full={page.data.full}
+    <DocsPage
+      tableOfContent={{
+        enabled: true,
+        style: 'clerk',
+      }}
+      toc={page.data.toc}
+      full={page.data.full}
     >
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
+
+      <DocActions markdown={processedMarkdown} title={page.data.title} />
+
       <DocsBody>
         <MDX
           components={getMDXComponents({
