@@ -30,7 +30,6 @@ export const metadata: Metadata = {
     'JS to Rust',
     'TitanPl',
     'Gravity Runtime',
-    'TitanPl Runtime',
     'TitanPl Core'
   ],
   authors: [{ name: 'Ezet Galaxy' }],

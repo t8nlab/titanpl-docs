@@ -199,7 +199,7 @@ export default function HomePage() {
               </div>
               <h2 className="text-3xl font-bold tracking-tight">TitanPL Extensions</h2>
               <p className="mt-4 text-lg leading-relaxed text-muted-foreground text-black/70 dark:text-white/70">
-                TitanPL Extensions let you add modular features to any Titan project. Build reusable plugins, integrate external services, or ship custom logic, and the runtime auto-loads them instantly via t.extensionName.
+                Titan Planet Extensions let you add modular features to any Titan project. Build reusable plugins, integrate external services, or ship custom logic, and the runtime auto-loads them instantly via t.extensionName.
               </p>
               <div className="mt-8 flex gap-4">
                 <Link
@@ -281,7 +281,7 @@ export default function HomePage() {
               </div>
               <h2 className="text-3xl font-bold tracking-tight">Gravity Runtime</h2>
               <p className="mt-4 text-lg leading-relaxed text-muted-foreground text-black/70 dark:text-white/70">
-                The core force that holds the entire TitanPl system together. Built on strictly synchronous V8 execution with native multi-threading, Gravity powers deterministic, predictable JavaScript at scale with zero event loop overhead.
+                The core force that holds the entire Titan Planet system together. Built on strictly synchronous V8 execution with native multi-threading, Gravity powers deterministic, predictable JavaScript at scale with zero event loop overhead.
               </p>
               <div className="mt-8 flex gap-4">
                 <Link
@@ -358,7 +358,7 @@ export default function HomePage() {
                   <span className="text-xs font-medium uppercase tracking-wider">Your Feedback</span>
                 </div>
                 <p className="text-xl font-medium leading-relaxed text-foreground/90">
-                  "Have you tried TitanPL? We'd love to hear your thoughts."
+                  "Have you tried Titan Planet? We'd love to hear your thoughts."
                 </p>
               </div>
               <div className="mt-8 pt-6 border-t border-border/50">

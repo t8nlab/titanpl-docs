@@ -1,11 +1,11 @@
 ---
 title: "@titanpl/eslint-plugin-titanpl"
-description: "ESLint plugin for Titan Planet projects. Enforces TitanPL-specific rules including blocking Node.js built-in modules that are not available in the TitanPL runtime."
+description: "ESLint plugin for Titan Planet projects. Enforces Titan Planet-specific rules including blocking Node.js built-in modules that are not available in the Gravity runtime."
 ---
 
 ## Overview
 
-ESLint plugin for Titan Planet projects. Enforces TitanPL-specific rules including blocking Node.js built-in modules that are not available in the TitanPL runtime.
+ESLint plugin for Titan Planet projects. Enforces Titan Planet-specific rules including blocking Node.js built-in modules that are not available in the Gravity runtime.
 
 ## Installation
 
@@ -61,9 +61,9 @@ export default [
 
 ### titanpl/no-node-builtins
 
-Disallows importing Node.js built-in modules that are not available in the TitanPL runtime.
+Disallows importing Node.js built-in modules that are not available in the Gravity runtime.
 
-Titan Planet is not a Node.js framework—it's a Rust server that speaks JavaScript/TypeScript. This means standard Node.js modules like `fs`, `path`, `http`, etc., are not available. Instead, Titan provides its own high-performance APIs through the `t` global object.
+Titan Planet is not a Node.js framework—it's a comprehensive ecosystem powered by the Gravity runtime. This means standard Node.js modules like `fs`, `path`, `http`, etc., are not available. Instead, Titan provides its own high-performance APIs through the `t` global object.
 
 #### ❌ Incorrect
 
@@ -123,12 +123,12 @@ The plugin provides helpful error messages with suggestions:
 
 ```text
 // With alternative:
-"fs" is not available in TitanPL. Use t.core.fs instead. File system operations.
+"fs" is not available in Titan Planet. Use t.core.fs instead. File system operations.
 
-"http" is not available in TitanPL. Use t.fetch() instead. HTTP client via Titan fetch API.
+"http" is not available in Titan Planet. Use t.fetch() instead. HTTP client via Titan fetch API.
 
 // Without alternative:
-"child_process" is not available in TitanPL and has no direct alternative in Titan.
+"child_process" is not available in Titan Planet and has no direct alternative in Titan.
 ```
 
 ## Titan Core API Quick Reference

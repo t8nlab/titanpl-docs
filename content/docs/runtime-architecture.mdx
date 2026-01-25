@@ -1,6 +1,6 @@
 ---
 title: "Gravity Runtime: Multi Threaded, Strictly Synchronous V8"
-description: "Understanding Gravity - TitanPL's strictly synchronous V8 runtime with multi-threaded execution."
+description: "Understanding Gravity - Titan Planet's strictly synchronous V8 runtime with multi-threaded execution."
 ---
 
 import { Callout } from "fumadocs-ui/components/callout"
@@ -9,7 +9,7 @@ import { Callout } from "fumadocs-ui/components/callout"
 
 **Gravity** is the core force that holds the entire TitanPL system together. 
 
-It's TitanPL's strictly synchronous V8 runtime engine — a fundamental departure from traditional JavaScript runtimes. While Node.js, Bun, and Deno rely on event loops for concurrency, Gravity achieves massive parallelism through **native multi-threading** and **synchronous execution**.
+Gravity is the strictly synchronous V8 runtime engine that powers Titan Planet. It represents a fundamental departure from traditional JavaScript runtimes. While Node.js, Bun, and Deno rely on event loops for concurrency, Gravity achieves massive parallelism through **native multi-threading** and **synchronous execution**.
 
 Think of Gravity as the gravitational force in the Titan ecosystem:
 - It **binds** your JavaScript code to native Rust performance
@@ -18,14 +18,16 @@ Think of Gravity as the gravitational force in the Titan ecosystem:
 
 ---
 
-## 🧱 What TitanPL Is Not
+## 🧱 What Titan Planet Is Not
 
-TitanPL is **not a Node.js framework**. It is fundamentally different.
+Titan Planet is **not a Node.js framework**. It is fundamentally different.
 
-TitanPL is a **Rust server with embedded V8 engines** that executes JavaScript/TypeScript **synchronously** in isolated worker threads.
+Titan Planet is a **complete high-performance framework** designed for modern backends. It unifies the **Orbit System** for O(1) routing, a powerful **Extension System**, and the **TitanPL SDK** into a cohesive platform. 
+
+It leverages **Gravity Runtime**, a strictly synchronous, multi-threaded Rust+V8 runtime, to execute JavaScript actions.
 
 <Callout type="info">
-  Unlike Node.js, Bun, or Deno, **Gravity** does not run an event loop. Code executes synchronously from request entry to response exit — making execution deterministic, predictable, and exceptionally fast for compute-bound workloads.
+  Unlike Node.js, Bun, or Deno, **Gravity Runtime** does not run an event loop. Code executes synchronously from request entry to response exit — making execution deterministic, predictable, and exceptionally fast for compute-bound workloads.
 </Callout>
 
 ---
@@ -34,7 +36,7 @@ TitanPL is a **Rust server with embedded V8 engines** that executes JavaScript/T
 
 ### 1. No Event Loop in Workers
 
-Unlike Node.js which uses libuv's event loop, or Deno/Bun which use Tokio's async runtime, **TitanPL workers execute synchronously**.
+Unlike Node.js which uses libuv's event loop, or Deno/Bun which use Tokio's async runtime, **Gravity workers execute synchronously**.
 
 - **No event queue**
 - **No microtask queue**
@@ -112,7 +114,7 @@ JavaScript actions **cannot use**:
 
 ## 🔄 Synchronous Execution Model
 
-Here's how a request flows through TitanPL:
+Here's how a request flows through Gravity:
 
 ![Synchronous Execution Flow](/synchronous_execution_flow.png)
 
@@ -165,13 +167,13 @@ Here's how a request flows through TitanPL:
 
 ## 🚀 Multi-Threaded Architecture
 
-TitanPL achieves massive concurrency through **native multi-threading**, not async I/O.
+Gravity achieves massive concurrency through **native multi-threading**, not async I/O.
 
 ![Multi-Threaded Architecture](/multi_threaded_architecture.png)
 
 ### How It Works
 
-TitanPL spins up a **worker pool**, where each worker owns:
+Gravity spins up a **worker pool**, where each worker owns:
 
 - **Its own V8 isolate** (completely independent JavaScript runtime)
 - **Its own context** (global scope, compiled actions)
@@ -199,13 +201,13 @@ HTTP Requests → Rust Load Balancer → Workers (parallel execution)
 
 ---
 
-## 🆚 TitanPL vs. Traditional JavaScript Runtimes
+## 🆚 Gravity vs. Node.js
 
-![TitanPL vs Node.js](/titanpl_vs_nodejs.png)
+![Gravity vs Node.js](/gravity_vs_nodejs.png)
 
-| Feature | Traditional JS Runtimes | TitanPL |
+| Feature | Node.js Runtime | Gravity Runtime |
 | :--- | :--- | :--- |
-| **Execution Model** | Event Loop (libuv/Tokio) | Synchronous Workers |
+| **Execution Model** | Event Loop (libuv) | Synchronous Workers |
 | **Concurrency** | Async I/O (Single Main Thread) | Native Multi-threading |
 | **Scaling** | Vertical (limited by event loop) | Linear (scales with cores) |
 | **Memory** | Shared Heap (GC blocks all) | Isolated Heap per Worker |
@@ -214,7 +216,7 @@ HTTP Requests → Rust Load Balancer → Workers (parallel execution)
 | **Promises** | ✅ Yes | ❌ No |
 | **Event Loop** | ✅ Yes | ❌ No |
 
-### Traditional Runtimes (Node.js, Bun, Deno)
+### Node.js Runtime
 
 **Strengths:**
 - Excellent for I/O-heavy workloads
@@ -226,7 +228,7 @@ HTTP Requests → Rust Load Balancer → Workers (parallel execution)
 - Event loop can become bottleneck
 - Async overhead for CPU-bound tasks
 
-### TitanPL
+### Gravity Runtime
 
 **Strengths:**
 - True multi-threaded JavaScript execution
@@ -241,7 +243,7 @@ HTTP Requests → Rust Load Balancer → Workers (parallel execution)
 
 ---
 
-## ⚡ When to Use TitanPL
+## ⚡ When to Use Gravity
 
 ### ✅ Perfect For
 
@@ -276,7 +278,7 @@ HTTP Requests → Rust Load Balancer → Workers (parallel execution)
   - Async I/O is more efficient for these workloads
 
 - **Applications requiring `setTimeout`, Promises, or async/await**
-  - TitanPL does not support async primitives
+  - Gravity does not support async primitives
 
 - **Real-time event-driven architectures**
   - Event loops are better suited for this
@@ -319,7 +321,7 @@ const result = await fetch(url1)
   .then(data => fetch(url2, { body: data }))
   .then(res => res.json());
 
-// ✅ TitanPL style
+// ✅ Gravity style
 const res1 = t.fetch(url1);
 const data = JSON.parse(res1.body);
 const res2 = t.fetch(url2, { body: JSON.stringify(data) });
@@ -336,7 +338,7 @@ Traditional JavaScript runtimes:
 - Rely heavily on **async I/O** to "fake" concurrency
 - Collapse under CPU-heavy workloads
 
-**TitanPL eliminates this limitation:**
+**Gravity eliminates this limitation:**
 
 ### Every worker can execute CPU-bound JavaScript simultaneously — **zero blocking**.
 
@@ -349,9 +351,9 @@ This is ideal for:
 
 ---
 
-## 🌌 TitanPL: The Future of JavaScript Backend Engines
+## 🌌 Gravity: The Future of JavaScript Backend Engines
 
-With native Rust + V8 multi-threading, TitanPL becomes:
+With native Rust + V8 multi-threading, Gravity becomes:
 
 - **Faster** for CPU-bound workloads
 - **More scalable** under load
