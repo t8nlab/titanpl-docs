@@ -37,11 +37,29 @@ export default function Footer() {
                                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                                 <div className="absolute inset-0 -z-10 bg-linear-to-r from-transparent via-white/10 to-transparent opacity-0 transition-opacity group-hover:animate-shimmer" />
                             </Link>
+                            <div className="mt-6 flex flex-wrap gap-4">
+                                <Link
+                                    href="https://x.com/TitanPl"
+                                    target="_blank"
+                                    className="group flex h-10 w-10 items-center justify-center rounded-full bg-black/5 dark:bg-white/10 transition-colors hover:bg-black/10 dark:hover:bg-white/20"
+                                    aria-label="Twitter"
+                                >
+                                    <RiTwitterXLine className="h-5 w-5 text-foreground/70 transition-colors group-hover:text-foreground" />
+                                </Link>
+                                <Link
+                                    href="https://github.com/ezet-galaxy"
+                                    target="_blank"
+                                    className="group flex h-10 w-10 items-center justify-center rounded-full bg-black/5 dark:bg-white/10 transition-colors hover:bg-black/10 dark:hover:bg-white/20"
+                                    aria-label="GitHub"
+                                >
+                                    <RiGithubFill className="h-5 w-5 text-foreground/70 transition-colors group-hover:text-foreground" />
+                                </Link>
+                            </div>
                         </div>
                     </div>
 
                     {/* Links Grid */}
-                    <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
+                    <div className="grid grid-cols-2 gap-8">
                         <div className="flex flex-col gap-4">
                             <h3 className="text-sm font-semibold text-foreground">Product</h3>
                             <Link href="/docs" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
@@ -53,6 +71,9 @@ export default function Footer() {
                             </Link>
                             <Link href="/docs/how-titan-works" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
                                 How Titan Works
+                            </Link>
+                            <Link href="/docs/runtime-architecture" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                                Gravity Runtime
                             </Link>
                             <Link href="https://github.com/topics/titanpl-ext" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
                                 Extensions
@@ -137,31 +158,26 @@ export default function Footer() {
                                 </ul>
                             </div>
                         </div>
-
-                        <div className="flex flex-col gap-4">
-                            <h3 className="text-sm font-semibold text-foreground">Socials</h3>
-                            <Link href="https://x.com/TitanPl" target="_blank" className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
-                                <RiTwitterXLine className="h-4 w-4" />
-                                Twitter | X
-                            </Link>
-                            <Link href="https://github.com/ezet-galaxy" target="_blank" className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
-                                <RiGithubFill className="h-4 w-4" />
-                                GitHub
-                            </Link>
-                        </div>
                     </div>
                 </div>
 
                 <div className="mt-16 border-t border-border/40 pt-8 sm:mt-20 lg:mt-24">
-                    <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+                    <div className="flex flex-col-reverse items-center justify-between gap-4 sm:flex-row">
                         <p className="text-xs leading-5 text-muted-foreground">
                             &copy; {new Date().getFullYear()} Titan Planet. All rights reserved.
                         </p>
-                        <p className="text-xs leading-5 text-black/80 dark:text-white/80">
-                            <Link href="https://petalite-stew-867.notion.site/Ezet-privacy-vault-2742b05812ae802da69ef20c3ef491d8" target="_blank" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                        <div className="flex items-center gap-6">
+                            <Link href="/status" className="flex items-center gap-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground">
+                                <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                                </span>
+                                All Systems Operational
+                            </Link>
+                            <Link href="https://petalite-stew-867.notion.site/Ezet-privacy-vault-2742b05812ae802da69ef20c3ef491d8" target="_blank" className="text-xs text-muted-foreground transition-colors hover:text-foreground">
                                 Privacy Policy
                             </Link>
-                        </p>
+                        </div>
                     </div>
                 </div>
             </div>

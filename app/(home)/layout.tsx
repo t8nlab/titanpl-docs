@@ -9,8 +9,8 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   return (
     <HomeLayout {...baseOptions()}>
-      <Notice title='Titan v26.12.1 is Live' variant='success'>
-        <p> Now new with Runtime Architecture!</p>
+      <Notice title='Titan v26.12.6 is Live' variant='success'>
+        <p> Gravity Runtime: The Multi-threaded Synchronous Runtime!</p>
       </Notice>
       {children}
     </HomeLayout>

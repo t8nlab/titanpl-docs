@@ -199,6 +199,30 @@ HTTP Requests → Rust Load Balancer → Workers (parallel execution)
 - Massive throughput under real traffic
 - No "Stop-the-World" garbage collection across workers
 
+### Configuring Worker Threads
+
+You can control the number of worker threads directly in your application entry point (`app/app.js`) using the `t.start` function.
+
+```javascript
+// Start server on port 3000, log message, and spawn 12 worker threads
+t.start(3000, "Titan Running!", 12);
+```
+
+**Parameters:**
+
+1. **Port**: The port number to listen on (e.g., `3000`).
+2. **Message**: A startup message to log to the console.
+3. **Thread Count** (Optional): The specific number of worker threads to spawn.
+
+**Default Behavior:**
+
+If the **Thread Count** argument is omitted, Gravity automatically calculates the thread count based on your hardware:
+
+> **Default Threads = CPU Core Count * 4**
+
+**Example:**
+If you have **16 CPU cores** and do not specify a thread count, Gravity will spawn **64 worker threads**.
+
 ---
 
 ## 🆚 Gravity vs. Node.js
