@@ -12,11 +12,16 @@ import {
     RefreshCw,
     Shield,
     CheckCircle2,
-    Info
+    Info,
+    AlertTriangle,
+    AlertOctagon,
+    Construction
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useStatus, SystemStatus } from '@/context/StatusContext';
 
 const StatusPage = () => {
+    const { status, activeVulnerabilities, resolvedVulnerabilities, refreshStatus } = useStatus();
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [lastUpdated, setLastUpdated] = useState<string>('');
 
@@ -24,58 +29,55 @@ const StatusPage = () => {
         setLastUpdated(new Date().toLocaleTimeString());
     }, []);
 
-    const handleRefresh = () => {
+    const handleRefresh = async () => {
         setIsRefreshing(true);
-        setTimeout(() => {
-            setIsRefreshing(false);
-            setLastUpdated(new Date().toLocaleTimeString());
-        }, 1200);
+        await refreshStatus();
+        setIsRefreshing(false);
+        setLastUpdated(new Date().toLocaleTimeString());
     };
 
-    const systems = [
-        {
-            name: "Orbit System",
-            description: "Core routing & orchestration",
-            status: "operational",
-            uptime: "99.99%",
-            icon: Layers
-        },
-        {
-            name: "Gravity Runtime",
-            description: "V8 execution engine",
-            status: "operational",
-            uptime: "100%",
-            icon: Cpu
-        },
-        {
-            name: "Titan SDK",
-            description: "Development toolkit",
-            status: "operational",
-            uptime: "100%",
-            icon: Box
-        },
-        {
-            name: "Extensions Registry",
-            description: "Package distribution",
-            status: "operational",
-            uptime: "99.95%",
-            icon: Puzzle
-        },
-        {
-            name: "Documentation",
-            description: "https://titan-docs-ez.vercel.app/docs",
-            status: "operational",
-            uptime: "100%",
-            icon: Globe
-        },
-        {
-            name: "Auth Services",
-            description: "Authentication & Security",
-            status: "operational",
-            uptime: "100%",
-            icon: Shield
+    const getStatusColor = (s: SystemStatus) => {
+        switch (s) {
+            case 'operational': return 'emerald';
+            case 'degraded': return 'amber';
+            case 'maintenance': return 'blue';
+            default: return 'emerald';
         }
+    };
+
+    const statusColor = getStatusColor(status);
+
+    // Dynamic background colors based on status
+    const glowColors = {
+        operational: { primary: "bg-emerald-600/20", secondary: "bg-cyan-500/10", tertiary: "bg-teal-600/10" },
+        degraded: { primary: "bg-amber-600/20", secondary: "bg-orange-500/10", tertiary: "bg-yellow-600/10" },
+        maintenance: { primary: "bg-blue-600/20", secondary: "bg-indigo-500/10", tertiary: "bg-violet-600/10" }
+    }[status];
+
+    // Helper to check if a system is affected by any active vulnerability
+    const getSystemStatus = (componentName: string) => {
+        const isAffected = activeVulnerabilities.some(v => v.component === componentName);
+        return isAffected ? 'degraded' : 'operational';
+    };
+
+    const systemList = [
+        { name: "Orbit System", icon: Layers, description: "Core routing & orchestration" },
+        { name: "Gravity Runtime", icon: Cpu, description: "V8 execution engine" },
+        { name: "Titan SDK", icon: Box, description: "Development toolkit" }, // Matches DB component name
+        { name: "Extensions Registry", icon: Puzzle, description: "Package distribution" },
+        { name: "Documentation", icon: Globe, description: "https://titan-docs-ez.vercel.app/docs" },
+        { name: "Auth Services", icon: Shield, description: "Authentication & Security" }
     ];
+
+    // Build dynamic systems array
+    const systems = systemList.map(sys => {
+        const sysStatus = getSystemStatus(sys.name);
+        return {
+            ...sys,
+            status: sysStatus,
+            uptime: sysStatus === 'degraded' ? '98.50%' : '99.99%' // Dynamic uptime simulation
+        };
+    });
 
     const container = {
         hidden: { opacity: 0 },
@@ -94,13 +96,12 @@ const StatusPage = () => {
 
     return (
         <div className="min-h-screen bg-background pt-32 pb-24 relative overflow-hidden">
-            {/* Background glow - Persistent matching landing page */}
+            {/* Background glow - Dynamic based on status */}
             <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-                <div className="absolute left-1/2 top-0 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-600/20 blur-[100px] opacity-80 mix-blend-screen dark:opacity-20 dark:bg-blue-500/10 dark:blur-[120px]" />
-                <div className="absolute left-0 top-[40%] h-[500px] w-[500px] -translate-x-1/3 -translate-y-1/2 rounded-full bg-cyan-500/10 blur-[120px] opacity-50 mix-blend-screen dark:opacity-10 dark:bg-cyan-400/5" />
-                <div className="absolute right-0 top-[60%] h-[500px] w-[500px] translate-x-1/3 -translate-y-1/2 rounded-full bg-purple-600/10 blur-[120px] opacity-50 mix-blend-screen dark:opacity-10 dark:bg-purple-500/5" />
+                <div className={`absolute left-1/2 top-0 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[100px] opacity-80 mix-blend-screen dark:opacity-20 dark:blur-[120px] transition-colors duration-1000 ${glowColors.primary}`} />
+                <div className={`absolute left-0 top-[40%] h-[500px] w-[500px] -translate-x-1/3 -translate-y-1/2 rounded-full blur-[120px] opacity-50 mix-blend-screen dark:opacity-10 transition-colors duration-1000 ${glowColors.secondary}`} />
+                <div className={`absolute right-0 top-[60%] h-[500px] w-[500px] translate-x-1/3 -translate-y-1/2 rounded-full blur-[120px] opacity-50 mix-blend-screen dark:opacity-10 transition-colors duration-1000 ${glowColors.tertiary}`} />
             </div>
-
 
             <div className="relative z-10 max-w-5xl mx-auto px-6">
 
@@ -110,13 +111,16 @@ const StatusPage = () => {
                         <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="flex items-center gap-3 mb-4"
+                            className="inline-flex items-center gap-3 mb-4 px-3 py-1 rounded-full border bg-background/50 backdrop-blur-sm"
                         >
                             <div className="relative flex h-2.5 w-2.5">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full bg-${statusColor}-500 opacity-75`}></span>
+                                <span className={`relative inline-flex rounded-full h-2.5 w-2.5 bg-${statusColor}-500`}></span>
                             </div>
-                            <span className="text-emerald-600 dark:text-emerald-500 font-semibold tracking-wide text-xs uppercase">All Systems Operational</span>
+                            <span className={`text-${statusColor}-600 dark:text-${statusColor}-500 font-semibold tracking-wide text-xs uppercase`}>
+                                {status === 'operational' ? 'All Systems Operational' :
+                                    status === 'degraded' ? 'Performance Degraded' : 'Under Maintenance'}
+                            </span>
                         </motion.div>
                         <motion.h1
                             initial={{ opacity: 0, y: 10 }}
@@ -160,21 +164,86 @@ const StatusPage = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="mb-12 relative overflow-hidden rounded-xl border bg-background/50 backdrop-blur-md p-8 sm:p-10"
+                    className={cn(
+                        "mb-12 relative overflow-hidden rounded-xl border bg-background/50 backdrop-blur-md p-8 sm:p-10 transition-colors duration-500",
+                        status === 'degraded' ? "border-amber-500/30 bg-amber-500/5" :
+                            status === 'maintenance' ? "border-blue-500/30 bg-blue-500/5" : ""
+                    )}
                 >
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 blur-[80px] rounded-full pointer-events-none" />
+                    <div className={cn(
+                        "absolute top-0 right-0 w-64 h-64 blur-[80px] rounded-full pointer-events-none transition-colors duration-500",
+                        `bg-${statusColor}-500/10`
+                    )} />
                     <div className="flex items-center gap-6 relative z-10">
-                        <div className="h-16 w-16 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-                            <Activity className="text-emerald-500" size={32} />
+                        <div className={cn(
+                            "h-16 w-16 rounded-full flex items-center justify-center border shadow-[0_0_15px_rgba(0,0,0,0.1)] transition-colors duration-500",
+                            `bg-${statusColor}-500/10 border-${statusColor}-500/20 shadow-[0_0_15px_rgba(var(--${statusColor}-500-rgb),0.2)]`
+                        )}>
+                            {status === 'operational' ? <Activity className={`text-${statusColor}-500`} size={32} /> :
+                                status === 'degraded' ? <AlertTriangle className={`text-${statusColor}-500`} size={32} /> :
+                                    <RefreshCw className={`text-${statusColor}-500`} size={32} />}
                         </div>
                         <div>
-                            <h2 className="text-2xl font-bold mb-2">Operational</h2>
+                            <h2 className="text-2xl font-bold mb-2 capitalize">{status}</h2>
                             <p className="text-muted-foreground text-base">
-                                All Titan Planet systems are currently running within normal operating parameters.
+                                {status === 'operational' ? "All Titan Planet systems are currently running within normal operating parameters." :
+                                    status === 'degraded' ? "Some systems are experiencing performance issues." :
+                                        "Scheduled maintenance is currently in progress."}
                             </p>
                         </div>
                     </div>
                 </motion.div>
+
+                {/* Active Vulnerabilities Section */}
+                {activeVulnerabilities && activeVulnerabilities.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 }}
+                        className="mb-12"
+                    >
+                        <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
+                            <AlertOctagon className="text-red-500" />
+                            Active Vulnerabilities
+                        </h3>
+                        <div className="grid gap-4">
+                            {activeVulnerabilities.map((vuln) => (
+                                <div key={vuln.id} className="relative overflow-hidden rounded-xl border border-red-500/30 bg-red-500/5 p-6 backdrop-blur-sm">
+                                    <div className="absolute top-0 right-0 p-4 opacity-10">
+                                        <AlertOctagon size={100} />
+                                    </div>
+                                    <div className="relative z-10">
+                                        <div className="flex flex-wrap items-center gap-3 mb-3">
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-500 border border-red-500/20">
+                                                {vuln.severity.toUpperCase()}
+                                            </span>
+                                            <span className="text-xs font-mono text-muted-foreground">
+                                                ID: {vuln.id}
+                                            </span>
+                                            <div className="flex gap-2">
+                                                {vuln.affectedVersions.map(ver => (
+                                                    <span key={ver} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
+                                                        v{ver}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <h4 className="text-lg font-semibold mb-2">Security Alert: {vuln.component}</h4>
+                                        <p className="text-muted-foreground mb-4 max-w-3xl">
+                                            {vuln.description}
+                                        </p>
+                                        {vuln.workaround && (
+                                            <div className="bg-background/50 rounded-lg p-3 border text-sm">
+                                                <span className="font-semibold text-foreground">Workaround: </span>
+                                                <span className="text-muted-foreground">{vuln.workaround}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
 
                 {/* Systems Grid */}
                 <motion.div
@@ -187,15 +256,29 @@ const StatusPage = () => {
                         <motion.div
                             key={i}
                             variants={item}
-                            className="group relative p-6 rounded-xl border bg-background/50 backdrop-blur-sm hover:bg-background/80 transition-all duration-300"
+                            className={cn(
+                                "group relative p-6 rounded-xl border bg-background/50 backdrop-blur-sm hover:bg-background/80 transition-all duration-300",
+                                system.status === 'degraded' ? "border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10" : ""
+                            )}
                         >
                             <div className="flex justify-between items-start mb-4">
-                                <div className="p-2.5 rounded-lg bg-secondary/50 group-hover:bg-secondary transition-colors">
-                                    <system.icon size={20} className="text-foreground" />
+                                <div className={cn(
+                                    "p-2.5 rounded-lg transition-colors",
+                                    system.status === 'degraded' ? "bg-amber-500/10 text-amber-500" : "bg-secondary/50 group-hover:bg-secondary text-foreground"
+                                )}>
+                                    <system.icon size={20} className="currentColor" />
                                 </div>
-                                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Active</span>
+                                <div className={cn(
+                                    "flex items-center gap-1.5 px-2 py-0.5 rounded-full border",
+                                    system.status === 'degraded' ? "bg-amber-500/10 border-amber-500/20" : "bg-emerald-500/10 border-emerald-500/20"
+                                )}>
+                                    <div className={cn("w-1.5 h-1.5 rounded-full", system.status === 'degraded' ? "bg-amber-500" : "bg-emerald-500")} />
+                                    <span className={cn(
+                                        "text-[10px] font-bold uppercase tracking-wider",
+                                        system.status === 'degraded' ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"
+                                    )}>
+                                        {system.status === 'degraded' ? 'Issues' : 'Active'}
+                                    </span>
                                 </div>
                             </div>
 
@@ -204,27 +287,82 @@ const StatusPage = () => {
 
                             <div className="flex items-center justify-between pt-3 border-t border-border/50">
                                 <span className="text-xs text-muted-foreground font-mono uppercase tracking-wider">Uptime</span>
-                                <span className="text-sm font-semibold font-mono text-emerald-600 dark:text-emerald-400">{system.uptime}</span>
+                                <span className={cn(
+                                    "text-sm font-semibold font-mono",
+                                    system.status === 'degraded' ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"
+                                )}>
+                                    {system.uptime}
+                                </span>
                             </div>
                         </motion.div>
                     ))}
                 </motion.div>
 
-                {/* Maintenance Note */}
+                {/* Maintenance Note (Dynamic) */}
                 <motion.div
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
-                    className="flex items-start gap-4 p-6 rounded-lg border border-blue-500/20 bg-blue-500/5"
+                    className={cn(
+                        "flex items-start gap-4 p-6 mb-12 rounded-lg border",
+                        activeVulnerabilities.length > 0
+                            ? "border-amber-500/20 bg-amber-500/5"
+                            : "border-blue-500/20 bg-blue-500/5"
+                    )}
                 >
-                    <Info className="text-blue-500 shrink-0 mt-0.5" size={18} />
+                    {activeVulnerabilities.length > 0 ? (
+                        <Construction className="text-amber-500 shrink-0 mt-0.5" size={18} />
+                    ) : (
+                        <Info className="text-blue-500 shrink-0 mt-0.5" size={18} />
+                    )}
+
                     <div className="space-y-1">
-                        <h4 className="text-sm font-semibold text-foreground">No Active Maintenance</h4>
+                        <h4 className="text-sm font-semibold text-foreground">
+                            {activeVulnerabilities.length > 0 ? "Active Maintenance" : "No Active Maintenance"}
+                        </h4>
                         <p className="text-sm text-muted-foreground leading-relaxed">
-                            Builds and deployments are functioning normally. No scheduled downtime for the next 7 days.
+                            {activeVulnerabilities.length > 0
+                                ? "Our team is currently working on resolving the active vulnerabilities listed above. Updates will be posted as they become available."
+                                : "Builds and deployments are functioning normally. No scheduled downtime for the next 7 days."}
                         </p>
                     </div>
                 </motion.div>
+
+                {/* Resolved History Section */}
+                {resolvedVulnerabilities && resolvedVulnerabilities.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        viewport={{ once: true }}
+                        className="mb-12"
+                    >
+                        <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
+                            <CheckCircle2 className="text-emerald-500" />
+                            Resolved Issues
+                        </h3>
+                        <div className="space-y-3">
+                            {resolvedVulnerabilities.map(vuln => (
+                                <div key={vuln.id} className="flex items-center justify-between p-4 rounded-lg border bg-background/30 hover:bg-background/50 transition-colors">
+                                    <div className="flex items-center gap-4">
+                                        <div className="p-2 rounded-full bg-emerald-500/10 text-emerald-500">
+                                            <CheckCircle2 size={16} />
+                                        </div>
+                                        <div>
+                                            <div className="flex items-center gap-2 mb-0.5">
+                                                <span className="font-semibold text-sm">{vuln.id}</span>
+                                                <span className="text-xs text-muted-foreground">({vuln.component})</span>
+                                            </div>
+                                            <p className="text-xs text-muted-foreground line-clamp-1">{vuln.description}</p>
+                                        </div>
+                                    </div>
+                                    <span className="text-xs font-mono text-muted-foreground px-2 py-1 rounded bg-secondary">
+                                        Resolved
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
 
             </div>
         </div>

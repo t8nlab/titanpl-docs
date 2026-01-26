@@ -1,9 +1,29 @@
+'use client';
+
 import Link from "next/link";
 import { Activity, ArrowRight } from "lucide-react";
 import { RiGithubFill, RiNpmjsFill, RiTwitterXLine } from "@remixicon/react";
 import Image from "next/image";
+import { useStatus } from "@/context/StatusContext";
 
 export default function Footer() {
+    const { status } = useStatus();
+
+    const getStatusInfo = () => {
+        switch (status) {
+            case 'operational':
+                return { text: 'All Systems Operational', color: 'bg-emerald-500', ping: 'bg-emerald-400' };
+            case 'degraded':
+                return { text: 'Performance Degraded', color: 'bg-amber-500', ping: 'bg-amber-400' };
+            case 'maintenance':
+                return { text: 'Systems Maintenance', color: 'bg-blue-500', ping: 'bg-blue-400' };
+            default:
+                return { text: 'Unknown Status', color: 'bg-gray-500', ping: 'bg-gray-400' };
+        }
+    };
+
+    const { text, color, ping } = getStatusInfo();
+
     return (
         <footer className="w-full mt-30 border-t bg-background/50 backdrop-blur-xl">
             <div className="mx-auto w-full max-w-7xl px-6 py-12 lg:px-8">
@@ -64,6 +84,12 @@ export default function Footer() {
                             <h3 className="text-sm font-semibold text-foreground">Product</h3>
                             <Link href="/docs" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
                                 Documentation
+                            </Link>
+                            <Link href="/changelog" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                                Changelog
+                            </Link>
+                            <Link href="/space-station" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                                Space Station
                             </Link>
                             <Link href="/benchmark" className="flex gap-2 items-center text-sm text-muted-foreground font-medium transition-colors hover:text-foreground">
                                 <Activity size={14} />
@@ -169,10 +195,10 @@ export default function Footer() {
                         <div className="flex items-center gap-6">
                             <Link href="/status" className="flex items-center gap-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground">
                                 <span className="relative flex h-2 w-2">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                                    <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${ping}`}></span>
+                                    <span className={`relative inline-flex rounded-full h-2 w-2 ${color}`}></span>
                                 </span>
-                                All Systems Operational
+                                {text}
                             </Link>
                             <Link href="https://petalite-stew-867.notion.site/Ezet-privacy-vault-2742b05812ae802da69ef20c3ef491d8" target="_blank" className="text-xs text-muted-foreground transition-colors hover:text-foreground">
                                 Privacy Policy

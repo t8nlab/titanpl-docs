@@ -7,6 +7,7 @@ import { Toaster } from 'react-hot-toast';
 import { Analytics } from "@vercel/analytics/next"
 import Footer from './components/Footer';
 import { VersionProvider } from '@/context/VersionContext';
+import { StatusProvider } from '@/context/StatusContext';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -64,10 +65,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <RootProvider>
           <AuthProvider>
             <VersionProvider>
-              {children}
-              <Footer />
-              <Analytics />
-              <Toaster position="bottom-right" reverseOrder={false} />
+              <StatusProvider>
+                {children}
+                <Footer />
+                <Analytics />
+                <Toaster position="bottom-right" reverseOrder={false} />
+              </StatusProvider>
             </VersionProvider>
           </AuthProvider>
         </RootProvider>

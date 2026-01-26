@@ -24,6 +24,16 @@ export function baseOptions(): BaseLayoutProps {
         active: "nested-url"
       },
       {
+        text: "Observatory",
+        url: "/observatory",
+        active: "nested-url"
+      },
+      {
+        text: "Changelog",
+        url: "/changelog",
+        active: "nested-url"
+      },
+      {
         text: <GithubStars />,
         url: "https://github.com/ezet-galaxy/titanpl",
         active: "nested-url"
