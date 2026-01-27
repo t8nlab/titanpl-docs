@@ -5,7 +5,7 @@ import {
     Zap,
     RefreshCcw,
     Terminal as TerminalIcon,
-    Rocket,
+    Activity,
     Code,
     Eye,
     Maximize2
@@ -61,13 +61,13 @@ export default function ObservatoryDeck({
                 <div className="z-10 flex flex-col items-center">
                     <div className="w-32 h-32 rounded-full bg-black/5 dark:bg-zinc-900/50 flex items-center justify-center mb-8 border border-black/5 dark:border-white/5 relative">
                         <div className="absolute inset-0 border border-black/5 dark:border-white/5 rounded-full animate-ping opacity-20" />
-                        <Rocket size={32} className="text-zinc-400 dark:text-zinc-700 -rotate-45" />
+                        <Activity size={32} className="text-zinc-400 dark:text-zinc-700" />
                     </div>
-                    <h3 className="text-xl font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-3">No Signals Yet</h3>
+                    <h3 className="text-xl font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-3">Ready to Connect</h3>
                     <p className="text-xs text-zinc-500 dark:text-zinc-700 font-mono max-w-sm leading-relaxed">
-                        Your local galaxy is quiet.
+                        No active orbit detected.
                         <br />
-                        <span className="text-blue-600 dark:text-blue-600 block mt-2">Fire up TitanPl to connect.</span>
+                        <span className="text-blue-600 dark:text-blue-600 block mt-2">Start your local TitanPl server to begin testing & debugging.</span>
                     </p>
                 </div>
             </div>
@@ -75,35 +75,37 @@ export default function ObservatoryDeck({
     }
 
     return (
-        <div className="h-full rounded-[48px] border border-black/5 dark:border-white/10 bg-white dark:bg-[#050505] overflow-hidden flex flex-col shadow-2xl relative min-h-[600px]">
-            {/* Deck Header - Enhanced UI */}
-            <div className="h-24 border-b border-black/5 dark:border-white/5 px-8 flex items-center justify-between shrink-0 bg-zinc-50/80 dark:bg-zinc-900/20 backdrop-blur-md relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50" />
-
-                <div className="flex items-center gap-6 relative z-10">
-                    <div className="relative">
-                        <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full" />
-                        <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-50 to-white dark:from-zinc-800 dark:to-black text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 shadow-lg">
-                            <Radio size={20} className="animate-pulse" />
-                        </div>
+        <div className="h-full rounded-[48px] border border-black/5 dark:border-white/20 bg-white dark:bg-[#080808] overflow-hidden flex flex-col shadow-2xl relative min-h-[600px]">
+            {/* Deck Header - Professional Tool UI */}
+            <div className="h-16 border-b border-black/5 dark:border-white/5 px-6 flex items-center justify-between shrink-0 bg-white dark:bg-[#0A0A0A] relative">
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                        <TerminalIcon size={16} />
                     </div>
                     <div>
-                        <h2 className="text-lg font-black text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                            Signal Locked
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">LIVE</span>
-                        </h2>
-                        <div className="flex items-center gap-2 mt-1">
-                            <span className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400">
-                                UPLINK ESTABLISHED
-                            </span>
-                            <span className="text-[11px] font-bold text-zinc-800 dark:text-zinc-200">
-                                {selectedServer?.name}
-                            </span>
-                            <span className="text-[10px] text-zinc-400 px-1.5 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded">
-                                :{selectedServer?.port}
-                            </span>
+                        <div className="flex items-center gap-2">
+                            <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                                {selectedServer ? selectedServer.name : 'No Connection'}
+                            </h2>
+                            {selectedServer && (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 font-medium border border-emerald-500/20">
+                                    LIVE
+                                </span>
+                            )}
+                        </div>
+                        <div className="flex items-center gap-2 text-[11px] text-zinc-500 font-mono">
+                            <span>ID: {selectedServer ? selectedServer.pid : '---'}</span>
+                            <span className="text-zinc-700 dark:text-zinc-600">|</span>
+                            <span>PORT: {selectedServer ? selectedServer.port : '---'}</span>
                         </div>
                     </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${selectedServer ? 'bg-emerald-500 animate-pulse' : 'bg-red-500/50'}`} />
+                    <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-400">
+                        {selectedServer ? 'System Online' : 'Offline'}
+                    </span>
                 </div>
             </div>
 
@@ -193,7 +195,7 @@ export default function ObservatoryDeck({
                 <div className="flex-1 min-h-[300px] rounded-[32px] bg-zinc-900 dark:bg-[#030303] border border-black/5 dark:border-white/5 flex flex-col relative overflow-hidden shadow-xl">
                     <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-white/[0.02]">
                         <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">
-                            <TerminalIcon size={12} /> Live Telemetry
+                            <TerminalIcon size={12} /> Console Output
                         </div>
                         <div className="flex items-center gap-2">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />

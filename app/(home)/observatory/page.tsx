@@ -1,6 +1,8 @@
 'use client';
 
-import { Telescope } from 'lucide-react';
+import { Telescope, RefreshCw, Play, Pause } from 'lucide-react';
+import Image from 'next/image';
+
 import { useState, useEffect } from 'react';
 import { useVersion } from '@/context/VersionContext';
 
@@ -9,6 +11,7 @@ import RadarVisualizer from '@/app/components/observatory/RadarVisualizer';
 import ServerList from '@/app/components/observatory/ServerList';
 import ObservatoryDeck from '@/app/components/observatory/ObservatoryDeck';
 import { LogEntry, TitanServer, generateId } from '@/app/components/observatory/types';
+import VideoLoader from '@/app/components/VideoLoader';
 
 export default function TitanObservatoryPage() {
     const { titanVersion } = useVersion();
@@ -16,7 +19,8 @@ export default function TitanObservatoryPage() {
     // State
     const [scannedServers, setScannedServers] = useState<TitanServer[]>([]);
     const [selectedServerId, setSelectedServerId] = useState<string | null>(null);
-    const [isScanning, setIsScanning] = useState(true);
+    const [isScanning, setIsScanning] = useState(false);
+    const [isStreaming, setIsStreaming] = useState(true);
     const [logs, setLogs] = useState<LogEntry[]>([]);
 
     // Route Tester State
@@ -29,50 +33,67 @@ export default function TitanObservatoryPage() {
         setLogs([]);
     }, []);
 
-    // 1. Real Scan Effect (Server-Side Scan)
-    useEffect(() => {
-        let isMounted = true;
+    // 1. Scan Function
+    const scanNetwork = async () => {
+        try {
+            // Only set scanning state if manual refresh (not streaming update)
+            // or if it's the first load
+            if (!isStreaming) setIsScanning(true);
 
-        const scanNetwork = async () => {
-            if (!isMounted) return;
+            const res = await fetch('/api/observatory/scan');
+            const data = await res.json();
 
-            try {
-                const res = await fetch('/api/observatory/scan');
-                const data = await res.json();
+            setScannedServers(prev => {
+                const prevIds = prev.map(s => s.id).sort().join(',');
+                const newIds = (data.orbits as TitanServer[]).map(s => s.id).sort().join(',');
 
-                if (isMounted) {
-                    setScannedServers(prev => {
-                        const prevIds = prev.map(s => s.id).sort().join(',');
-                        const newIds = (data.orbits as TitanServer[]).map(s => s.id).sort().join(',');
-
-                        // Detect changes
-                        if (prevIds !== newIds) {
-                            const newCount = data.orbits.length;
-                            setLogs(p => [...p, {
-                                id: generateId(),
-                                timestamp: new Date().toLocaleTimeString([], { hour12: false }),
-                                message: `Sensors updated: ${newCount} active orbit${newCount === 1 ? '' : 's'} detected.`,
-                                type: 'success'
-                            }]);
-                            return data.orbits;
-                        }
-                        return prev;
-                    });
-                    setIsScanning(false);
+                if (prevIds !== newIds) {
+                    const newCount = data.orbits.length;
+                    setLogs(p => [...p, {
+                        id: generateId(),
+                        timestamp: new Date().toLocaleTimeString([], { hour12: false }),
+                        message: `Scan complete: ${newCount} active instances detected.`,
+                        type: 'success'
+                    }]);
+                    return data.orbits;
                 }
-            } catch (err) {
-                if (isMounted) setIsScanning(false);
+                return prev;
+            });
+            setIsScanning(false);
+        } catch (err) {
+            setIsScanning(false);
+        }
+    };
+
+    // 2. Stream Effect
+    useEffect(() => {
+        // Initial scan
+        scanNetwork();
+
+        if (!isStreaming) return;
+
+        const timer = setInterval(scanNetwork, 5000);
+        return () => clearInterval(timer);
+    }, [isStreaming]);
+
+    // 3. Global Keys
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Refresh on Enter if not in an input/textarea
+            if (e.key === 'Enter' &&
+                !(e.target instanceof HTMLInputElement) &&
+                !(e.target instanceof HTMLTextAreaElement)
+            ) {
+                scanNetwork();
             }
         };
 
-        const timer = setInterval(scanNetwork, 5000);
-        scanNetwork();
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isStreaming]); // Re-bind if streaming changes, though not strictly necessary if scanNetwork is stable? 
+    // Actually scanNetwork relies on isStreaming logic inside strict mode? No. 
+    // simpler: just call scanNetwork. 
 
-        return () => {
-            isMounted = false;
-            clearInterval(timer);
-        };
-    }, []);
 
     // 2. Log Stream Effect
     useEffect(() => {
@@ -84,7 +105,7 @@ export default function TitanObservatoryPage() {
         setLogs(prev => [...prev, {
             id: generateId(),
             timestamp: new Date().toLocaleTimeString([], { hour12: false }),
-            message: `Telemetry uplink established with ${displayId}`,
+            message: `Connection established with ${displayId}`,
             type: 'info'
         }]);
         setRouteResponse(null);
@@ -148,23 +169,79 @@ export default function TitanObservatoryPage() {
 
     return (
         <div className="min-h-screen bg-[#020202] text-[#abb2bf] dark:bg-[#020202] dark:text-[#abb2bf] bg-white text-zinc-800 transition-colors duration-500 flex flex-col">
+            <VideoLoader text="Observatory" />
 
-            {/* Background Texture */}
-            <div className="fixed inset-0 pointer-events-none -z-10 bg-[linear-gradient(to_right,rgba(100,100,100,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(100,100,100,0.05)_1px,transparent_1px)] bg-[size:60px_60px]" />
-            <div className="fixed top-0 left-0 w-[600px] h-[600px] bg-blue-500/10 blur-[150px] pointer-events-none -z-10" />
+            {/* Professional Studio Background */}
+            <div className="fixed inset-0 bg-[#050505] -z-20" />
+            <div className="fixed inset-0 bg-gradient-to-tr from-blue-900/10 via-transparent to-zinc-900/20 pointer-events-none -z-10" />
+            <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] bg-blue-500/5 blur-[120px] pointer-events-none -z-10" />
 
-            <div className="max-w-[1600px] mx-auto px-6 pt-12 pb-4 w-full flex-1 flex flex-col min-h-0 relative z-10">
+            <div className="w-full mx-auto px-6 pt-16 pb-24 flex-1 flex flex-col min-h-0 relative z-10 max-w-[1800px]">
 
                 {/* Header Section */}
                 <div className="flex-none flex flex-col md:flex-row md:items-end justify-between gap-6 mb-6 border-b border-black/5 dark:border-white/5 pb-6">
                     <div className="space-y-3">
-                        <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-blue-600 dark:text-blue-500 bg-blue-50 dark:bg-blue-500/5 px-4 py-1.5 rounded-full border border-blue-100 dark:border-blue-500/10 shadow-sm">
-                            <Telescope size={14} className={isScanning ? "animate-pulse" : ""} />
-                            Mesh Status: {isScanning ? 'SCANNING SYSTEM...' : `${scannedServers.length} ACTIVE ORBITS`}
+                        <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-blue-600 dark:text-blue-500 bg-blue-50 dark:bg-blue-500/5 px-4 py-1.5 rounded-full border border-blue-100 dark:border-blue-500/10 shadow-sm min-h-[32px]">
+                            {isScanning ? (
+                                <div className="flex items-center gap-3">
+                                    <div className="relative w-4 h-4">
+                                        <div className="absolute inset-0 bg-blue-500 rounded-full animate-ping opacity-20" />
+                                        <Image
+                                            src="/favicon.ico"
+                                            alt="TitanPl"
+                                            width={16}
+                                            height={16}
+                                            className="animate-spin duration-[3s]"
+                                        />
+                                    </div>
+                                    <span className="tracking-[0.2em]">TitanPl Observatory Scanning...</span>
+                                </div>
+                            ) : (
+                                <>
+                                    <Telescope size={14} />
+                                    <span>Mesh Status: {scannedServers.length} ACTIVE ORBITS</span>
+                                </>
+                            )}
                         </div>
                         <h1 className="text-4xl font-black tracking-tighter text-zinc-900 dark:text-white leading-tight">
                             TitanPl Observatory
                         </h1>
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400 font-mono mt-2 max-w-xl">
+                            Real-time development & testing utility. Scan for local TitanPl servers, inspect output, and debug routes instantly.
+                        </p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        {/* Manual Refresh Button */}
+                        <button
+                            onClick={() => scanNetwork()}
+                            disabled={isScanning}
+                            className="h-10 px-6 rounded-full bg-white dark:bg-zinc-900 border border-black/5 dark:border-white/10 text-zinc-600 dark:text-zinc-300 font-bold text-xs uppercase tracking-wider hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2 shadow-sm"
+                        >
+                            <RefreshCw size={14} className={isScanning ? "animate-spin" : ""} />
+                            Refresh
+                        </button>
+
+                        {/* Stream Toggle Button */}
+                        <button
+                            onClick={() => setIsStreaming(!isStreaming)}
+                            className={`h-10 px-6 rounded-full border font-bold text-xs uppercase tracking-wider transition-all active:scale-95 flex items-center gap-2 shadow-sm ${isStreaming
+                                ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                                : 'bg-white dark:bg-zinc-900 border-black/5 dark:border-white/10 text-zinc-400'
+                                }`}
+                        >
+                            {isStreaming ? (
+                                <>
+                                    <Pause size={14} className="fill-current" />
+                                    Stream On
+                                </>
+                            ) : (
+                                <>
+                                    <Play size={14} className="fill-current" />
+                                    Stream Off
+                                </>
+                            )}
+                        </button>
                     </div>
                 </div>
 

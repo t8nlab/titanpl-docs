@@ -7,91 +7,134 @@ const execAsync = promisify(exec);
 
 export async function GET() {
     try {
-        // 1. Find PIDs of titan-server.exe (or titan.exe)
-        // tasklist /FI "IMAGENAME eq titan-server.exe" /FO CSV /NH
-        // Output example: "titan-server.exe","1234","Console","1","12,345 K"
-
-        let pids: string[] = [];
-
-        try {
-            const { stdout: taskOut } = await execAsync('tasklist /FI "IMAGENAME eq titan-server.exe" /FO CSV /NH');
-            const lines = taskOut.trim().split('\r\n');
-            pids = lines
-                .map(line => {
-                    const parts = line.split(',');
-                    if (parts.length < 2) return null;
-                    // Remove quotes and get PID (2nd column usually)
-                    const pid = parts[1].replace(/"/g, '');
-                    return pid;
-                })
-                .filter((pid): pid is string => !!pid && !isNaN(Number(pid)));
-        } catch (e) {
-            // Ignore if tasklist fails (maybe no process found)
+        // Vercel / Cloud Environment Check
+        if (process.env.VERCEL) {
+            return NextResponse.json({
+                orbits: [{
+                    id: 'vercel-cloud',
+                    name: 'Cloud Environment Detected',
+                    port: 0,
+                    pid: 'CLOUD',
+                    uptime: 'N/A',
+                    status: 'standby',
+                    description: 'Localhost scanning is not available in cloud deployments. Run the docs locally to scan your machine.'
+                }]
+            });
         }
 
-        // Also check "node.exe" potentially if they are running via node (less likely for titan-server.exe binary, but safe to skip for now to avoid noise)
-        // Check "titan.exe" as well?
-        try {
-            const { stdout: taskOutTitan } = await execAsync('tasklist /FI "IMAGENAME eq titan.exe" /FO CSV /NH');
-            const lines = taskOutTitan.trim().split('\r\n');
-            const titanPids = lines
-                .map(line => {
-                    const parts = line.split(',');
-                    if (parts.length < 2) return null;
-                    const pid = parts[1].replace(/"/g, '');
-                    return pid;
-                })
-                .filter((pid): pid is string => !!pid && !isNaN(Number(pid)));
-            pids = [...pids, ...titanPids];
-        } catch (e) { }
+        const isWin = process.platform === 'win32';
+        let pids: string[] = [];
 
+        if (isWin) {
+            // --- Windows Scan (tasklist) ---
+            try {
+                // Check titan-server.exe
+                const { stdout: taskOut } = await execAsync('tasklist /FI "IMAGENAME eq titan-server.exe" /FO CSV /NH');
+                pids.push(...parseTasklist(taskOut));
+            } catch (e) { }
 
-        // 2. If no PIDs, maybe fallback or return empty
+            try {
+                // Check titan.exe (common alias)
+                const { stdout: taskOut } = await execAsync('tasklist /FI "IMAGENAME eq titan.exe" /FO CSV /NH');
+                pids.push(...parseTasklist(taskOut));
+            } catch (e) { }
+
+        } else {
+            // --- Linux / macOS / WSL Scan (ps) ---
+            try {
+                // ps -e -o pid,comm
+                const { stdout: psOut } = await execAsync('ps -e -o pid,comm');
+                const lines = psOut.trim().split('\n');
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    if (!trimmed) continue;
+                    // PID COMM
+                    const match = trimmed.match(/^(\d+)\s+(.+)$/);
+                    if (match) {
+                        const pid = match[1];
+                        const comm = match[2];
+                        if (comm.includes('titan-server') || comm.includes('titan')) {
+                            pids.push(pid);
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('Linux ps scan failed', e);
+            }
+        }
+
+        // remove duplicates
+        pids = [...new Set(pids)];
+
         if (pids.length === 0) {
             return NextResponse.json({ orbits: [] });
         }
 
-        const { stdout: netstatOut } = await execAsync('netstat -ano');
-        const netstatLines = netstatOut.trim().split('\r\n');
-
         const foundOrbits = [];
         const seenPorts = new Set();
 
-        for (const line of netstatLines) {
-            // Parse line. Simple whitespace split
-            const parts = line.trim().split(/\s+/);
-            // Expected parts: Proto, Local Address, Foreign Address, State, PID
-            // TCP 0.0.0.0:80 ... LISTENING 1234
-            if (parts.length < 5) continue;
+        if (isWin) {
+            // --- Windows Port Scan (netstat) ---
+            const { stdout: netstatOut } = await execAsync('netstat -ano');
+            const netstatLines = netstatOut.trim().split('\r\n');
 
-            const protocol = parts[0];
-            const localAddr = parts[1];
-            const state = parts[3]; // State is usually 4th elem for TCP
-            const pid = parts[parts.length - 1]; // PID is last
+            for (const line of netstatLines) {
+                const parts = line.trim().split(/\s+/);
+                if (parts.length < 5) continue;
 
-            // Filter for TCP and LISTENING
-            if (protocol !== 'TCP' && protocol !== 'tcp') continue;
-            // Windows netstat state column might be different index if no state? usually standard.
-            // "LISTENING"
-            if (state !== 'LISTENING') continue;
+                const protocol = parts[0];
+                const localAddr = parts[1];
+                const state = parts[3];
+                const pid = parts[parts.length - 1];
 
-            if (pids.includes(pid)) {
-                // Extract port from 0.0.0.0:5100 or [::]:5100
-                const portMatch = localAddr.match(/:(\d+)$/);
-                if (portMatch) {
-                    const port = parseInt(portMatch[1]);
-                    if (!seenPorts.has(port)) {
-                        seenPorts.add(port);
-                        foundOrbits.push({
-                            id: `srv-${pid}-${port}`,
-                            name: `New App (Orbit ${port})`,
-                            port: port,
-                            pid: pid,
-                            uptime: 'LIVE',
-                            status: 'active'
-                        });
+                if ((protocol === 'TCP' || protocol === 'tcp') && state === 'LISTENING' && pids.includes(pid)) {
+                    const portMatch = localAddr.match(/:(\d+)$/);
+                    if (portMatch) {
+                        const port = parseInt(portMatch[1]);
+                        if (!seenPorts.has(port)) {
+                            seenPorts.add(port);
+                            foundOrbits.push(createOrbit(pid, port));
+                        }
                     }
                 }
+            }
+        } else {
+            // --- Linux Port Scan (ss or netstat) ---
+            // Try 'ss -lntp' first (faster, modern)
+            try {
+                const { stdout: ssOut } = await execAsync('ss -lntp');
+                // State Recv-Q Send-Q Local Address:Port Peer Address:PortProcess
+                // LISTEN 0      4096   *:3000              *:*               users:(("node",pid=123,fd=18))
+
+                const lines = ssOut.trim().split('\n');
+                for (const line of lines) {
+                    // Check if line contains any of our PIDs
+                    const hasPid = pids.some(pid => line.includes(`pid=${pid},`) || line.includes(`pid=${pid})`));
+                    if (hasPid) {
+                        // Extract port
+                        // Address format might be [::]:port or *:port or 127.0.0.1:port
+                        const parts = line.trim().split(/\s+/);
+                        // usually 4th column is Local Address:Port
+                        const localAddr = parts[3] || '';
+                        const lastColon = localAddr.lastIndexOf(':');
+                        if (lastColon !== -1) {
+                            const portStr = localAddr.substring(lastColon + 1);
+                            const port = parseInt(portStr);
+
+                            // Find which pid it matched
+                            const matchedPid = pids.find(pid => line.includes(`pid=${pid}`)) || pids[0]; // fallback
+
+                            if (!isNaN(port) && !seenPorts.has(port)) {
+                                seenPorts.add(port);
+                                foundOrbits.push(createOrbit(matchedPid, port));
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                // Fallback to netstat if ss fails
+                // netstat -tlpn
+                console.error('SS failed, falling back to netstat', e);
             }
         }
 
@@ -101,4 +144,27 @@ export async function GET() {
         console.error('Scan failed:', error);
         return NextResponse.json({ orbits: [] }, { status: 500 });
     }
+}
+
+// Helpers
+function parseTasklist(output: string): string[] {
+    const lines = output.trim().split('\r\n');
+    return lines
+        .map(line => {
+            const parts = line.split(',');
+            if (parts.length < 2) return null;
+            return parts[1].replace(/"/g, '');
+        })
+        .filter((pid): pid is string => !!pid && !isNaN(Number(pid)));
+}
+
+function createOrbit(pid: string, port: number) {
+    return {
+        id: `tpl-${pid}-${port}`,
+        name: `Local TitanPl (Orbit ${port})`, // Better name
+        port: port,
+        pid: pid,
+        uptime: 'LIVE',
+        status: 'active'
+    };
 }

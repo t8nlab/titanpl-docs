@@ -174,21 +174,26 @@ const StatusPage = () => {
                         "absolute top-0 right-0 w-64 h-64 blur-[80px] rounded-full pointer-events-none transition-colors duration-500",
                         `bg-${statusColor}-500/10`
                     )} />
-                    <div className="flex items-center gap-6 relative z-10">
+                    <div className="flex flex-row items-center gap-4 lg:gap-6 relative z-10">
                         <div className={cn(
-                            "h-16 w-16 rounded-full flex items-center justify-center border shadow-[0_0_15px_rgba(0,0,0,0.1)] transition-colors duration-500",
+                            "shrink-0 lg:h-16 lg:w-16 h-12 w-12 rounded-full flex items-center justify-center border shadow-[0_0_15px_rgba(0,0,0,0.1)] transition-colors duration-500",
                             `bg-${statusColor}-500/10 border-${statusColor}-500/20 shadow-[0_0_15px_rgba(var(--${statusColor}-500-rgb),0.2)]`
                         )}>
-                            {status === 'operational' ? <Activity className={`text-${statusColor}-500`} size={32} /> :
-                                status === 'degraded' ? <AlertTriangle className={`text-${statusColor}-500`} size={32} /> :
-                                    <RefreshCw className={`text-${statusColor}-500`} size={32} />}
+                            {status === 'operational' ? <Activity className={`text-${statusColor}-500 w-6 h-6 lg:w-8 lg:h-8`} /> :
+                                status === 'degraded' ? <AlertTriangle className={`text-${statusColor}-500 w-6 h-6 lg:w-8 lg:h-8`} /> :
+                                    <RefreshCw className={`text-${statusColor}-500 w-6 h-6 lg:w-8 lg:h-8`} />}
                         </div>
-                        <div>
-                            <h2 className="text-2xl font-bold mb-2 capitalize">{status}</h2>
-                            <p className="text-muted-foreground text-base">
-                                {status === 'operational' ? "All Titan Planet systems are currently running within normal operating parameters." :
-                                    status === 'degraded' ? "Some systems are experiencing performance issues." :
-                                        "Scheduled maintenance is currently in progress."}
+                        <div className="min-w-0 flex-1">
+                            <h2 className="text-xl lg:text-2xl font-bold mb-1 lg:mb-2 capitalize truncate">{status}</h2>
+                            <p className="text-muted-foreground text-sm lg:text-base leading-relaxed">
+                                {status === 'operational' ? "All Titan systems are operational." :
+                                    status === 'degraded' ? "Some systems are degraded." :
+                                        "Maintenance in progress."}
+                                <span className="hidden sm:inline">
+                                    {" "}{status === 'operational' ? "Running within normal parameters." :
+                                        status === 'degraded' ? "Performance may be affected." :
+                                            "Services will resume shortly."}
+                                </span>
                             </p>
                         </div>
                     </div>

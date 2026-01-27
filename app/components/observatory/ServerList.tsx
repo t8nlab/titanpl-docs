@@ -18,7 +18,7 @@ export default function ServerList({ scannedServers, selectedServerId, isScannin
             {/* Cool Header */}
             <div className="flex items-center justify-between mb-6 px-2 pt-2 relative z-10">
                 <div className="flex items-center gap-3">
-                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-600 dark:text-blue-500">Detected Signals</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-600 dark:text-blue-400">Detected Signals</span>
                     <div className="relative">
                         <div className="absolute inset-0 bg-blue-500 blur-sm opacity-50 animate-pulse"></div>
                         <Activity size={12} className="text-blue-600 dark:text-blue-400 relative z-10" />
@@ -47,7 +47,7 @@ export default function ServerList({ scannedServers, selectedServerId, isScannin
                                     className={`w-full group relative overflow-hidden rounded-[24px] border text-left transition-all duration-300 outline-none
                                     ${selectedServerId === srv.id
                                             ? 'border-blue-500/50 bg-gradient-to-br from-zinc-900 to-black dark:from-zinc-900 dark:to-[#0a0a0a] shadow-[0_0_30px_-10px_rgba(59,130,246,0.3)]'
-                                            : 'border-transparent bg-white/50 dark:bg-white/[0.03] hover:bg-white dark:hover:bg-white/[0.08] hover:border-black/5 dark:hover:border-white/10'
+                                            : 'border-transparent bg-white/80 dark:bg-white/[0.08] hover:bg-white dark:hover:bg-white/[0.12] hover:border-black/5 dark:hover:border-white/20'
                                         }`}
                                 >
                                     {/* Selection Glow (Background) */}
@@ -94,19 +94,19 @@ export default function ServerList({ scannedServers, selectedServerId, isScannin
                         </AnimatePresence>
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center h-full gap-4 opacity-70">
-                        <div className="w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center">
-                            <AlertCircle size={24} className="text-zinc-300 dark:text-zinc-700" />
+                    <div className="flex flex-col items-center justify-center h-full gap-4 opacity-100">
+                        <div className="w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border border-zinc-200 dark:border-zinc-700">
+                            <AlertCircle size={24} className="text-zinc-400 dark:text-zinc-500" />
                         </div>
-                        <div className="text-[10px] text-zinc-400 dark:text-zinc-600 font-black uppercase tracking-widest leading-relaxed text-center">
+                        <div className="text-[10px] text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-widest leading-relaxed text-center">
                             No Active Orbits found<br />in local sector
                         </div>
                     </div>
                 )}
             </div>
 
-            {/* Decorative bottom fade */}
-            <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-zinc-50 dark:from-[#050505] to-transparent pointer-events-none z-20" />
+            {/* Decorative bottom fade - REMOVED for better visibility */}
+            {/* <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-zinc-50 dark:from-[#050505] to-transparent pointer-events-none z-20" /> */}
         </div>
     );
 }
