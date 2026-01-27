@@ -115,49 +115,73 @@ export default function TitanObservatoryPage() {
             if (!isStreaming) setIsScanning(true);
 
             // 1. Try Server-Side Scan (Works for local dev via Node.js)
-            // In Cloud/Vercel, this returns [] which is fine - user will add manually.
-            const res = await fetch('/api/observatory/scan');
-            const data = await res.json();
-            let serverOrbits = data.orbits as TitanServer[];
-
-            // 2. Special Check: Always probe Port 5100 (Titan Primary) from Browser
-            // This ensures we detect the main instance even if server-side scan fails or is cloud-based.
+            // In Cloud/Vercel, this returns [] which is fine.
+            let serverOrbits: TitanServer[] = [];
             try {
-                const controller = new AbortController();
-                // Short timeout for the auto-check to avoid delaying the UI too much
-                const timeoutId = setTimeout(() => controller.abort(), 1000);
-
-                await fetch('http://localhost:5100', {
-                    mode: 'no-cors',
-                    method: 'GET', // HEAD might be blocked more often, GET is safer for opaque
-                    signal: controller.signal
-                });
-                clearTimeout(timeoutId);
-
-                // If no error, the port is listening
-                if (!serverOrbits.some(s => s.port === 5100)) {
-                    serverOrbits.push({
-                        id: 'special-5100',
-                        name: 'Titan Primary (5100)',
-                        port: 5100,
-                        pid: 'PRIMARY',
-                        status: 'active',
-                        uptime: 'LIVE'
-                    });
-                }
+                const res = await fetch('/api/observatory/scan');
+                const data = await res.json();
+                serverOrbits = data.orbits || [];
             } catch (e) {
-                // 5100 is not reachable, ignore
+                console.warn("Server scan failed (likely cloud env):", e);
             }
 
+            // 2. Client-Side Scan (Browser Probing)
+            // Critical for deployed environments where the server cannot see localhost.
+            // We scan a commonly used range (5100-5110) in parallel.
+            const commonPorts = Array.from({ length: 11 }, (_, i) => 5100 + i);
+            
+            const checkPort = async (port: number): Promise<TitanServer | null> => {
+                try {
+                    const controller = new AbortController();
+                    // Short timeout for the auto-check to maintain UI responsiveness
+                    const timeoutId = setTimeout(() => controller.abort(), 800);
+
+                    await fetch(`http://localhost:${port}`, {
+                        mode: 'no-cors',
+                        method: 'GET',
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+
+                    // If request succeeds (even opaque), something is listening
+                    return {
+                        id: `local-client-${port}`,
+                        name: port === 5100 ? 'Titan Primary (5100)' : `Local Instance (${port})`,
+                        port: port,
+                        pid: 'LOCAL',
+                        status: 'active',
+                        uptime: 'LIVE'
+                    };
+                } catch (e) {
+                    return null;
+                }
+            };
+
+            const clientResults = await Promise.all(commonPorts.map(checkPort));
+            const clientOrbits = clientResults.filter((s): s is TitanServer => s !== null);
+
+            // 3. Merge Results (Deduplicate by Port)
+            // Client-side detection takes precedence for localhost attributes in cloud mode,
+            // but Server-side often has better PID/Process info if available.
+            const mergedOrbits = [...serverOrbits];
+            
+            clientOrbits.forEach(clientOrbit => {
+                if (!mergedOrbits.some(s => s.port === clientOrbit.port)) {
+                    mergedOrbits.push(clientOrbit);
+                }
+            });
+
             setScannedServers(prev => {
-                const prevIds = prev.map(s => s.id).sort().join(',');
-                const newIds = serverOrbits.map(s => s.id).sort().join(',');
+                // Create unique IDs string for comparison
+                const prevSig = prev.map(s => `${s.port}`).sort().join(',');
+                const newSig = mergedOrbits.map(s => `${s.port}`).sort().join(',');
 
-                if (prevIds !== newIds) {
-                    const newCount = serverOrbits.length;
-
-                    // Only log if count changed
-                    if (prev.length !== newCount) {
+                if (prevSig !== newSig) {
+                    // Only log if we found something new or lost something
+                    const newCount = mergedOrbits.length;
+                    
+                    // Simple log logic: only log if count changed meaningfully to reduce noise
+                    if (prev.length !== newCount && !isStreaming) {
                         setLogs(p => [...p, {
                             id: generateId(),
                             timestamp: new Date().toLocaleTimeString([], { hour12: false }),
@@ -165,10 +189,11 @@ export default function TitanObservatoryPage() {
                             type: 'success'
                         }]);
                     }
-                    return serverOrbits;
+                    return mergedOrbits;
                 }
                 return prev;
             });
+            
             setIsScanning(false);
         } catch (err) {
             setIsScanning(false);
