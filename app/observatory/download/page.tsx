@@ -83,7 +83,7 @@ export default function ObservatoryDownloadPage() {
                             className="flex flex-col items-center"
                         >
                             <Link
-                                href="https://drive.google.com/file/d/1Vq2z6NYh0qSQr9XWO2fXqlBtqAzDJImH/view?usp=drive_link"
+                                href="https://gitlab.com/titan-planet-group/titan-planet-project/-/raw/main/TitanPl_Observatory_Setup.exe?inline=false"
                                 download={true}
                                 className="group relative inline-flex items-center gap-3 px-8 py-3.5 bg-white text-black hover:bg-zinc-200 rounded-lg font-bold tracking-wide transition-all overflow-hidden"
                             >
