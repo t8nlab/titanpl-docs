@@ -5,9 +5,9 @@ import { Inter } from 'next/font/google';
 import type { Metadata } from 'next';
 import { Toaster } from 'react-hot-toast';
 import { Analytics } from "@vercel/analytics/next"
-import Footer from './components/Footer';
 import { VersionProvider } from '@/context/VersionContext';
 import { StatusProvider } from '@/context/StatusContext';
+import { ConditionalFooter } from './components/ConditionalFooter';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -67,7 +67,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <VersionProvider>
               <StatusProvider>
                 {children}
-                <Footer />
+                <ConditionalFooter />
                 <Analytics />
                 <Toaster position="bottom-right" reverseOrder={false} />
               </StatusProvider>

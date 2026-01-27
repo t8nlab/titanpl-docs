@@ -17,9 +17,15 @@ export default async function ChangelogPage() {
     let markdown = '';
 
     try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
+
         const res = await fetch('https://raw.githubusercontent.com/ezet-galaxy/titanpl/main/CHANGELOG.md', {
-            cache: 'no-store'
+            cache: 'no-store',
+            signal: controller.signal
         });
+
+        clearTimeout(timeoutId);
 
         if (!res.ok) {
             throw new Error('Failed to fetch changelog');
@@ -27,8 +33,8 @@ export default async function ChangelogPage() {
 
         markdown = await res.text();
     } catch (error) {
-        console.error('Error fetching changelog:', error);
-        markdown = '# Error fetching changelog\n\nPlease check the [GitHub repository](https://github.com/ezet-galaxy/titanpl) directly.';
+        console.warn('Changelog Sync: Destination Unreachable (Offline or DNS issue).');
+        markdown = '# Changelog Unavailable\n\nWe could not sync the latest changelog from GitHub. Please check the [GitHub repository](https://github.com/ezet-galaxy/titanpl) manually for the latest updates.';
     }
 
 

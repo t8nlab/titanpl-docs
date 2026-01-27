@@ -1,14 +1,18 @@
 {
   "name": "titan-docs",
-  "version": "0.0.0",
+  "version": "1.2.4",
   "private": true,
+  "description": "TitanPl Observatory - The official native dashboard for TitanPl orbits.",
+  "author": "Ezet Galaxy",
+  "productName": "TitanPl Observatory",
+  "main": "electron/main.js",
   "scripts": {
-    "build": "next build",
     "dev": "next dev",
+    "build": "next build",
     "start": "next start",
-    "types:check": "fumadocs-mdx && next typegen && tsc --noEmit",
-    "postinstall": "fumadocs-mdx",
-    "lint": "eslint"
+    "lint": "next lint",
+    "electron:dev": "concurrently \"cross-env BROWSER=none next dev\" \"wait-on tcp:3000 && electron .\"",
+    "electron:build": "next build && electron-builder --config electron-builder.yml"
   },
   "dependencies": {
     "@remixicon/react": "^4.8.0",
@@ -18,7 +22,6 @@
     "cookie": "^1.1.1",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.3",
-    "drizzle-kit": "^0.31.8",
     "drizzle-orm": "^0.45.1",
     "framer-motion": "^12.25.0",
     "fumadocs-core": "16.4.1",
@@ -28,7 +31,7 @@
     "lucide-react": "^0.561.0",
     "next": "16.0.10",
     "open-graph-scraper": "^6.11.0",
-    "pg": "^8.16.3",
+    "pg": "^8.17.2",
     "postgres": "^3.4.8",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
@@ -50,10 +53,16 @@
     "@types/pg": "^8.16.0",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "drizzle-kit": "^0.31.8",
+    "electron": "^40.0.0",
+    "electron-builder": "^26.4.0",
     "eslint": "^9.39.2",
     "eslint-config-next": "16.0.10",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.18",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "wait-on": "^9.0.3"
   }
 }

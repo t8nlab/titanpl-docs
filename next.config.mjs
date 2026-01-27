@@ -16,7 +16,8 @@ const config = {
         protocol: 'http',
         hostname: '**',
       }
-    ]
+    ],
+    qualities: [75, 100],
   }
 };
 

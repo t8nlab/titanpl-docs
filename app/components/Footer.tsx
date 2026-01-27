@@ -88,7 +88,7 @@ export default function Footer() {
                             <Link href="/changelog" className="text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
                                 Changelog
                             </Link>
-                            <Link href="/observatory" className="text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
+                            <Link href="/observatory/download" className="text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
                                 Observatory
                             </Link>
                             <Link href="/benchmark" className="flex gap-2 items-center text-sm text-zinc-500 dark:text-zinc-400 font-medium transition-colors hover:text-zinc-900 dark:hover:text-white">

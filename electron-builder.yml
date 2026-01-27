@@ -1,0 +1,28 @@
+appId: com.tpl.observatory
+productName: TitanPl Observatory
+copyright: "Copyright © 2026 Ezet Galaxy"
+directories:
+  output: build-pack
+compression: maximum
+asar: true
+files:
+  - electron/**/*
+  - package.json
+  - "!node_modules"
+  - public/**/*
+  - "!public/**/*.exe"
+  - "!**/*.map"
+win:
+  target: nsis
+  icon: public/icon.png
+  artifactName: "TitanPl_Observatory_Setup.${ext}"
+  compression: maximum
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: TitanPl Observatory
+npmRebuild: false
+nodeGypRebuild: false

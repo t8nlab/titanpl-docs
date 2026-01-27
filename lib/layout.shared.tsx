@@ -25,7 +25,7 @@ export function baseOptions(): BaseLayoutProps {
       },
       {
         text: "Observatory",
-        url: "/observatory",
+        url: "/observatory/download",
         active: "nested-url"
       },
       {

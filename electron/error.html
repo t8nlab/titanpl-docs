@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>TitanPl Observatory - Signal Recovery</title>
+    <style>
+        body {
+            background: #050505;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            padding: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 40px;
+            background: rgba(15, 15, 18, 0.5);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo-ring {
+            width: 80px;
+            height: 80px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            margin: 0 auto 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .logo-ring::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border: 2px solid #0070f3;
+            border-radius: 50%;
+            border-top-color: transparent;
+            border-left-color: transparent;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        h1 {
+            margin: 0 0 16px;
+            font-weight: 900;
+            font-size: 32px;
+            letter-spacing: -1.5px;
+        }
+
+        p {
+            color: rgba(255, 255, 255, 0.4);
+            margin: 0 0 40px;
+            font-size: 15px;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        .input-wrapper {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 32px;
+            text-align: left;
+            transition: border-color 0.3s;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: rgba(0, 112, 243, 0.5);
+        }
+
+        label {
+            display: block;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.2);
+            margin-bottom: 10px;
+        }
+
+        input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            outline: none;
+            box-sizing: border-box;
+            font-family: monospace;
+        }
+
+        .btn-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 18px;
+            border-radius: 20px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            width: 100%;
+        }
+
+        .primary-btn {
+            background: #fff;
+            color: #000;
+        }
+
+        .primary-btn:hover {
+            transform: scale(1.02);
+            background: #eee;
+        }
+
+        .secondary-btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .secondary-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #ff4d4d;
+            display: inline-block;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="logo-ring">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="m16 10-4 4-4-4" />
+            </svg>
+        </div>
+        <h1>Signal Lost.</h1>
+        <p>Your local observatory cannot establish a downlink. Select your flight path below.</p>
+
+        <div class="input-wrapper">
+            <label>Target Coordinate (URL)</label>
+            <input type="text" id="urlInput" placeholder="https://..."
+                value="https://titan-docs.vercel.app/observatory">
+        </div>
+
+        <div class="btn-stack">
+            <button class="btn primary-btn" onclick="connect()">Re-establish Connection</button>
+            <button class="btn secondary-btn" onclick="setLocal()">Switch to Localhost:3000</button>
+        </div>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        function setLocal() {
+            document.getElementById('urlInput').value = "http://localhost:3000/observatory";
+            connect();
+        }
+
+        function connect() {
+            const url = document.getElementById('urlInput').value;
+            ipcRenderer.send('retry-connection', url);
+        }
+    </script>
+</body>
+
+</html>

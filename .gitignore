@@ -1,27 +1,56 @@
-# deps
+# Dependencies
 /node_modules
-
-# generated content
-.source
-
-# test & build
-/coverage
-/.next/
-/out/
-/build
-*.tsbuildinfo
-
-# misc
-.DS_Store
-*.pem
 /.pnp
 .pnp.js
+
+# Testing
+/coverage
+
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+.source
+
+# Production
+/build
+/dist
+/release
+
+# Electron
+/dist-electron
+/release-builds
+
+# Misc
+.DS_Store
+*.pem
+*.local
+.env*
+!.env.example
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-# others
-.env*.local
-.env
+pnpm-debug.log*
 .vercel
-next-env.d.ts
+
+# TypeScript
+*.tsbuildinfo
+
+# OS Generated
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+
+# IDEs
+.idea
+.vscode
+*.swp
+*.swo
+
+# Project Specific
+build-pack/
+titan/
+server/
+cli/target/
+.cache/
+*.log

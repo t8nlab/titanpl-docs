@@ -4,16 +4,23 @@ export async function GithubStars() {
     let stars: number | null = null;
 
     try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3s timeout
+
         const res = await fetch('https://api.github.com/repos/ezet-galaxy/titanpl', {
             next: { revalidate: 3600 },
+            signal: controller.signal
         });
+
+        clearTimeout(timeoutId);
 
         if (res.ok) {
             const data = await res.json();
             stars = data.stargazers_count;
         }
     } catch (error) {
-        console.error('Failed to fetch stats:', error);
+        // Silently fail or log as warning to prevent crashing the dev server UI
+        console.warn('GitHub Stats Sync: Destination Unreachable (Offline or DNS issue).');
     }
 
     return (

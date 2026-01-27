@@ -1,8 +1,9 @@
 'use client';
 
-import { Telescope, RefreshCw, Play, Pause, ArrowLeft, Home } from 'lucide-react';
+import { Telescope, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useVersion } from '@/context/VersionContext';
@@ -22,7 +23,6 @@ export default function TitanObservatoryPage() {
     const [manualServers, setManualServers] = useState<TitanServer[]>([]); // User-added ports
     const [selectedServerId, setSelectedServerId] = useState<string | null>(null);
     const [isScanning, setIsScanning] = useState(false);
-    const [isStreaming, setIsStreaming] = useState(true);
     const [logs, setLogs] = useState<LogEntry[]>([]);
 
     // Route Tester State
@@ -111,8 +111,29 @@ export default function TitanObservatoryPage() {
     // 1. Scan Function
     const scanNetwork = async () => {
         try {
-            // Only set scanning state if manual refresh (not streaming update)
-            if (!isStreaming) setIsScanning(true);
+            setIsScanning(true);
+
+            // ELECTRON NATIVE CHECK
+            if (typeof window !== 'undefined' && (window as any).titanNative) {
+                console.log("Using TPL Electron Scan");
+                const nativeOrbits = await (window as any).titanNative.scan();
+                setScannedServers(prev => {
+                    // Update if changed
+                    const prevIds = prev.map(s => s.id).sort().join(',');
+                    const newIds = nativeOrbits.map((s: TitanServer) => s.id).sort().join(',');
+                    if (prevIds !== newIds) {
+                        if (prev.length !== nativeOrbits.length) {
+                            setLogs(p => [...p, { id: generateId(), timestamp: new Date().toLocaleTimeString(), message: `TPL Scan: ${nativeOrbits.length} active instances.`, type: 'success' }]);
+                        }
+                        return nativeOrbits;
+                    }
+                    return prev;
+                });
+                setIsScanning(false);
+                return;
+            }
+
+            // ... Fallback to Web ...
 
             // 1. Try Server-Side Scan (Works for local dev via Node.js)
             // In Cloud/Vercel, this returns [] which is fine.
@@ -126,24 +147,14 @@ export default function TitanObservatoryPage() {
             }
 
             // 2. Client-Side Scan (Browser Probing)
-            // Critical for deployed environments where the server cannot see localhost.
-            // We scan a commonly used range (5100-5110) in parallel.
             const commonPorts = Array.from({ length: 11 }, (_, i) => 5100 + i);
-            
+
             const checkPort = async (port: number): Promise<TitanServer | null> => {
                 try {
                     const controller = new AbortController();
-                    // Short timeout for the auto-check to maintain UI responsiveness
                     const timeoutId = setTimeout(() => controller.abort(), 800);
-
-                    await fetch(`http://localhost:${port}`, {
-                        mode: 'no-cors',
-                        method: 'GET',
-                        signal: controller.signal
-                    });
+                    await fetch(`http://localhost:${port}`, { mode: 'no-cors', method: 'GET', signal: controller.signal });
                     clearTimeout(timeoutId);
-
-                    // If request succeeds (even opaque), something is listening
                     return {
                         id: `local-client-${port}`,
                         name: port === 5100 ? 'Titan Primary (5100)' : `Local Instance (${port})`,
@@ -152,48 +163,30 @@ export default function TitanObservatoryPage() {
                         status: 'active',
                         uptime: 'LIVE'
                     };
-                } catch (e) {
-                    return null;
-                }
+                } catch (e) { return null; }
             };
 
             const clientResults = await Promise.all(commonPorts.map(checkPort));
             const clientOrbits = clientResults.filter((s): s is TitanServer => s !== null);
 
-            // 3. Merge Results (Deduplicate by Port)
-            // Client-side detection takes precedence for localhost attributes in cloud mode,
-            // but Server-side often has better PID/Process info if available.
+            // 3. Merge Results
             const mergedOrbits = [...serverOrbits];
-            
             clientOrbits.forEach(clientOrbit => {
-                if (!mergedOrbits.some(s => s.port === clientOrbit.port)) {
-                    mergedOrbits.push(clientOrbit);
-                }
+                if (!mergedOrbits.some(s => s.port === clientOrbit.port)) mergedOrbits.push(clientOrbit);
             });
 
             setScannedServers(prev => {
-                // Create unique IDs string for comparison
                 const prevSig = prev.map(s => `${s.port}`).sort().join(',');
                 const newSig = mergedOrbits.map(s => `${s.port}`).sort().join(',');
-
                 if (prevSig !== newSig) {
-                    // Only log if we found something new or lost something
-                    const newCount = mergedOrbits.length;
-                    
-                    // Simple log logic: only log if count changed meaningfully to reduce noise
-                    if (prev.length !== newCount && !isStreaming) {
-                        setLogs(p => [...p, {
-                            id: generateId(),
-                            timestamp: new Date().toLocaleTimeString([], { hour12: false }),
-                            message: `Scan complete: ${newCount} active instances detected.`,
-                            type: 'success'
-                        }]);
+                    if (prev.length !== mergedOrbits.length) {
+                        setLogs(p => [...p, { id: generateId(), timestamp: new Date().toLocaleTimeString(), message: `Scan complete: ${mergedOrbits.length} active instances.`, type: 'success' }]);
                     }
                     return mergedOrbits;
                 }
                 return prev;
             });
-            
+
             setIsScanning(false);
         } catch (err) {
             setIsScanning(false);
@@ -201,76 +194,66 @@ export default function TitanObservatoryPage() {
         }
     };
 
-    // 2. Stream Effect
-    useEffect(() => {
-        // Initial scan
-        scanNetwork();
+    // ... Stream Effect ...
 
-        if (!isStreaming) return;
-
-        const timer = setInterval(scanNetwork, 5000);
-        return () => clearInterval(timer);
-    }, [isStreaming]);
-
-    // 3. Global Keys
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Enter' &&
-                !(e.target instanceof HTMLInputElement) &&
-                !(e.target instanceof HTMLTextAreaElement)
-            ) {
-                scanNetwork();
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isStreaming]);
-
-
-    // 2. Log Stream Effect
-    useEffect(() => {
-        if (!selectedServerId) return;
-        if (selectedServerId === lastConnectedId.current) return;
-
-        lastConnectedId.current = selectedServerId; // Update tracking ref
-
-        const server = allServers.find(s => s.id === selectedServerId);
-        const displayId = server ? `tpl-${server.pid}-${server.port}` : selectedServerId;
-
-        setLogs(prev => [...prev, {
-            id: generateId(),
-            timestamp: new Date().toLocaleTimeString([], { hour12: false }),
-            message: `Connection established with ${displayId}`,
-            type: 'info'
-        }]);
-        setRouteResponse(null);
-        setRoutePath('/');
-    }, [selectedServerId, allServers]); // Added allServers to dependency array
+    // ...
 
     // 3. Route Fetcher (Via Proxy OR Direct)
     const fetchRoute = async () => {
-        const server = allServers.find(s => s.id === selectedServerId); // Use allServers
+        const server = allServers.find(s => s.id === selectedServerId);
         if (!server) return;
 
         setIsFetchingRoute(true);
         setRouteResponse(null);
 
-        // Check if this is a client-detected server (format: local-client-HOST-PORT or legacy local-client-PORT)
-        // We support both for safety, but new code uses host.
+        // ELECTRON CHECK
+        if (typeof window !== 'undefined' && (window as any).titanNative) {
+            try {
+                const targetHost = 'localhost'; // Native can always reach localhost
+                const titanUrl = `http://${targetHost}:${server.port}${routePath.startsWith('/') ? '' : '/'}${routePath}`;
+
+                setLogs(prev => [...prev, {
+                    id: generateId(),
+                    timestamp: new Date().toLocaleTimeString([], { hour12: false }),
+                    message: `TPL GET ${titanUrl}`,
+                    type: 'info'
+                }]);
+
+                const res = await (window as any).titanNative.fetch(titanUrl, { method: 'GET' });
+
+                // Response format from IPC: { status, statusText, data }
+                setRouteResponse(res.data);
+
+                setLogs(prev => [...prev, {
+                    id: generateId(),
+                    timestamp: new Date().toLocaleTimeString([], { hour12: false }),
+                    message: `✔ Response (${res.status} ${res.statusText})`,
+                    type: 'success'
+                }]);
+            } catch (e: any) {
+                setRouteResponse(`TPL Error: ${e}`);
+                setLogs(prev => [...prev, {
+                    id: generateId(),
+                    timestamp: new Date().toLocaleTimeString([], { hour12: false }),
+                    message: `TPL Failed: ${e}`,
+                    type: 'error'
+                }]);
+            } finally {
+                setIsFetchingRoute(false);
+            }
+            return;
+        }
+
+
+        // WEB LOGIC (Existing)
         let targetHost = 'localhost';
         let isClientDetected = false;
 
         if (server.id.startsWith('local-client-')) {
             isClientDetected = true;
             const parts = server.id.split('-');
-            if (parts.length >= 4) {
-                // local-client-127.0.0.1-3000
-                targetHost = parts[2];
-            }
+            if (parts.length >= 4) targetHost = parts[2];
         }
-        // Also treat manual servers as client detected (direct fetch) but strictly localhost for safety unless we want to parse something else.
-        // For manual, we assume localhost.
         if (server.pid === 'MANUAL') {
             isClientDetected = true;
             targetHost = 'localhost';
@@ -291,10 +274,6 @@ export default function TitanObservatoryPage() {
             let statusText = '';
 
             if (isClientDetected) {
-                // DIRECT BROWSER FETCH
-                // Note: accurate status requires CORS. Without CORS, we might fail or get opaque.
-                // We assume user is trying to test a real API so we hope for CORS.
-
                 try {
                     const res = await fetch(titanUrl);
                     status = res.status;
@@ -307,12 +286,10 @@ export default function TitanObservatoryPage() {
                         dataStr = await res.text();
                     }
                 } catch (fetchErr: any) {
-                    // Likely CORS or Mixed Content error
-                    throw new Error(`Direct Fetch Failed. Possible causes:\n1. CORS not enabled on Titan server.\n2. Mixed Content (Using HTTP localhost from HTTPS site).\nError: ${fetchErr.message}`);
+                    throw new Error(`Direct Fetch Failed. CORS/Mixed Content.\n${fetchErr.message}`);
                 }
 
             } else {
-                // PROXY FETCH (Original Logic)
                 const res = await fetch('/api/observatory/proxy', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -320,10 +297,7 @@ export default function TitanObservatoryPage() {
                 });
 
                 const proxyResult = await res.json();
-
-                if (!res.ok) {
-                    throw new Error(proxyResult.details || proxyResult.error || 'Proxy Error');
-                }
+                if (!res.ok) throw new Error(proxyResult.details || proxyResult.error || 'Proxy Error');
 
                 status = proxyResult.status;
                 statusText = proxyResult.statusText;
@@ -353,29 +327,62 @@ export default function TitanObservatoryPage() {
         }
     };
 
+    // Environment Check
+    const [isVercelWeb, setIsVercelWeb] = useState(false);
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const isNative = !!(window as any).titanNative;
+            if (!isLocal && !isNative) {
+                setIsVercelWeb(true);
+            }
+        }
+    }, []);
+
     return (
-        <div className="min-h-screen bg-[#020202] text-[#abb2bf] dark:bg-[#020202] dark:text-[#abb2bf] bg-white text-zinc-800 transition-colors duration-500 flex flex-col">
-            <VideoLoader text="Observatory" />
+        <div className="flex flex-col min-h-screen bg-white dark:bg-[#050505] text-zinc-900 dark:text-zinc-100 font-sans selection:bg-blue-500/30 relative overflow-y-auto">
+            {/* Ambient Background */}
+            <div className="fixed inset-0 z-0 pointer-events-none opacity-40">
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:40px_40px]" />
+                <div className="absolute top-0 left-0 right-0 h-64 bg-gradient-to-b from-blue-500/5 to-transparent blur-3xl" />
+            </div>
 
-            {/* Professional Studio Background */}
-            <div className="fixed inset-0 bg-[#050505] -z-20" />
-            <div className="fixed inset-0 bg-gradient-to-tr from-blue-900/10 via-transparent to-zinc-900/20 pointer-events-none -z-10" />
-            <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] bg-blue-500/5 blur-[120px] pointer-events-none -z-10" />
+            <VideoLoader text="TitanPl Observatory" />
 
-            <div className="w-full mx-auto px-6 pt-16 pb-24 flex-1 flex flex-col min-h-0 relative z-10 max-w-[1800px]">
+            {/* Vercel Environment Warning - Prototype Mode */}
+            <AnimatePresence>
+                {isVercelWeb && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="relative z-[100] bg-blue-600 dark:bg-blue-600/20 border-b border-blue-500/20 text-white px-6 py-3 text-center flex flex-col md:flex-row items-center justify-center gap-4 shadow-xl backdrop-blur-md"
+                    >
+                        <div className="flex items-center gap-3">
+                            <span className="flex h-2 w-2 relative">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-200 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                            </span>
+                            <span className="text-[11px] font-bold uppercase tracking-[0.15em]">Web Prototype Mode Active</span>
+                        </div>
+                        <span className="hidden md:inline text-blue-100/50 text-xs">|</span>
+                        <span className="text-xs text-blue-100 font-medium tracking-wide">
+                            Native sockets & CORS bypass not available. Download the desktop client for full orbital control.
+                        </span>
+                        <Link href="/observatory/download" className="bg-white text-blue-600 hover:bg-blue-50 px-5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all hover:scale-105 shadow-lg">
+                            Get Native Client
+                        </Link>
+                        {/* <button onClick={() => setIsVercelWeb(false)} className="opacity-50 hover:opacity-100 text-xs font-mono ml-4">[DISMISS]</button> */}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <div className="flex-1 flex flex-col p-6 relative z-10 max-w-[1920px] mx-auto w-full">
+
 
                 {/* Header Section */}
                 <div className="flex-none flex flex-col md:flex-row justify-between gap-6 mb-6 border-b border-black/5 dark:border-white/5 pb-6">
                     <div className="space-y-3">
-                        <Link
-                            href="/"
-                            className="group flex items-center gap-2 mb-6 px-4 py-2 w-fit rounded-full bg-white dark:bg-zinc-900 border border-black/5 dark:border-white/10 hover:border-black/10 dark:hover:border-white/20 transition-all shadow-sm active:scale-95"
-                        >
-                            <div className="w-5 h-5 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center group-hover:-translate-x-0.5 transition-transform">
-                                <ArrowLeft size={10} className="text-zinc-600 dark:text-zinc-400" />
-                            </div>
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-800 dark:group-hover:text-zinc-200 transition-colors">Return to Base</span>
-                        </Link>
                         <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-blue-600 dark:text-blue-500 bg-blue-50 dark:bg-blue-500/5 px-4 py-1.5 rounded-full border border-blue-100 dark:border-blue-500/10 shadow-sm min-h-[32px]">
                             {isScanning ? (
                                 <div className="flex items-center gap-3">
@@ -399,10 +406,12 @@ export default function TitanObservatoryPage() {
                             )}
                         </div>
                         <h1 className="text-4xl font-black tracking-tighter text-zinc-900 dark:text-white leading-tight">
-                            TitanPl Observatory
+                            {isVercelWeb ? "Observatory (Web Prototype)" : "TitanPl Observatory"}
                         </h1>
                         <p className="text-sm text-zinc-500 dark:text-zinc-400 font-mono mt-2 max-w-xl">
-                            Real-time development & testing utility. Scan for local TitanPl servers, inspect output, and debug routes instantly.
+                            {isVercelWeb
+                                ? "Limited preview environment. For raw socket access and multi-orbit control, please use the Native Desktop Client."
+                                : "Real-time development & testing utility. Scan for local TitanPl servers, inspect output, and debug routes instantly."}
                         </p>
                     </div>
 
@@ -417,26 +426,8 @@ export default function TitanObservatoryPage() {
                             Refresh Sector
                         </button>
 
-                        {/* Stream Toggle Button */}
-                        <button
-                            onClick={() => setIsStreaming(!isStreaming)}
-                            className={`h-10 px-6 rounded-full border font-bold text-xs uppercase tracking-wider transition-all active:scale-95 flex items-center gap-2 shadow-sm ${isStreaming
-                                ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
-                                : 'bg-white dark:bg-zinc-900 border-black/5 dark:border-white/10 text-zinc-400'
-                                }`}
-                        >
-                            {isStreaming ? (
-                                <>
-                                    <Pause size={14} className="fill-current" />
-                                    Stream On
-                                </>
-                            ) : (
-                                <>
-                                    <Play size={14} className="fill-current" />
-                                    Stream Off
-                                </>
-                            )}
-                        </button>
+
+
                     </div>
                 </div>
 
@@ -482,9 +473,7 @@ export default function TitanObservatoryPage() {
                     </div>
 
                 </div>
-
             </div>
-
             <style jsx global>{`
                 .custom-scrollbar::-webkit-scrollbar {
                     width: 4px;
