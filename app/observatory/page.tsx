@@ -1,6 +1,7 @@
 'use client';
 
-import { Telescope, RefreshCw, Play, Pause } from 'lucide-react';
+import { Telescope, RefreshCw, Play, Pause, ArrowLeft, Home } from 'lucide-react';
+import Link from 'next/link';
 import Image from 'next/image';
 
 import { useState, useEffect } from 'react';
@@ -179,8 +180,17 @@ export default function TitanObservatoryPage() {
             <div className="w-full mx-auto px-6 pt-16 pb-24 flex-1 flex flex-col min-h-0 relative z-10 max-w-[1800px]">
 
                 {/* Header Section */}
-                <div className="flex-none flex flex-col md:flex-row md:items-end justify-between gap-6 mb-6 border-b border-black/5 dark:border-white/5 pb-6">
+                <div className="flex-none flex flex-col md:flex-row justify-between gap-6 mb-6 border-b border-black/5 dark:border-white/5 pb-6">
                     <div className="space-y-3">
+                        <Link
+                            href="/"
+                            className="group flex items-center gap-2 mb-6 px-4 py-2 w-fit rounded-full bg-white dark:bg-zinc-900 border border-black/5 dark:border-white/10 hover:border-black/10 dark:hover:border-white/20 transition-all shadow-sm active:scale-95"
+                        >
+                            <div className="w-5 h-5 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center group-hover:-translate-x-0.5 transition-transform">
+                                <ArrowLeft size={10} className="text-zinc-600 dark:text-zinc-400" />
+                            </div>
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-800 dark:group-hover:text-zinc-200 transition-colors">Return to Base</span>
+                        </Link>
                         <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-blue-600 dark:text-blue-500 bg-blue-50 dark:bg-blue-500/5 px-4 py-1.5 rounded-full border border-blue-100 dark:border-blue-500/10 shadow-sm min-h-[32px]">
                             {isScanning ? (
                                 <div className="flex items-center gap-3">
@@ -191,7 +201,7 @@ export default function TitanObservatoryPage() {
                                             alt="TitanPl"
                                             width={16}
                                             height={16}
-                                            className="animate-spin duration-[3s]"
+                                            className="animate-spin duration-[3s] rounded-full"
                                         />
                                     </div>
                                     <span className="tracking-[0.2em]">TitanPl Observatory Scanning...</span>
@@ -216,10 +226,10 @@ export default function TitanObservatoryPage() {
                         <button
                             onClick={() => scanNetwork()}
                             disabled={isScanning}
-                            className="h-10 px-6 rounded-full bg-white dark:bg-zinc-900 border border-black/5 dark:border-white/10 text-zinc-600 dark:text-zinc-300 font-bold text-xs uppercase tracking-wider hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2 shadow-sm"
+                            className="h-10 px-6 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/20 font-bold text-xs uppercase tracking-wider transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2 shadow-lg shadow-blue-500/10 backdrop-blur-sm"
                         >
                             <RefreshCw size={14} className={isScanning ? "animate-spin" : ""} />
-                            Refresh
+                            Refresh Sector
                         </button>
 
                         {/* Stream Toggle Button */}

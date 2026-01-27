@@ -3,7 +3,6 @@
 import {
     Radio,
     Zap,
-    RefreshCcw,
     Terminal as TerminalIcon,
     Activity,
     Code,
@@ -13,6 +12,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 import { LogEntry, TitanServer } from './types';
+import TitanLoader from './TitanLoader';
 
 interface ObservatoryDeckProps {
     selectedServerId: string | null;
@@ -56,7 +56,7 @@ export default function ObservatoryDeck({
 
     if (!selectedServerId) {
         return (
-            <div className="h-full rounded-[48px] border border-black/5 dark:border-white/5 bg-zinc-50 dark:bg-[#030303] flex flex-col items-center justify-center p-12 text-center opacity-80 dark:opacity-60 relative overflow-hidden group min-h-[500px]">
+            <div className="h-full rounded-[48px] border border-black/5 dark:border-white/5 bg-zinc-50/80 dark:bg-[#030303]/80 backdrop-blur-xl flex flex-col items-center justify-center p-12 text-center opacity-80 dark:opacity-60 relative overflow-hidden group min-h-[500px]">
                 <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
                 <div className="z-10 flex flex-col items-center">
                     <div className="w-32 h-32 rounded-full bg-black/5 dark:bg-zinc-900/50 flex items-center justify-center mb-8 border border-black/5 dark:border-white/5 relative">
@@ -75,7 +75,7 @@ export default function ObservatoryDeck({
     }
 
     return (
-        <div className="h-full rounded-[48px] border border-black/5 dark:border-white/20 bg-white dark:bg-[#080808] overflow-hidden flex flex-col shadow-2xl relative min-h-[600px]">
+        <div className="h-full rounded-[48px] border border-black/5 dark:border-white/10 bg-white/90 dark:bg-[#080808]/90 backdrop-blur-2xl overflow-hidden flex flex-col shadow-2xl relative min-h-[600px]">
             {/* Deck Header - Professional Tool UI */}
             <div className="h-16 border-b border-black/5 dark:border-white/5 px-6 flex items-center justify-between shrink-0 bg-white dark:bg-[#0A0A0A] relative">
                 <div className="flex items-center gap-4">
@@ -104,12 +104,12 @@ export default function ObservatoryDeck({
                 <div className="flex items-center gap-2">
                     <div className={`w-2 h-2 rounded-full ${selectedServer ? 'bg-emerald-500 animate-pulse' : 'bg-red-500/50'}`} />
                     <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-400">
-                        {selectedServer ? 'System Online' : 'Offline'}
+                        {selectedServer ? 'Active Orbit' : 'Offline'}
                     </span>
                 </div>
             </div>
 
-            <div className="flex-1 flex flex-col p-8 gap-6 overflow-y-auto bg-zinc-50/30 dark:bg-black/20">
+            <div className="flex-1 flex flex-col p-8 gap-6 overflow-hidden bg-zinc-50/30 dark:bg-black/20">
                 {/* Route Tester Card */}
                 <div className="p-2 rounded-[32px] bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 shadow-sm transition-shadow hover:shadow-md focus-within:ring-2 focus-within:ring-blue-500/20">
                     <div className="flex items-center pl-4 pr-1.5 py-1.5">
@@ -134,7 +134,7 @@ export default function ObservatoryDeck({
                             disabled={isFetchingRoute}
                             className="shrink-0 px-6 py-2.5 rounded-[22px] bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black font-black text-[10px] uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100 shadow-md flex items-center gap-2"
                         >
-                            {isFetchingRoute ? <RefreshCcw size={14} className="animate-spin" /> : <>FETCH <span className="hidden sm:inline">DATA</span></>}
+                            {isFetchingRoute ? <TitanLoader size={24} /> : <>FETCH <span className="hidden sm:inline">DATA</span></>}
                         </button>
                     </div>
                 </div>
@@ -192,7 +192,7 @@ export default function ObservatoryDeck({
                 </AnimatePresence>
 
                 {/* Telemetry Console */}
-                <div className="flex-1 min-h-[300px] rounded-[32px] bg-zinc-900 dark:bg-[#030303] border border-black/5 dark:border-white/5 flex flex-col relative overflow-hidden shadow-xl">
+                <div className="max-h-[400px] min-h-[300px] shrink-0 rounded-[32px] bg-zinc-900 dark:bg-[#030303] border border-black/5 dark:border-white/5 flex flex-col relative overflow-hidden shadow-xl">
                     <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-white/[0.02]">
                         <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">
                             <TerminalIcon size={12} /> Console Output
@@ -203,14 +203,16 @@ export default function ObservatoryDeck({
                         </div>
                     </div>
 
+
+
                     <div
                         ref={outputRef}
-                        className="flex-1 overflow-y-auto font-mono text-[12px] p-6 space-y-3 custom-scrollbar"
+                        className="flex-1 overflow-y-auto font-mono text-[12px] p-6 space-y-3 custom-scrollbar bg-black/20 scroll-smooth will-change-transform transform-gpu"
                     >
                         {logs.map((log) => (
-                            <div key={log.id} className="flex gap-4 opacity-90 hover:opacity-100 transition-opacity">
-                                <span className="text-zinc-600 shrink-0 select-none text-[10px] w-14 mt-0.5">[{log.timestamp}]</span>
-                                <span className={`block flex-1 leading-relaxed break-all ${log.type === 'error' ? 'text-rose-400' :
+                            <div key={log.id} className="flex gap-4 opacity-90 hover:opacity-100 transition-opacity contain-content content-visibility-auto">
+                                <span className="text-zinc-600 shrink-0 select-none text-[10px] w-14 mt-0.5 font-mono">[{log.timestamp}]</span>
+                                <span className={`block flex-1 leading-relaxed break-all font-mono ${log.type === 'error' ? 'text-rose-400' :
                                     log.type === 'success' ? 'text-emerald-400' :
                                         log.type === 'info' ? 'text-blue-200/70' :
                                             'text-zinc-400'

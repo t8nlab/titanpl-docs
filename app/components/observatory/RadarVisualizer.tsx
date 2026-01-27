@@ -11,15 +11,15 @@ interface RadarVisualizerProps {
 
 export default function RadarVisualizer({ scannedServers, selectedServerId, onSelectServer }: RadarVisualizerProps) {
     return (
-        <div className="flex-none h-96 rounded-[48px] border border-black/5 dark:border-white/5 bg-zinc-50 dark:bg-[#050505] relative overflow-hidden shadow-2xl group border-l-[4px] border-l-blue-500/30">
+        <div className="flex-none h-96 rounded-[48px] border border-black/5 dark:border-white/5 bg-zinc-50/50 dark:bg-[#050505]/50 backdrop-blur-xl relative overflow-hidden shadow-2xl group border-l-[4px] border-l-blue-500/20">
             {/* Radar Grid Background */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
-                <div className="absolute w-full h-[1px] bg-blue-500/30" />
-                <div className="absolute h-full w-[1px] bg-blue-500/30" />
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-30 dark:opacity-20">
+                <div className="absolute w-full h-[1px] bg-black/5 dark:bg-white/5" />
+                <div className="absolute h-full w-[1px] bg-black/5 dark:bg-white/5" />
                 {/* Base concentric rings for depth */}
-                <div className="absolute w-[100px] h-[100px] rounded-full border border-blue-500/20" />
-                <div className="absolute w-[200px] h-[200px] rounded-full border border-blue-500/20" />
-                <div className="absolute w-[300px] h-[300px] rounded-full border border-blue-500/20" />
+                <div className="absolute w-[100px] h-[100px] rounded-full border border-black/5 dark:border-white/5" />
+                <div className="absolute w-[200px] h-[200px] rounded-full border border-black/5 dark:border-white/5" />
+                <div className="absolute w-[300px] h-[300px] rounded-full border border-black/5 dark:border-white/5" />
             </div>
 
             {/* Scanning Beam (Central) */}
@@ -41,7 +41,7 @@ export default function RadarVisualizer({ scannedServers, selectedServerId, onSe
                     return (
                         <div
                             key={srv.id}
-                            className="absolute rounded-full border border-dashed border-blue-500/20 dark:border-blue-500/30 flex items-center justify-center transition-all duration-1000"
+                            className="absolute rounded-full border border-dashed border-black/5 dark:border-white/10 flex items-center justify-center transition-all duration-1000 pointer-events-none"
                             style={{
                                 width: size,
                                 height: size,
@@ -54,7 +54,7 @@ export default function RadarVisualizer({ scannedServers, selectedServerId, onSe
                                     onClick={() => onSelectServer(srv.id)}
                                     whileHover={{ scale: 1.2 }}
                                     style={{ animation: `spin ${duration}s linear infinite ${isReverse ? 'normal' : 'reverse'}` }} // Counter-rotate to keep upright
-                                    className="relative cursor-pointer group/planet"
+                                    className="relative cursor-pointer group/planet pointer-events-auto"
                                 >
                                     {/* Custom "Circular Satellite" Design */}
                                     <div className="relative w-8 h-8 flex items-center justify-center scale-90 md:scale-100">

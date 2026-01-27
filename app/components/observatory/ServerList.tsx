@@ -1,8 +1,9 @@
 'use client';
 
-import { Activity, Search, Server, AlertCircle, Wifi } from 'lucide-react';
+import { Activity, AlertCircle, Wifi } from 'lucide-react';
 import { TitanServer } from './types';
 import { motion, AnimatePresence } from 'framer-motion';
+import TitanLoader from './TitanLoader';
 
 interface ServerListProps {
     scannedServers: TitanServer[];
@@ -13,7 +14,7 @@ interface ServerListProps {
 
 export default function ServerList({ scannedServers, selectedServerId, isScanning, onSelectServer }: ServerListProps) {
     return (
-        <div className="flex-1 rounded-[48px] border border-black/5 dark:border-white/5 bg-zinc-50 dark:bg-[#050505] p-6 overflow-hidden flex flex-col border-b-[3px] border-b-blue-500/20 shadow-sm dark:shadow-none min-h-[300px] relative">
+        <div className="flex-1 rounded-[48px] border border-black/5 dark:border-white/5 bg-zinc-50/80 dark:bg-[#050505]/80 backdrop-blur-xl p-6 overflow-hidden flex flex-col shadow-2xl relative min-h-[300px]">
 
             {/* Cool Header */}
             <div className="flex items-center justify-between mb-6 px-2 pt-2 relative z-10">
@@ -28,12 +29,9 @@ export default function ServerList({ scannedServers, selectedServerId, isScannin
 
             <div className="flex-1 overflow-y-auto custom-scrollbar relative z-10 p-1">
                 {isScanning && scannedServers.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full gap-4 opacity-50">
-                        <div className="relative">
-                            <div className="absolute inset-0 bg-blue-500/30 blur-xl rounded-full animate-pulse"></div>
-                            <Search size={24} className="animate-spin text-blue-600 dark:text-blue-400 relative z-10" />
-                        </div>
-                        <div className="text-[10px] text-zinc-500 dark:text-zinc-600 font-mono tracking-widest uppercase">Scanning Sector...</div>
+                    <div className="flex flex-col items-center justify-center h-full gap-6 opacity-80">
+                        <TitanLoader size={48} />
+                        <div className="text-[10px] text-zinc-500 dark:text-zinc-400 font-mono tracking-[0.2em] uppercase animate-pulse">Scanning Sector...</div>
                     </div>
                 ) : scannedServers.length > 0 ? (
                     <div className="space-y-4">
@@ -46,8 +44,8 @@ export default function ServerList({ scannedServers, selectedServerId, isScannin
                                     onClick={() => onSelectServer(srv.id)}
                                     className={`w-full group relative overflow-hidden rounded-[24px] border text-left transition-all duration-300 outline-none
                                     ${selectedServerId === srv.id
-                                            ? 'border-blue-500/50 bg-gradient-to-br from-zinc-900 to-black dark:from-zinc-900 dark:to-[#0a0a0a] shadow-[0_0_30px_-10px_rgba(59,130,246,0.3)]'
-                                            : 'border-transparent bg-white/80 dark:bg-white/[0.08] hover:bg-white dark:hover:bg-white/[0.12] hover:border-black/5 dark:hover:border-white/20'
+                                            ? 'border-blue-500/20 bg-blue-500/5 dark:bg-blue-500/10 shadow-[0_0_30px_-10px_rgba(59,130,246,0.3)]'
+                                            : 'border-transparent bg-white/50 dark:bg-white/[0.03] hover:bg-white/80 dark:hover:bg-white/[0.08] hover:border-black/5 dark:hover:border-white/10'
                                         }`}
                                 >
                                     {/* Selection Glow (Background) */}
@@ -56,12 +54,12 @@ export default function ServerList({ scannedServers, selectedServerId, isScannin
                                     )}
 
                                     {/* Active Indicator Strip */}
-                                    <div className={`absolute left-0 top-0 bottom-0 w-[4px] transition-colors duration-300 ${selectedServerId === srv.id ? 'bg-blue-500' : 'bg-transparent group-hover:bg-zinc-200 dark:group-hover:bg-zinc-800'}`} />
+                                    <div className={`absolute left-0 top-0 bottom-0 w-[3px] transition-colors duration-300 transform scale-y-75 group-hover:scale-y-100 rounded-r-full ${selectedServerId === srv.id ? 'bg-blue-500' : 'bg-transparent group-hover:bg-zinc-300 dark:group-hover:bg-zinc-700'}`} />
 
                                     <div className="p-4 pl-6 relative z-10">
                                         <div className="flex justify-between items-start mb-3">
                                             <div>
-                                                <h4 className={`text-xs font-black uppercase tracking-wider mb-1 transition-colors ${selectedServerId === srv.id ? 'text-blue-500 dark:text-blue-400' : 'text-zinc-700 dark:text-zinc-300'}`}>
+                                                <h4 className={`text-sm font-bold tracking-tight mb-1 transition-colors ${selectedServerId === srv.id ? 'text-zinc-900 dark:text-white' : 'text-zinc-700 dark:text-zinc-300'}`}>
                                                     {srv.name}
                                                 </h4>
                                                 <div className="flex items-center gap-2">
@@ -70,9 +68,8 @@ export default function ServerList({ scannedServers, selectedServerId, isScannin
                                                 </div>
                                             </div>
 
-                                            {/* Status Badge */}
-                                            <div className={`px-2 py-1 rounded-md border flex items-center gap-1.5 transition-colors ${selectedServerId === srv.id ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-zinc-100 dark:bg-zinc-800 border-transparent text-zinc-400'}`}>
-                                                <Wifi size={10} className={selectedServerId === srv.id ? 'animate-pulse' : ''} />
+                                            <div className={`px-2 py-1 rounded-full border flex items-center gap-1.5 transition-colors ${selectedServerId === srv.id ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-zinc-100 dark:bg-zinc-800 border-transparent text-zinc-400'}`}>
+                                                <div className={`w-1.5 h-1.5 rounded-full ${selectedServerId === srv.id ? 'bg-emerald-500 animate-pulse' : 'bg-zinc-400'}`} />
                                                 <span className="text-[9px] font-bold uppercase tracking-wider">Live</span>
                                             </div>
                                         </div>
