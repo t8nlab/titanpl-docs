@@ -9,17 +9,9 @@ export async function GET() {
     try {
         // Vercel / Cloud Environment Check
         if (process.env.VERCEL) {
-            return NextResponse.json({
-                orbits: [{
-                    id: 'vercel-cloud',
-                    name: 'Cloud Environment Detected',
-                    port: 0,
-                    pid: 'CLOUD',
-                    uptime: 'N/A',
-                    status: 'standby',
-                    description: 'Localhost scanning is not available in cloud deployments. Run the docs locally to scan your machine.'
-                }]
-            });
+            // In cloud, we can't scan the user's localhost from the server.
+            // Return empty so the frontend can fallback to client-side probing.
+            return NextResponse.json({ orbits: [] });
         }
 
         const isWin = process.platform === 'win32';

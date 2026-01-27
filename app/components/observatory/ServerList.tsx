@@ -1,18 +1,29 @@
-'use client';
-
-import { Activity, AlertCircle, Wifi } from 'lucide-react';
+import { Activity, AlertCircle, Wifi, Plus } from 'lucide-react';
 import { TitanServer } from './types';
 import { motion, AnimatePresence } from 'framer-motion';
 import TitanLoader from './TitanLoader';
+import { useState } from 'react';
 
 interface ServerListProps {
     scannedServers: TitanServer[];
     selectedServerId: string | null;
     isScanning: boolean;
     onSelectServer: (id: string) => void;
+    onAddManualOrbit?: (port: number) => void;
 }
 
-export default function ServerList({ scannedServers, selectedServerId, isScanning, onSelectServer }: ServerListProps) {
+export default function ServerList({ scannedServers, selectedServerId, isScanning, onSelectServer, onAddManualOrbit }: ServerListProps) {
+    const [manualPort, setManualPort] = useState('');
+
+    const handleAdd = () => {
+        if (!manualPort || !onAddManualOrbit) return;
+        const port = parseInt(manualPort);
+        if (port > 0 && port < 65536) {
+            onAddManualOrbit(port);
+            setManualPort('');
+        }
+    };
+
     return (
         <div className="flex-1 rounded-[48px] border border-black/5 dark:border-white/5 bg-zinc-50/80 dark:bg-[#050505]/80 backdrop-blur-xl p-6 overflow-hidden flex flex-col shadow-2xl relative min-h-[300px]">
 
@@ -27,7 +38,7 @@ export default function ServerList({ scannedServers, selectedServerId, isScannin
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto custom-scrollbar relative z-10 p-1">
+            <div className="flex-1 overflow-y-auto custom-scrollbar relative z-10 p-1 mb-4">
                 {isScanning && scannedServers.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full gap-6 opacity-80">
                         <TitanLoader size={48} />
@@ -98,12 +109,44 @@ export default function ServerList({ scannedServers, selectedServerId, isScannin
                         <div className="text-[10px] text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-widest leading-relaxed text-center">
                             No Active Orbits found<br />in local sector
                         </div>
+                        <p className="text-[9px] text-zinc-400 dark:text-zinc-600 font-mono text-center max-w-[200px] leading-relaxed">
+                            Running in Cloud? Browser security might block local connections.
+                        </p>
                     </div>
                 )}
             </div>
 
-            {/* Decorative bottom fade - REMOVED for better visibility */}
-            {/* <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-zinc-50 dark:from-[#050505] to-transparent pointer-events-none z-20" /> */}
+            {/* Manual Add Input */}
+            <div className="relative z-10 pt-4 border-t border-black/5 dark:border-white/5">
+                <div className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider mb-2 pl-1">Manual Deep Scan</div>
+                <div className="flex items-center gap-2 bg-white dark:bg-zinc-900/50 rounded-xl border border-black/5 dark:border-white/10 p-1.5 pl-3 shadow-sm focus-within:ring-2 ring-blue-500/20 transition-all hover:bg-white/80 dark:hover:bg-zinc-900">
+                    <div className="text-xs font-bold text-zinc-500 font-mono">localhost:</div>
+                    <input
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        value={manualPort}
+                        onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, ''); // Only numbers
+                            if (val.length <= 5) setManualPort(val);
+                        }}
+                        onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+                        placeholder="PORT"
+                        className="flex-1 bg-transparent border-none outline-none text-sm font-mono text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-300 w-full min-w-0 tracking-wider"
+                    />
+                    <button
+                        onClick={handleAdd}
+                        disabled={!manualPort}
+                        className="px-3 py-1.5 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-black hover:scale-105 active:scale-95 transition-all shadow-md disabled:opacity-50 disabled:scale-100 disabled:shadow-none"
+                    >
+                        <div className="flex items-center gap-1.5">
+                            <Plus size={12} strokeWidth={3} />
+                            <span className="text-[10px] font-black uppercase tracking-wider">Add</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
         </div>
     );
 }

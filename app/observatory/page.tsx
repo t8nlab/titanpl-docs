@@ -4,7 +4,7 @@ import { Telescope, RefreshCw, Play, Pause, ArrowLeft, Home } from 'lucide-react
 import Link from 'next/link';
 import Image from 'next/image';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useVersion } from '@/context/VersionContext';
 
 // Components
@@ -19,6 +19,7 @@ export default function TitanObservatoryPage() {
 
     // State
     const [scannedServers, setScannedServers] = useState<TitanServer[]>([]);
+    const [manualServers, setManualServers] = useState<TitanServer[]>([]); // User-added ports
     const [selectedServerId, setSelectedServerId] = useState<string | null>(null);
     const [isScanning, setIsScanning] = useState(false);
     const [isStreaming, setIsStreaming] = useState(true);
@@ -29,6 +30,79 @@ export default function TitanObservatoryPage() {
     const [routeResponse, setRouteResponse] = useState<string | null>(null);
     const [isFetchingRoute, setIsFetchingRoute] = useState(false);
 
+    // Track last logged ID to prevent duplicate logs
+    const lastConnectedId = useRef<string | null>(null);
+
+    // Derived State: Combine scanned and manual servers (Memoized to prevent re-renders)
+    const allServers = useMemo(() => {
+        const combined = [...scannedServers];
+        manualServers.forEach(ms => {
+            if (!combined.some(s => s.port === ms.port)) {
+                combined.push(ms);
+            }
+        });
+        return combined;
+    }, [scannedServers, manualServers]);
+
+    // Helper: Add Manual Orbit
+    const addManualOrbit = async (port: number) => {
+        if (allServers.some(s => s.port === port)) {
+            const existing = allServers.find(s => s.port === port);
+            if (existing) setSelectedServerId(existing.id);
+            return;
+        }
+
+        setLogs(p => [...p, {
+            id: generateId(),
+            timestamp: new Date().toLocaleTimeString([], { hour12: false }),
+            message: `Probing localhost:${port} for Titan signal...`,
+            type: 'system'
+        }]);
+
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s timeout
+
+            // "no-cors" mode allows us to detect if a server is running at all (Opaque response).
+            // Usually Titan servers won't have CORS setup for localhost docs, so this is necessary.
+            await fetch(`http://localhost:${port}`, {
+                mode: 'no-cors',
+                method: 'GET',
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            // If we didn't throw, something is listening
+            const id = `manual-${port}`;
+            const newServer: TitanServer = {
+                id,
+                name: `Manual Orbit (${port})`,
+                port,
+                pid: 'MANUAL',
+                status: 'active',
+                uptime: 'user-added'
+            };
+
+            setManualServers(prev => [...prev, newServer]);
+            setSelectedServerId(id);
+
+            setLogs(p => [...p, {
+                id: generateId(),
+                timestamp: new Date().toLocaleTimeString([], { hour12: false }),
+                message: `Signal Verified: Uplink established on Port ${port}`,
+                type: 'success'
+            }]);
+
+        } catch (e) {
+            setLogs(p => [...p, {
+                id: generateId(),
+                timestamp: new Date().toLocaleTimeString([], { hour12: false }),
+                message: `Connection Failed: No active Titan signal on port ${port}.`,
+                type: 'error'
+            }]);
+        }
+    };
+
     // 0. Safety: Clear logs on mount
     useEffect(() => {
         setLogs([]);
@@ -38,31 +112,67 @@ export default function TitanObservatoryPage() {
     const scanNetwork = async () => {
         try {
             // Only set scanning state if manual refresh (not streaming update)
-            // or if it's the first load
             if (!isStreaming) setIsScanning(true);
 
+            // 1. Try Server-Side Scan (Works for local dev via Node.js)
+            // In Cloud/Vercel, this returns [] which is fine - user will add manually.
             const res = await fetch('/api/observatory/scan');
             const data = await res.json();
+            let serverOrbits = data.orbits as TitanServer[];
+
+            // 2. Special Check: Always probe Port 5100 (Titan Primary) from Browser
+            // This ensures we detect the main instance even if server-side scan fails or is cloud-based.
+            try {
+                const controller = new AbortController();
+                // Short timeout for the auto-check to avoid delaying the UI too much
+                const timeoutId = setTimeout(() => controller.abort(), 1000);
+
+                await fetch('http://localhost:5100', {
+                    mode: 'no-cors',
+                    method: 'GET', // HEAD might be blocked more often, GET is safer for opaque
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                // If no error, the port is listening
+                if (!serverOrbits.some(s => s.port === 5100)) {
+                    serverOrbits.push({
+                        id: 'special-5100',
+                        name: 'Titan Primary (5100)',
+                        port: 5100,
+                        pid: 'PRIMARY',
+                        status: 'active',
+                        uptime: 'LIVE'
+                    });
+                }
+            } catch (e) {
+                // 5100 is not reachable, ignore
+            }
 
             setScannedServers(prev => {
                 const prevIds = prev.map(s => s.id).sort().join(',');
-                const newIds = (data.orbits as TitanServer[]).map(s => s.id).sort().join(',');
+                const newIds = serverOrbits.map(s => s.id).sort().join(',');
 
                 if (prevIds !== newIds) {
-                    const newCount = data.orbits.length;
-                    setLogs(p => [...p, {
-                        id: generateId(),
-                        timestamp: new Date().toLocaleTimeString([], { hour12: false }),
-                        message: `Scan complete: ${newCount} active instances detected.`,
-                        type: 'success'
-                    }]);
-                    return data.orbits;
+                    const newCount = serverOrbits.length;
+
+                    // Only log if count changed
+                    if (prev.length !== newCount) {
+                        setLogs(p => [...p, {
+                            id: generateId(),
+                            timestamp: new Date().toLocaleTimeString([], { hour12: false }),
+                            message: `Scan complete: ${newCount} active instances detected.`,
+                            type: 'success'
+                        }]);
+                    }
+                    return serverOrbits;
                 }
                 return prev;
             });
             setIsScanning(false);
         } catch (err) {
             setIsScanning(false);
+            console.error(err);
         }
     };
 
@@ -80,7 +190,6 @@ export default function TitanObservatoryPage() {
     // 3. Global Keys
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            // Refresh on Enter if not in an input/textarea
             if (e.key === 'Enter' &&
                 !(e.target instanceof HTMLInputElement) &&
                 !(e.target instanceof HTMLTextAreaElement)
@@ -91,16 +200,17 @@ export default function TitanObservatoryPage() {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isStreaming]); // Re-bind if streaming changes, though not strictly necessary if scanNetwork is stable? 
-    // Actually scanNetwork relies on isStreaming logic inside strict mode? No. 
-    // simpler: just call scanNetwork. 
+    }, [isStreaming]);
 
 
     // 2. Log Stream Effect
     useEffect(() => {
         if (!selectedServerId) return;
+        if (selectedServerId === lastConnectedId.current) return;
 
-        const server = scannedServers.find(s => s.id === selectedServerId);
+        lastConnectedId.current = selectedServerId; // Update tracking ref
+
+        const server = allServers.find(s => s.id === selectedServerId);
         const displayId = server ? `tpl-${server.pid}-${server.port}` : selectedServerId;
 
         setLogs(prev => [...prev, {
@@ -111,18 +221,38 @@ export default function TitanObservatoryPage() {
         }]);
         setRouteResponse(null);
         setRoutePath('/');
-    }, [selectedServerId]);
+    }, [selectedServerId, allServers]); // Added allServers to dependency array
 
-    // 3. Route Fetcher (Via Proxy)
+    // 3. Route Fetcher (Via Proxy OR Direct)
     const fetchRoute = async () => {
-        const server = scannedServers.find(s => s.id === selectedServerId);
+        const server = allServers.find(s => s.id === selectedServerId); // Use allServers
         if (!server) return;
 
         setIsFetchingRoute(true);
         setRouteResponse(null);
 
+        // Check if this is a client-detected server (format: local-client-HOST-PORT or legacy local-client-PORT)
+        // We support both for safety, but new code uses host.
+        let targetHost = 'localhost';
+        let isClientDetected = false;
+
+        if (server.id.startsWith('local-client-')) {
+            isClientDetected = true;
+            const parts = server.id.split('-');
+            if (parts.length >= 4) {
+                // local-client-127.0.0.1-3000
+                targetHost = parts[2];
+            }
+        }
+        // Also treat manual servers as client detected (direct fetch) but strictly localhost for safety unless we want to parse something else.
+        // For manual, we assume localhost.
+        if (server.pid === 'MANUAL') {
+            isClientDetected = true;
+            targetHost = 'localhost';
+        }
+
         try {
-            const titanUrl = `http://localhost:${server.port}${routePath.startsWith('/') ? '' : '/'}${routePath}`;
+            const titanUrl = `http://${targetHost}:${server.port}${routePath.startsWith('/') ? '' : '/'}${routePath}`;
 
             setLogs(prev => [...prev, {
                 id: generateId(),
@@ -131,20 +261,50 @@ export default function TitanObservatoryPage() {
                 type: 'info'
             }]);
 
-            const res = await fetch('/api/observatory/proxy', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: titanUrl, method: 'GET' })
-            });
+            let dataStr = '';
+            let status = 0;
+            let statusText = '';
 
-            const proxyResult = await res.json();
+            if (isClientDetected) {
+                // DIRECT BROWSER FETCH
+                // Note: accurate status requires CORS. Without CORS, we might fail or get opaque.
+                // We assume user is trying to test a real API so we hope for CORS.
 
-            if (!res.ok) {
-                throw new Error(proxyResult.details || proxyResult.error || 'Proxy Error');
+                try {
+                    const res = await fetch(titanUrl);
+                    status = res.status;
+                    statusText = res.statusText;
+                    const contentType = res.headers.get("content-type");
+                    if (contentType && contentType.includes("application/json")) {
+                        const json = await res.json();
+                        dataStr = JSON.stringify(json, null, 2);
+                    } else {
+                        dataStr = await res.text();
+                    }
+                } catch (fetchErr: any) {
+                    // Likely CORS or Mixed Content error
+                    throw new Error(`Direct Fetch Failed. Possible causes:\n1. CORS not enabled on Titan server.\n2. Mixed Content (Using HTTP localhost from HTTPS site).\nError: ${fetchErr.message}`);
+                }
+
+            } else {
+                // PROXY FETCH (Original Logic)
+                const res = await fetch('/api/observatory/proxy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: titanUrl, method: 'GET' })
+                });
+
+                const proxyResult = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(proxyResult.details || proxyResult.error || 'Proxy Error');
+                }
+
+                status = proxyResult.status;
+                statusText = proxyResult.statusText;
+                const data = proxyResult.data;
+                dataStr = typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
             }
-
-            const { status, statusText, data } = proxyResult;
-            const dataStr = typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
 
             setRouteResponse(dataStr);
 
@@ -209,7 +369,7 @@ export default function TitanObservatoryPage() {
                             ) : (
                                 <>
                                     <Telescope size={14} />
-                                    <span>Mesh Status: {scannedServers.length} ACTIVE ORBITS</span>
+                                    <span>Mesh Status: {allServers.length} ACTIVE ORBITS</span>
                                 </>
                             )}
                         </div>
@@ -263,7 +423,7 @@ export default function TitanObservatoryPage() {
                         {/* 1. Radar Visualizer (Advanced Multi-Orbit) */}
                         <div className="flex-none">
                             <RadarVisualizer
-                                scannedServers={scannedServers}
+                                scannedServers={allServers}
                                 selectedServerId={selectedServerId}
                                 onSelectServer={setSelectedServerId}
                             />
@@ -272,10 +432,11 @@ export default function TitanObservatoryPage() {
                         {/* 2. Detected Servers List */}
                         <div className="flex-1 flex flex-col min-h-[400px] lg:min-h-0">
                             <ServerList
-                                scannedServers={scannedServers}
+                                scannedServers={allServers}
                                 selectedServerId={selectedServerId}
                                 isScanning={isScanning}
                                 onSelectServer={setSelectedServerId}
+                                onAddManualOrbit={addManualOrbit}
                             />
                         </div>
 
