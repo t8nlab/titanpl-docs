@@ -4,7 +4,7 @@ Official documentation for **TitanPL** v26.12.1 — A strictly synchronous V8 ru
 
 ## 🌐 Live Documentation
 
-Visit [titan-docs.vercel.app](https://titan-docs.vercel.app) (or your deployment URL) to view the full documentation.
+Visit [titan-docs-ez.vercel.app](https://titan-docs-ez.vercel.app) (or your deployment URL) to view the full documentation.
 
 ## 📚 What's Inside
 

@@ -1,7 +1,7 @@
 'use client';
 
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { Download, Zap, Globe, Terminal, Activity, Layers, Search, Moon, Sun, Telescope } from 'lucide-react';
+import { motion, useScroll } from 'framer-motion';
+import { Download, Activity, Layers, Search, Telescope } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRef, useState } from 'react';
@@ -63,7 +63,7 @@ export default function ObservatoryDownloadPage() {
                             className="text-5xl md:text-7xl font-semibold tracking-tighter mb-6 leading-[1.1] text-white"
                         >
                             Craft Perfect <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-white to-indigo-300">Test Orbits.</span>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-white to-indigo-300">Servers With TitanPl.</span>
                         </motion.h1>
 
                         <motion.p
@@ -83,7 +83,8 @@ export default function ObservatoryDownloadPage() {
                             className="flex flex-col items-center"
                         >
                             <Link
-                                href="/TitanPl_Observatory_Setup.exe"
+                                href="https://drive.google.com/file/d/1Vq2z6NYh0qSQr9XWO2fXqlBtqAzDJImH/view?usp=drive_link"
+                                download={true}
                                 className="group relative inline-flex items-center gap-3 px-8 py-3.5 bg-white text-black hover:bg-zinc-200 rounded-lg font-bold tracking-wide transition-all overflow-hidden"
                             >
                                 <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/0 via-indigo-500/10 to-indigo-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
@@ -207,7 +208,7 @@ export default function ObservatoryDownloadPage() {
 
                 {/* Footer */}
                 <section className="mt-32 border-t border-white/5 pt-12 pb-12 text-center">
-                    <p className="text-zinc-600 text-[10px] font-bold uppercase tracking-[0.2em] mb-6">Titan Protocol // Professional Edition</p>
+                    <p className="text-zinc-600 text-[10px] font-bold uppercase tracking-[0.2em] mb-6">TitanPl Protocol // Professional Edition</p>
                     <div className="flex justify-center gap-8">
                         <Link href="/" className="text-xs font-semibold text-zinc-500 hover:text-white transition-colors uppercase tracking-wider">Home</Link>
                         <Link href="https://github.com/ezet-galaxy/titanpl" className="text-xs font-semibold text-zinc-500 hover:text-white transition-colors uppercase tracking-wider">GitHub</Link>

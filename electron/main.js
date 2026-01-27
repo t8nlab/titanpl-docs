@@ -37,7 +37,7 @@ function createWindow() {
 
     // --- SMART UPLINK SEQUENCE ---
     const isDev = !app.isPackaged;
-    const prodUrl = 'https://titan-docs.vercel.app/observatory';
+    const prodUrl = 'https://titan-docs-ez.vercel.app/observatory';
     const devUrl = 'http://localhost:3000/observatory';
 
     // Bootloader: Try local, fallback to cloud

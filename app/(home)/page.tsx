@@ -159,7 +159,7 @@ export default function HomePage() {
               </div>
               <h2 className="text-4xl font-black tracking-tight leading-tight">TitanPl Observatory</h2>
               <p className="mt-4 text-lg leading-relaxed text-muted-foreground text-black/70 dark:text-white/70">
-                Monitor your Titan orbits with zero-latency desktop integration. Auto-scan local processes, inspect logs, and debug orbits through a high-performance native interface.
+                Monitor your TitanPl orbits with zero-latency desktop integration. Auto-scan local processes, inspect logs, and debug orbits through a high-performance native interface.
               </p>
               <div className="mt-8 flex gap-4">
                 <Link
@@ -179,7 +179,7 @@ export default function HomePage() {
             </div>
             <div className="relative aspect-video w-full overflow-hidden rounded-2xl border shadow-2xl group-hover:border-blue-500/30 transition-colors">
               <Image
-                src="/observatory_preview.png"
+                src="/observatory_preview_active.png"
                 alt="TitanPl Observatory Real-time Preview"
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
