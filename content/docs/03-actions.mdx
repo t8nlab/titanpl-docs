@@ -1,6 +1,6 @@
 ---
 title: Actions
-description: Execute request-aware business logic in JavaScript, TypeScript (Beta), or Rust, compiled and embedded into Titan’s native server.
+description: Execute request-aware business logic in JavaScript, TypeScript (Beta), or Rust, compiled and embedded into TitanPl’s native server.
 ---
 
 import { File, Folder, Files } from 'fumadocs-ui/components/files';
@@ -9,12 +9,12 @@ import { Callout } from 'fumadocs-ui/components/callout';
 ## What is an Action?
 
 An **action** is a function that executes when a route is matched.  
-Actions receive the full request context and are responsible for all **dynamic behavior** in a Titan application.
+Actions receive the full request context and are responsible for all **dynamic behavior** in a TitanPl application.
 
 Routes define *what* endpoint exists.  
 Actions define *what happens* when that endpoint is called.
 
-Titan is unique because it allows you to write endpoints in **JavaScript**, **TypeScript** (Beta), and **Rust** within the same project.
+TitanPl is unique because it allows you to write endpoints in **JavaScript**, **TypeScript** (Beta), and **Rust** within the same project.
 
 ---
 
@@ -22,7 +22,7 @@ Titan is unique because it allows you to write endpoints in **JavaScript**, **Ty
 
 <span className="inline-flex items-center rounded-full border bg-green-500/10 border-green-500/20 px-2 text-[10px] font-medium text-green-500">BETA</span>
 
-Fully typed, strict, and auto-compiled. Titan enforces zero type errors before running.
+Fully typed, strict, and auto-compiled. TitanPl enforces zero type errors before running.
 
 ```typescript title="app/actions/hello.ts"
 
@@ -90,7 +90,7 @@ pub async fn run(req: Request<Body>) -> impl IntoResponse {
 
 ## ⚡ Hybrid Action System
 
-Titan automatically detects, compiles, and routes all types.
+TitanPl automatically detects, compiles, and routes all types.
 
 * `.ts` files are type-checked and compiled.
 * `.js` files are bundled.
@@ -279,13 +279,13 @@ Titan converts errors into proper HTTP responses or log on the terminal.
 
 ---
 
-## Synchronous and deterministic execution (JS)
+## Powered by multi-threaded Gravity (JS)
 
-JavaScript actions execute synchronously inside Titan’s embedded JavaScript engine.
+JavaScript actions execute synchronously within the **Gravity runtime**, a high-performance **multi-threaded engine** embedded into the native Rust server.
 
-* No Node.js runtime
-* No event loop
-* No background async side effects
+* **Multi-threaded Execution**: Scaling across all CPU cores.
+* **No Node.js Runtime**: Zero overhead from traditional event loops.
+* **Predictable Execution**: Linear, easy-to-reason logic via Drift.
 
 This ensures predictable execution and easy reasoning about behavior.
 

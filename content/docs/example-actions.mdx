@@ -129,7 +129,7 @@ export default function register(req) {
 
   const password_hash = t.password.hash(password);
 
-  const res = t.fetch(
+  const res = drift(t.fetch(
     `https://${process.env.SUPABASE_PROJECT_ID}.supabase.co/rest/v1/users`,
     {
       method: "POST",
@@ -141,7 +141,7 @@ export default function register(req) {
       },
       body: { email, password_hash }
     }
-  );
+  ));
 
   if (res.status === 409) {
     return { status: 409, error: "Email already registered" };
@@ -168,7 +168,7 @@ export default function(req) {
     // Read SQL from external file for clean code
     const sql = t.read("../db/get_users.sql");
     
-    const users = db.query(sql, [req.query.active || true]);
+    const users = drift(db.query(sql, [req.query.active || true]));
     
     return {
         status: 200,

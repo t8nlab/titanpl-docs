@@ -85,16 +85,16 @@ When a request arrives at `http://localhost:3000/actions/user`:
 2. **Router matches the path** to `/actions/user`
 3. **Request is dispatched** to an available worker
 
-### Phase 2: Worker Execution (V8 Isolate)
+### Phase 2: Worker Execution (Gravity Runtime)
 
-![Synchronous Execution Flow](/synchronous_execution_flow.png)
+![Drift Execution Flow](/drift_execution_flow.png)
 
 Each worker:
 
 1. **Receives the request** (headers, body, query params)
-2. **Enters V8 isolate** (isolated JavaScript environment)
-3. **Calls the action function** (pre-compiled bytecode)
-4. **Executes synchronously** (blocking until completion)
+2. **Enters V8 isolate** (managed by multi-threaded Gravity)
+3. **Calls the action function** 
+4. **Executes synchronously** — If `drift()` is encounterd, the worker is **freed** during the I/O wait.
 5. **Returns the response** back to Axum
 
 ```javascript
@@ -103,8 +103,8 @@ export const getUser = defineAction((req) => {
   // This runs inside a V8 isolate
   const userId = req.query.id;
   
-  // Blocking call to database (synchronous from JS perspective)
-  const user = t.db.query(`SELECT * FROM users WHERE id = ?`, [userId]);
+  // Non-blocking call to database via Drift
+  const user = drift(t.db.query(`SELECT * FROM users WHERE id = ?`, [userId]));
   
   return {
     status: 200,
@@ -114,14 +114,15 @@ export const getUser = defineAction((req) => {
 ```
 
 **From JavaScript's perspective:**
-- Everything is synchronous
-- No callbacks, no promises
+- Everything is synchronous-looking (via Drift)
+- No `async`/`await`, no callbacks, no promises
 - Linear execution, top to bottom
 
-**Behind the scenes (Rust):**
-- Async I/O for network and database
-- Efficient tokio runtime
-- But JavaScript sees only **synchronous blocking calls**
+**Key Architectural Principles:**
+- **Async Rust Core**: The Axum server is fully asynchronous for maximum network I/O efficiency.
+- **Synchronous Workers**: Each worker executes JavaScript synchronously to ensure predictability.
+- **Worker Guard**: Native blocking calls (without `drift()`) are disallowed and will trigger a runtime error to preserve concurrency.
+- **Worker Availability**: Once an action completes or a `drift()` suspends it, the worker returns to the pool for the next request.
 
 ### Phase 3: Response
 

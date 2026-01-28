@@ -5,8 +5,8 @@ description: Use built-in runtime APIs inside actions to perform side effects su
 
 ## Overview
 
-Titan provides a small, intentional set of **runtime APIs** that are available inside **actions**.  
-These APIs allow actions to perform controlled side effects while preserving Titan’s performance, determinism, and Rust-backed execution model.
+TitanPl provides a small, intentional set of **runtime APIs** that are available inside **actions**.  
+These APIs allow actions to perform controlled side effects while leveraging the **Gravity runtime's multi-threaded model**, preserving performance, determinism, and Rust-powered execution.
 
 Runtime APIs are exposed through the global `t` object.
 
@@ -19,7 +19,7 @@ import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 
 <Accordions>
 <Accordion title="t.log() — Structured logging">
-`t.log()` is Titan’s built-in logging API.  
+`t.log()` is TitanPl’s built-in logging API.  
 It allows actions to emit logs that are collected and handled by the native Rust server.
 
 ```js
@@ -53,17 +53,19 @@ Use `t.log()` instead of `console.log()` in all actions.
 
 <Accordion title="t.fetch() — Outbound HTTP requests">
 `t.fetch()` allows actions to make outbound HTTP requests.
-It follows a familiar `fetch`-style API while executing through Titan’s Rust networking layer.
+It follows a familiar `fetch`-style API while executing through TitanPl’s Rust networking layer.
+
+> **Note:** `t.fetch()` must be wrapped in `drift()`. Calling it directly significantly impacts performance and will throw a runtime error.
 
 ```js
-const res = t.fetch("https://api.example.com/users")
+const res = drift(t.fetch("https://api.example.com/users"))
 ```
 
 ### Basic usage
 
 ```js
 export default function example(req) {
-  const res = t.fetch("https://api.example.com/data")
+  const res = drift(t.fetch("https://api.example.com/data"))
   return res
 }
 ```
@@ -75,7 +77,7 @@ export default function example(req) {
 ### Sending a JSON request
 
 ```js title="app/actions/login.js"
-t.fetch("https://api.example.com/login", {
+drift(t.fetch("https://api.example.com/login", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -83,7 +85,7 @@ t.fetch("https://api.example.com/login", {
   body: {
     email: req.body.email,
   },
-})
+}))
 ```
 
 * Objects passed as `body` are serialized automatically
@@ -95,7 +97,7 @@ t.fetch("https://api.example.com/login", {
 `t.fetch()` returns a parsed response object.
 
 ```js
-const res = t.fetch("https://api.example.com/user/1")
+const res = drift(t.fetch("https://api.example.com/user/1"))
 
 return {
   status: res.status,
@@ -116,7 +118,7 @@ If a request fails:
 * You control how failures are handled
 
 ```js
-const res = t.fetch(url)
+const res = drift(t.fetch(url))
 
 if (res.status !== 200) {
   t.log("Upstream service failed")
@@ -231,8 +233,8 @@ const ok = t.password.verify("admin123", hash)
 * All verification enforced in Rust
 </Accordion>
 
-<Accordion title="t.db — Titan Database API">
-Titan includes a built-in, high-performance PostgreSQL client available directly in your runtime via the global `t` object. This allows you to interact with your data without installing any external Node.js dependencies.
+<Accordion title="t.db — TitanPl Database API">
+TitanPl includes a built-in, high-performance PostgreSQL client available directly in your runtime via the global `t` object. This allows you to interact with your data without installing any external Node.js dependencies.
 
 ### 🚀 Quick Start
 
@@ -247,8 +249,8 @@ Titan includes a built-in, high-performance PostgreSQL client available directly
        // 1. Connect
        const db = t.db.connect(process.env.DATABASE_URL);
 
-       // 2. Query
-       const users = db.query("SELECT * FROM users WHERE active = $1");
+       // 2. Query (using drift for non-blocking execution)
+       const users = drift(db.query("SELECT * FROM users WHERE active = $1"));
 
        // 3. Return
        return users;
@@ -337,7 +339,7 @@ export default function(req) {
 
 ### ⚠️ Important Notes
 
-- **Synchronous Execution**: Database queries in Titan are currently synchronous. This simplifies logic but means the query blocks the specific action execution. Titan handles concurrency at the server thread level.
+- **Synchronous Execution**: Database queries in Titan are currently executed synchronously in the worker. **You MUST wrap `db.query()` in `drift()`**. Failure to do so will throw a runtime error.
 - **Connection Pooling**: Titan manages connections for you, but `t.db.connect` aims to be lightweight.
 - **Environment Variables**: Always use `process.env` for sensitive credentials. Never hardcode passwords.
 </Accordion>
