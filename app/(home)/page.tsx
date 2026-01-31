@@ -7,6 +7,7 @@ import { motion, useScroll, useTransform } from "framer-motion"
 import { Terminal, Zap, Cpu, Rocket, Binary, MessageSquareQuote, Monitor } from "lucide-react"
 import VideoLoader from "@/app/components/VideoLoader"
 import StatusBadge from "@/app/components/StatusBadge"
+import WorkflowSection from "@/app/components/WorkflowSection"
 import { RiJavascriptFill, RiTwitterXFill, RiLinkedinFill, RiGithubFill } from "@remixicon/react"
 import { Feature } from "@/app/components/Feature"
 import { FeedbackCard } from "@/app/components/FeedbackCard"
@@ -146,7 +147,7 @@ export default function HomePage() {
         <div className="mt-32 w-full max-w-5xl space-y-16 px-6">
 
           {/* Observatory Section (Primary Feature) */}
-          <div className="group relative grid gap-8 overflow-hidden rounded-[2.5rem] border bg-background/40 p-6 backdrop-blur-sm transition-all hover:bg-background/60 md:grid-cols-2 md:items-center md:gap-12 md:p-10 border-blue-500/20 shadow-2xl shadow-blue-500/5">
+          <div className="group relative grid gap-8 overflow-hidden rounded-[2.5rem] border bg-background/40 p-6 backdrop-blur-sm transition-all hover:bg-background/60 md:grid-cols-2 md:items-center md:gap-12 md:p-10 shadow-2xl">
             <div className="order-last md:order-first text-left">
               <div className="flex flex-wrap items-center gap-3 mb-6">
                 <div className="inline-flex items-center rounded-full border bg-blue-500/10 border-blue-500/20 px-3 py-1 text-xs font-bold text-blue-500 uppercase tracking-widest">
@@ -297,40 +298,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Gravity Runtime Section */}
-          <div className="group relative grid gap-8 overflow-hidden rounded-2xl border bg-background/40 p-6 backdrop-blur-sm transition-all hover:bg-background/60 md:grid-cols-2 md:items-center md:gap-12 md:p-10">
-            <div className="relative aspect-square w-full overflow-hidden rounded-xl border shadow-2xl">
-              <Image
-                src="/images/gravity-runtime.png"
-                alt="Gravity Runtime Visualization"
-                fill
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-            </div>
-            <div className="text-left">
-              <div className="flex flex-wrap items-center gap-3 mb-6">
-                <div className="inline-flex items-center rounded-full border bg-cyan-500/10 border-cyan-500/20 px-3 py-1 text-xs font-medium text-cyan-500">
-                  Core Runtime
-                </div>
-                <StatusBadge status="STABLE" />
-                <div className="inline-flex items-center gap-1 rounded-full border bg-orange-500/10 border-orange-500/20 px-3 py-1 text-xs font-medium text-orange-500">
-                  <Binary size={12} strokeWidth={2.5} /> Rust + V8
-                </div>
-              </div>
-              <h2 className="text-3xl font-bold tracking-tight">Gravity Runtime</h2>
-              <p className="mt-4 text-lg leading-relaxed text-muted-foreground text-black/70 dark:text-white/70">
-                The core force that holds the entire Titan Planet system together. Built on strictly synchronous V8 execution with native multi-threading, Gravity powers deterministic, predictable JavaScript at scale with zero event loop overhead.
-              </p>
-              <div className="mt-8 flex gap-4">
-                <Link
-                  href="/docs/runtime-architecture"
-                  className="inline-flex items-center rounded-lg border bg-background px-5 py-2.5 text-sm font-semibold transition hover:bg-muted"
-                >
-                  Learn about Gravity
-                </Link>
-              </div>
-            </div>
-          </div>
+          {/* Gravity Runtime Section - Replaced with Interactive Workflow */}
 
           {/* Orbit System Section */}
           <div className="group relative grid gap-8 overflow-hidden rounded-2xl border bg-background/40 p-6 backdrop-blur-sm transition-all hover:bg-background/60 md:grid-cols-2 md:items-center md:gap-12 md:p-10">
@@ -406,6 +374,11 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+
+          <div id="workflow" className="mt-32">
+            <WorkflowSection />
+          </div>
+
         </div>
       </main>
     </>
