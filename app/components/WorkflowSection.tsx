@@ -7,7 +7,7 @@ import { MotionPathPlugin } from "gsap/MotionPathPlugin"
 import {
     Globe, Cpu, Database, Cog, Zap, Server, Activity,
     FileCode, FileJson, Package, ArrowRight, Layers,
-    Play, Repeat, Users, TerminalSquare, Box, Binary
+    Play, Repeat, Users, TerminalSquare, Box, Binary, Info
 } from "lucide-react"
 import { motion, AnimatePresence, useInView } from "framer-motion"
 
@@ -30,6 +30,24 @@ const TABS = [
     { id: "runtime", label: "2. Runtime Architecture", icon: Layers },
     { id: "traffic", label: "3. Live Traffic", icon: Activity },
 ]
+
+const STEP_INFO = {
+    build: {
+        title: "Phase 1: Build",
+        mobileTitle: "Build & Optimize",
+        description: "TitanPl bundles your application code and dependencies into a single, high-performance binary and copy other folders (eg. actions, static, public, etc) from your codebase, ready for deployment."
+    },
+    runtime: {
+        title: "Phase 2: Runtime",
+        mobileTitle: "Runtime Initialization",
+        description: "The system pre-loads route maps and warms up independent V8 worker threads to ensure zero-latency cold starts."
+    },
+    traffic: {
+        title: "Phase 3: Traffic",
+        mobileTitle: "High-Scale Traffic",
+        description: "Requests are intelligently balanced. Heavy I/O automatically 'drifts' to the Rust thread pool to keep workers responsive."
+    }
+}
 
 export default function WorkflowSection() {
     const [activeTab, setActiveTab] = useState("build")
@@ -283,15 +301,15 @@ export default function WorkflowSection() {
     }, [activeTab, isInView])
 
     return (
-        <div ref={containerRef} className="group relative flex flex-col items-center overflow-hidden rounded-2xl border bg-background/40 p-6 backdrop-blur-sm transition-all hover:bg-background/60 md:p-10">
+        <div ref={containerRef} className="group relative flex flex-col items-center overflow-hidden rounded-2xl border bg-background/40 p-4 backdrop-blur-sm transition-all hover:bg-background/60 md:p-10">
 
             <div className="relative z-10 w-full flex flex-col items-center">
 
-                <div className="flex flex-col items-center mb-8 text-center max-w-3xl">
+                <div className="flex flex-col items-center mb-6 md:mb-8 text-center max-w-3xl">
 
 
                     {/* TABS */}
-                    <div className="mt-8 flex flex-wrap justify-center gap-2 p-1 bg-white/5 border border-white/10 rounded-full backdrop-blur-md">
+                    <div className="mt-6 md:mt-8 flex flex-wrap justify-center gap-2 p-1 bg-white/5 border border-white/10 rounded-full backdrop-blur-md">
                         {TABS.map((tab) => {
                             const Icon = tab.icon
                             const isActive = activeTab === tab.id
@@ -299,12 +317,12 @@ export default function WorkflowSection() {
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
-                                    className={`px-5 py-2 rounded-full text-sm font-semibold flex items-center gap-2 transition-all duration-300 ${isActive
+                                    className={`px-4 py-1.5 md:px-5 md:py-2 rounded-full text-xs md:text-sm font-semibold flex items-center gap-2 transition-all duration-300 ${isActive
                                         ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25'
                                         : 'text-slate-400 hover:text-white hover:bg-white/5'
                                         }`}
                                 >
-                                    <Icon size={16} />
+                                    <Icon size={14} className="md:w-4 md:h-4" />
                                     {tab.label}
                                 </button>
                             )
@@ -313,314 +331,374 @@ export default function WorkflowSection() {
                 </div>
 
                 {/* --- MAIN STAGE --- */}
-                <div className="relative w-full aspect-[16/9] md:aspect-[2.2/1] rounded-xl border border-slate-800 shadow-2xl overflow-hidden group">
+                {/* Mobile: Stacked Layout. Desktop: Unified Aspect Ratio Container */}
+                <div className="w-full flex flex-col gap-4">
 
-                    {/* Dynamic Glows */}
-                    <div className={`absolute pointer-events-none transition-all duration-1000 blur-[100px] opacity-40
-                    ${activeTab === 'build' ? 'bg-yellow-500/30 w-96 h-96 top-0 left-0' : ''}
-                    ${activeTab === 'runtime' ? 'bg-emerald-500/30 w-96 h-96 bottom-0 center' : ''}
-                    ${activeTab === 'traffic' ? 'bg-blue-500/30 w-full h-64 top-1/4' : ''}
-                `} />
+                    {/* Main Stage Wrapper (Defines Size & Aspect Ratio) */}
+                    <div className="relative w-full aspect-[1.5] md:aspect-[2.2/1] rounded-xl border border-slate-800 shadow-2xl group bg-slate-950/50 isolate">
 
-                    <svg ref={svgRef} viewBox="0 0 900 600" className="w-full h-full relative z-10 selection:bg-transparent bg-background/20" preserveAspectRatio="xMidYMid meet">
+                        {/* LAYER 1: Animation & Glows (Clipped) */}
+                        <div className="absolute inset-0 w-full h-full overflow-hidden rounded-xl z-0">
 
-                        {/* ==================== TAB 1: BUILD PHASE ==================== */}
-                        {activeTab === 'build' && (
-                            <g>
-                                {/* INPUT FILES */}
-                                <g className="build-stage-inputs" transform="translate(100, 150)">
-                                    <text x="0" y="-30" fill={COLORS.js} fontSize="14" fontWeight="bold">SOURCE CODE</text>
-                                    {[0, 1, 2].map(i => (
-                                        <g key={i} className="file-input" transform={`translate(${i * 10}, ${i * 30})`}>
-                                            <rect width="140" height="40" rx="8" fill="#1e293b" stroke={COLORS.js} strokeWidth="1" />
-                                            <text x="40" y="25" fill="white" fontSize="12" fontFamily="monospace">app/actions/{i === 0 ? 'user' : i === 1 ? 'auth' : 'post'}.js</text>
-                                            <FileCode x="10" y="10" size={20} color={COLORS.js} />
+                            {/* Dynamic Glows */}
+                            <div className={`absolute pointer-events-none transition-all duration-1000 blur-[60px] md:blur-[100px] opacity-40
+                        ${activeTab === 'build' ? 'bg-yellow-500/30 w-64 h-64 md:w-96 md:h-96 top-0 left-0' : ''}
+                        ${activeTab === 'runtime' ? 'bg-emerald-500/30 w-64 h-64 md:w-96 md:h-96 bottom-0 center' : ''}
+                        ${activeTab === 'traffic' ? 'bg-blue-500/30 w-full h-48 md:h-64 top-1/4' : ''}
+                    `} />
+
+                            <svg ref={svgRef} viewBox="0 0 900 600" className="w-full h-full relative z-10 selection:bg-transparent bg-background/20" preserveAspectRatio="xMidYMid meet">
+
+                                {/* ==================== TAB 1: BUILD PHASE ==================== */}
+                                {activeTab === 'build' && (
+                                    <g>
+                                        {/* INPUT FILES */}
+                                        <g className="build-stage-inputs" transform="translate(100, 150)">
+                                            <text x="0" y="-30" fill={COLORS.js} fontSize="14" fontWeight="bold">SOURCE CODE</text>
+                                            {[0, 1, 2].map(i => (
+                                                <g key={i} className="file-input" transform={`translate(${i * 10}, ${i * 30})`}>
+                                                    <rect width="140" height="40" rx="8" fill="#1e293b" stroke={COLORS.js} strokeWidth="1" />
+                                                    <text x="40" y="25" fill="white" fontSize="12" fontFamily="monospace">app/actions/{i === 0 ? 'user' : i === 1 ? 'auth' : 'post'}.js</text>
+                                                    <FileCode x="10" y="10" size={20} color={COLORS.js} />
+                                                </g>
+                                            ))}
                                         </g>
-                                    ))}
-                                </g>
 
-                                {/* CLI PROCESS */}
-                                <g className="build-stage-cli" transform="translate(400, 200)">
-                                    <rect className="cli-box" width="120" height="120" rx="20" fill="#0f172a" stroke="white" strokeWidth="2" strokeDasharray="5 5" />
-                                    <g className="cli-inner" transform="translate(60, 60)">
-                                        <Cog size={50} color="white" x="-25" y="-25" />
-                                    </g>
-                                    <text x="60" y="150" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">TITAN CLI</text>
-                                    <text x="60" y="170" textAnchor="middle" fill="#94a3b8" fontSize="10">Bundling & Compiling...</text>
-                                </g>
-
-                                {/* ARROWS */}
-                                <path d="M 260 200 L 380 250" stroke="white" strokeWidth="2" strokeDasharray="4 4" className="build-arrow opacity-30" />
-                                <path d="M 540 250 L 640 200" stroke="white" strokeWidth="2" strokeDasharray="4 4" className="build-arrow opacity-30" />
-
-
-                                {/* OUTPUT ARTIFACTS */}
-                                <g className="artifact-group cursor-pointer" transform="translate(620, 100)">
-                                    {/* 1. Production Binary */}
-                                    <g transform="translate(0, 0)">
-                                        <rect width="240" height="320" rx="15" fill="#1e293b" stroke="#64748b" strokeWidth="1" />
-                                        <text x="20" y="30" fill="#94a3b8" fontSize="12" fontWeight="bold">APP</text>
-
-                                        {/* Main Binary */}
-                                        <g
-                                            transform="translate(20, 50)"
-                                            onMouseEnter={() => setHoveredFile("bin")}
-                                            onMouseLeave={() => setHoveredFile(null)}
-                                        >
-                                            <rect width="200" height="60" rx="8"
-                                                fill={hoveredFile === "bin" ? COLORS.rust : "#f97316"}
-                                                fillOpacity={hoveredFile === "bin" ? 0.3 : 0.1}
-                                                stroke={COLORS.rust} strokeWidth="2"
-                                                className="transition-all duration-300"
-                                            />
-                                            <text x="50" y="35" fill="white" fontSize="14" fontWeight="bold">titan-server</text>
-                                            <Binary x="15" y="18" size={24} color={COLORS.rust} />
+                                        {/* CLI PROCESS */}
+                                        <g className="build-stage-cli" transform="translate(400, 200)">
+                                            <rect className="cli-box" width="120" height="120" rx="20" fill="#0f172a" stroke="white" strokeWidth="2" strokeDasharray="5 5" />
+                                            <g className="cli-inner" transform="translate(60, 60)">
+                                                <Cog size={50} color="white" x="-25" y="-25" />
+                                            </g>
+                                            <text x="60" y="150" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">TITAN CLI</text>
+                                            <text x="60" y="170" textAnchor="middle" fill="#94a3b8" fontSize="10">Bundling & Compiling...</text>
                                         </g>
-                                    </g>
 
-                                    {/* 2. Assets (Routes & Action Map) */}
-                                    <g transform="translate(20, 130)">
-                                        <g
-                                            transform="translate(0, 0)"
-                                            onMouseEnter={() => setHoveredFile("routes")}
-                                            onMouseLeave={() => setHoveredFile(null)}
-                                        >
-                                            <rect width="180" height="40" rx="6" fill="#0f172a"
-                                                stroke={COLORS.json}
-                                                fillOpacity={hoveredFile === "routes" ? 0.5 : 0}
-                                                className="transition-all"
-                                            />
-                                            <text x="40" y="25" fill="white" fontSize="12" fontFamily="monospace">routes.json</text>
-                                            <FileJson x="10" y="10" size={18} color={COLORS.json} />
-                                        </g>
-                                        <g
-                                            transform="translate(0, 50)"
-                                            onMouseEnter={() => setHoveredFile("map")}
-                                            onMouseLeave={() => setHoveredFile(null)}
-                                        >
-                                            <rect width="180" height="40" rx="6" fill="#0f172a"
-                                                stroke={COLORS.json}
-                                                fillOpacity={hoveredFile === "map" ? 0.5 : 0}
-                                                className="transition-all"
-                                            />
-                                            <text x="40" y="25" fill="white" fontSize="12" fontFamily="monospace">actionmap.json</text>
-                                            <FileJson x="10" y="10" size={18} color={COLORS.json} />
-                                        </g>
-                                    </g>
+                                        {/* ARROWS */}
+                                        <path d="M 260 200 L 380 250" stroke="white" strokeWidth="2" strokeDasharray="4 4" className="build-arrow opacity-30" />
+                                        <path d="M 540 250 L 640 200" stroke="white" strokeWidth="2" strokeDasharray="4 4" className="build-arrow opacity-30" />
 
-                                    {/* 3. Actions Folder (Bundles) */}
-                                    <g
-                                        transform="translate(20, 240)"
-                                        onMouseEnter={() => setHoveredFile("bundle")}
-                                        onMouseLeave={() => setHoveredFile(null)}
-                                    >
-                                        <rect width="90" height="60" rx="6" fill="#0f172a" stroke={COLORS.js} strokeDasharray="4 4"
-                                            fillOpacity={hoveredFile === "bundle" ? 0.5 : 0}
-                                            className="transition-all"
-                                        />
-                                        <text x="10" y="25" fill="#94a3b8" fontSize="10" fontWeight="bold">actions/</text>
-                                        <Box x="10" y="35" size={16} color={COLORS.js} />
-                                        <text x="32" y="48" fill="white" fontSize="10" fontFamily="monospace">.jsbundle</text>
-                                    </g>
 
-                                    {/* 4. Ext Folder */}
-                                    <g
-                                        transform="translate(120, 240)"
-                                        onMouseEnter={() => setHoveredFile("ext")}
-                                        onMouseLeave={() => setHoveredFile(null)}
-                                    >
-                                        <rect width="80" height="60" rx="6" fill="#0f172a" stroke="#a855f7" strokeDasharray="4 4"
-                                            fillOpacity={hoveredFile === "ext" ? 0.5 : 0}
-                                            className="transition-all"
-                                        />
-                                        <text x="10" y="25" fill="#94a3b8" fontSize="10" fontWeight="bold">.ext/</text>
-                                        <Package x="10" y="35" size={16} color="#a855f7" />
-                                    </g>
+                                        {/* OUTPUT ARTIFACTS */}
+                                        <g className="artifact-group cursor-pointer" transform="translate(620, 100)">
+                                            {/* 1. Production Binary */}
+                                            <g transform="translate(0, 0)">
+                                                <rect width="240" height="320" rx="15" fill="#1e293b" stroke="#64748b" strokeWidth="1" />
+                                                <text x="20" y="30" fill="#94a3b8" fontSize="12" fontWeight="bold">APP</text>
 
-                                    {/* HOVER DESCRIPTION BOX (Absolute positioning adjacent to the artifact group) */}
-                                    <foreignObject x="260" y="0" width="200" height="300" className="pointer-events-none">
-                                        <AnimatePresence>
-                                            {hoveredFile && (
-                                                <motion.div
-                                                    initial={{ opacity: 0, x: -10 }}
-                                                    animate={{ opacity: 1, x: 0 }}
-                                                    exit={{ opacity: 0, x: -10 }}
-                                                    className="bg-slate-900/90 backdrop-blur border border-slate-700 p-4 rounded-lg shadow-xl text-sm"
+                                                {/* Main Binary */}
+                                                <g
+                                                    transform="translate(20, 50)"
+                                                    onMouseEnter={() => setHoveredFile("bin")}
+                                                    onMouseLeave={() => setHoveredFile(null)}
                                                 >
-                                                    {hoveredFile === "bin" && (
-                                                        <>
-                                                            <h4 className="font-bold text-orange-400 mb-1">Single Binary</h4>
-                                                            <p className="text-slate-300 leading-snug">Zero-dependency Rust executable. Contains the Gravity (V8) runtime, web server, and routing logics.</p>
-                                                        </>
-                                                    )}
-                                                    {hoveredFile === "routes" && (
-                                                        <>
-                                                            <h4 className="font-bold text-lime-400 mb-1">Static Routes</h4>
-                                                            <p className="text-slate-300 leading-snug">Pre-calculated Radix Tree for O(1) request routing.</p>
-                                                        </>
-                                                    )}
-                                                    {hoveredFile === "map" && (
-                                                        <>
-                                                            <h4 className="font-bold text-lime-400 mb-1">Action Map</h4>
-                                                            <p className="text-slate-300 leading-snug">Links HTTP Routes to V8 Function Pointers.</p>
-                                                        </>
-                                                    )}
-                                                    {hoveredFile === "bundle" && (
-                                                        <>
-                                                            <h4 className="font-bold text-yellow-400 mb-1">Bytecode Bundles</h4>
-                                                            <p className="text-slate-300 leading-snug">Pre-compiled JS Bytecode for instant isolate startup.</p>
-                                                        </>
-                                                    )}
-                                                    {hoveredFile === "ext" && (
-                                                        <>
-                                                            <h4 className="font-bold text-purple-400 mb-1">Native Extensions</h4>
-                                                            <p className="text-slate-300 leading-snug">Dynamic Libraries (.dll/.so) loaded into V8 snapshots.</p>
-                                                        </>
-                                                    )}
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                    </foreignObject>
-                                </g>
+                                                    <rect width="200" height="60" rx="8"
+                                                        fill={hoveredFile === "bin" ? COLORS.rust : "#f97316"}
+                                                        fillOpacity={hoveredFile === "bin" ? 0.3 : 0.1}
+                                                        stroke={COLORS.rust} strokeWidth="2"
+                                                        className="transition-all duration-300"
+                                                    />
+                                                    <text x="50" y="35" fill="white" fontSize="14" fontWeight="bold">titan-server</text>
+                                                    <Binary x="15" y="18" size={24} color={COLORS.rust} />
+                                                </g>
+                                            </g>
 
-                            </g>
-                        )}
+                                            {/* 2. Assets (Routes & Action Map) */}
+                                            <g transform="translate(20, 130)">
+                                                <g
+                                                    transform="translate(0, 0)"
+                                                    onMouseEnter={() => setHoveredFile("routes")}
+                                                    onMouseLeave={() => setHoveredFile(null)}
+                                                >
+                                                    <rect width="180" height="40" rx="6" fill="#0f172a"
+                                                        stroke={COLORS.json}
+                                                        fillOpacity={hoveredFile === "routes" ? 0.5 : 0}
+                                                        className="transition-all"
+                                                    />
+                                                    <text x="40" y="25" fill="white" fontSize="12" fontFamily="monospace">routes.json</text>
+                                                    <FileJson x="10" y="10" size={18} color={COLORS.json} />
+                                                </g>
+                                                <g
+                                                    transform="translate(0, 50)"
+                                                    onMouseEnter={() => setHoveredFile("map")}
+                                                    onMouseLeave={() => setHoveredFile(null)}
+                                                >
+                                                    <rect width="180" height="40" rx="6" fill="#0f172a"
+                                                        stroke={COLORS.json}
+                                                        fillOpacity={hoveredFile === "map" ? 0.5 : 0}
+                                                        className="transition-all"
+                                                    />
+                                                    <text x="40" y="25" fill="white" fontSize="12" fontFamily="monospace">actionmap.json</text>
+                                                    <FileJson x="10" y="10" size={18} color={COLORS.json} />
+                                                </g>
+                                            </g>
 
-                        {/* ==================== TAB 2: RUNTIME INIT ==================== */}
-                        {activeTab === 'runtime' && (
-                            <g>
-                                {/* LEFT: METADATA */}
-                                <g transform="translate(100, 250)">
-                                    <text x="0" y="-80" fill="#94a3b8" fontSize="10" fontWeight="bold">LOADING CONFIG...</text>
-                                    <g className="metadata-file">
-                                        <rect width="140" height="40" rx="6" fill="#0f172a" stroke={COLORS.json} />
-                                        <text x="40" y="25" fill="white" fontSize="12" fontFamily="monospace">routes.json</text>
-                                        <FileJson x="10" y="10" size={20} color={COLORS.json} />
+                                            {/* 3. Actions Folder (Bundles) */}
+                                            <g
+                                                transform="translate(20, 240)"
+                                                onMouseEnter={() => setHoveredFile("bundle")}
+                                                onMouseLeave={() => setHoveredFile(null)}
+                                            >
+                                                <rect width="90" height="60" rx="6" fill="#0f172a" stroke={COLORS.js} strokeDasharray="4 4"
+                                                    fillOpacity={hoveredFile === "bundle" ? 0.5 : 0}
+                                                    className="transition-all"
+                                                />
+                                                <text x="10" y="25" fill="#94a3b8" fontSize="10" fontWeight="bold">actions/</text>
+                                                <Box x="10" y="35" size={16} color={COLORS.js} />
+                                                <text x="32" y="48" fill="white" fontSize="10" fontFamily="monospace">.jsbundle</text>
+                                            </g>
+
+                                            {/* 4. Ext Folder */}
+                                            <g
+                                                transform="translate(120, 240)"
+                                                onMouseEnter={() => setHoveredFile("ext")}
+                                                onMouseLeave={() => setHoveredFile(null)}
+                                            >
+                                                <rect width="80" height="60" rx="6" fill="#0f172a" stroke="#a855f7" strokeDasharray="4 4"
+                                                    fillOpacity={hoveredFile === "ext" ? 0.5 : 0}
+                                                    className="transition-all"
+                                                />
+                                                <text x="10" y="25" fill="#94a3b8" fontSize="10" fontWeight="bold">.ext/</text>
+                                                <Package x="10" y="35" size={16} color="#a855f7" />
+                                            </g>
+
+                                            {/* HOVER DESCRIPTION BOX (Absolute positioning adjacent to the artifact group) */}
+                                            <foreignObject x="260" y="0" width="200" height="300" className="pointer-events-none">
+                                                <AnimatePresence>
+                                                    {hoveredFile && (
+                                                        <motion.div
+                                                            initial={{ opacity: 0, x: -10 }}
+                                                            animate={{ opacity: 1, x: 0 }}
+                                                            exit={{ opacity: 0, x: -10 }}
+                                                            className="bg-slate-900/90 backdrop-blur border border-slate-700 p-4 rounded-lg shadow-xl text-sm"
+                                                        >
+                                                            {hoveredFile === "bin" && (
+                                                                <>
+                                                                    <h4 className="font-bold text-orange-400 mb-1">Single Binary</h4>
+                                                                    <p className="text-slate-300 leading-snug">Zero-dependency Rust executable. Contains the Gravity (V8) runtime, web server, and routing logics.</p>
+                                                                </>
+                                                            )}
+                                                            {hoveredFile === "routes" && (
+                                                                <>
+                                                                    <h4 className="font-bold text-lime-400 mb-1">Static Routes</h4>
+                                                                    <p className="text-slate-300 leading-snug">Pre-calculated Radix Tree for O(1) request routing.</p>
+                                                                </>
+                                                            )}
+                                                            {hoveredFile === "map" && (
+                                                                <>
+                                                                    <h4 className="font-bold text-lime-400 mb-1">Action Map</h4>
+                                                                    <p className="text-slate-300 leading-snug">Links HTTP Routes to V8 Function Pointers.</p>
+                                                                </>
+                                                            )}
+                                                            {hoveredFile === "bundle" && (
+                                                                <>
+                                                                    <h4 className="font-bold text-yellow-400 mb-1">Bytecode Bundles</h4>
+                                                                    <p className="text-slate-300 leading-snug">Pre-compiled JS Bytecode for instant isolate startup.</p>
+                                                                </>
+                                                            )}
+                                                            {hoveredFile === "ext" && (
+                                                                <>
+                                                                    <h4 className="font-bold text-purple-400 mb-1">Native Extensions</h4>
+                                                                    <p className="text-slate-300 leading-snug">Dynamic Libraries (.dll/.so) loaded into V8 snapshots.</p>
+                                                                </>
+                                                            )}
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
+                                            </foreignObject>
+                                        </g>
+
                                     </g>
-                                    <g className="metadata-file" transform="translate(0, 50)">
-                                        <rect width="140" height="40" rx="6" fill="#0f172a" stroke={COLORS.json} />
-                                        <text x="40" y="25" fill="white" fontSize="12" fontFamily="monospace">actionmap.json</text>
-                                        <FileJson x="10" y="10" size={20} color={COLORS.json} />
-                                    </g>
-                                </g>
+                                )}
 
-                                {/* CENTER: ORBIT SYSTEM */}
-                                <g className="orbit-system" transform="translate(350, 200)">
-                                    <circle className="orbit-inner" cx="50" cy="80" r="50" fill="#0f172a" stroke={COLORS.orbit} strokeWidth="3" />
-                                    <Globe x="26" y="56" size={48} color={COLORS.orbit} />
-                                    <text x="50" y="-20" textAnchor="middle" fill={COLORS.orbit} fontWeight="bold" fontSize="16">ORBIT SYSTEM</text>
-                                    <text x="50" y="0" textAnchor="middle" fill="#94a3b8" fontSize="10">O(1) ROUTING ENGINE</text>
-                                </g>
-
-                                {/* RIGHT: WORKER POOL */}
-                                <g transform="translate(600, 100)">
-                                    <text x="0" y="-30" fill={COLORS.gravity} fontWeight="bold" fontSize="16">WORKER POOL</text>
-                                    <text x="0" y="-10" fill="#94a3b8" fontSize="10">GRAVITY RUNTIME THREADS</text>
-
-                                    {[0, 1, 2].map(i => (
-                                        <g key={i} className="worker-box" transform={`translate(0, ${i * 120})`}>
-                                            <rect width="200" height="100" rx="10" fill="#1e293b" stroke={COLORS.gravity} strokeWidth="2" />
-                                            <g transform="translate(15, 15)">
-                                                <Cpu color={COLORS.gravity} size={24} />
-                                                <text x="35" y="18" fill="white" fontWeight="bold" fontSize="14">Worker #{i + 1}</text>
-                                                <rect y="35" width="80" height="20" rx="4" fill={COLORS.js} fillOpacity="0.2" />
-                                                <text x="10" y="48" fill={COLORS.js} fontSize="10" fontWeight="bold">V8 ISOLATE</text>
-                                                <text x="120" y="80" fill="#64748b" fontSize="10" fontFamily="monospace">IDLE</text>
+                                {/* ==================== TAB 2: RUNTIME INIT ==================== */}
+                                {activeTab === 'runtime' && (
+                                    <g>
+                                        {/* LEFT: METADATA */}
+                                        <g transform="translate(100, 250)">
+                                            <text x="0" y="-80" fill="#94a3b8" fontSize="10" fontWeight="bold">LOADING CONFIG...</text>
+                                            <g className="metadata-file">
+                                                <rect width="140" height="40" rx="6" fill="#0f172a" stroke={COLORS.json} />
+                                                <text x="40" y="25" fill="white" fontSize="12" fontFamily="monospace">routes.json</text>
+                                                <FileJson x="10" y="10" size={20} color={COLORS.json} />
+                                            </g>
+                                            <g className="metadata-file" transform="translate(0, 50)">
+                                                <rect width="140" height="40" rx="6" fill="#0f172a" stroke={COLORS.json} />
+                                                <text x="40" y="25" fill="white" fontSize="12" fontFamily="monospace">actionmap.json</text>
+                                                <FileJson x="10" y="10" size={20} color={COLORS.json} />
                                             </g>
                                         </g>
-                                    ))}
-                                </g>
 
-                                {/* CONNECTION RAYS */}
-                                <g transform="translate(410, 280)">
-                                    {[0, 1, 2].map(i => (
-                                        <path
-                                            key={i}
-                                            className="orbit-connection"
-                                            d={`M 0 0 L 190 ${-130 + (i * 120)}`}
-                                            stroke={COLORS.orbit}
-                                            strokeWidth="2"
-                                            strokeDasharray="5 5"
-                                            opacity="0.3"
-                                        />
-                                    ))}
-                                </g>
-                            </g>
-                        )}
-
-                        {/* ==================== TAB 3: LIVE TRAFFIC ==================== */}
-                        {activeTab === 'traffic' && (
-                            <g>
-                                {/* 1. USERS */}
-                                <g transform="translate(50, 300)">
-                                    <text x="0" y="-40" fill="white" fontWeight="bold" fontSize="14">USERS</text>
-                                    <g transform="translate(0, 0)"> <Users size={32} color="white" /> </g>
-                                    <g transform="translate(-15, 25)" opacity="0.6"> <Users size={24} color="white" /> </g>
-                                    <g transform="translate(20, 25)" opacity="0.6"> <Users size={24} color="white" /> </g>
-
-                                    {/* Incoming Requests Label */}
-                                    <text x="0" y="70" fill="#94a3b8" fontSize="10">INCOMING TRAFFIC</text>
-                                </g>
-
-                                {/* 2. ORBIT */}
-                                <g transform="translate(250, 250)">
-                                    <rect width="150" height="100" rx="20" fill="#064e3b" stroke={COLORS.orbit} strokeWidth="2" />
-                                    <text x="75" y="40" textAnchor="middle" fill="white" fontWeight="bold">ORBIT</text>
-                                    <text x="75" y="60" textAnchor="middle" fill="#6ee7b7" fontSize="10">ROUTER</text>
-                                </g>
-
-                                {/* 3. WORKERS (Rows) */}
-                                <g transform="translate(550, 50)">
-                                    {[0, 1, 2].map(i => (
-                                        <g key={i} id={`worker-${i}`} transform={`translate(0, ${i * 150})`}>
-                                            {/* Worker Box */}
-                                            <rect className="worker-bg" width="200" height="100" rx="10" fill="#1e293b" stroke={COLORS.gravity} strokeWidth="2" />
-                                            <g transform="translate(15, 15)">
-                                                <text x="0" y="20" fill="white" fontSize="14" fontWeight="bold">Worker {i + 1}</text>
-                                                <rect y="35" width="80" height="20" rx="4" fill={COLORS.js} fillOpacity="0.1" />
-                                                <text x="10" y="48" fill={COLORS.js} fontSize="10" fontWeight="bold">V8 ISOLATE</text>
-
-                                                {/* Dynamic Status Text */}
-                                                <text className="worker-status-text" x="180" y="80" textAnchor="end" fill="#94a3b8" fontSize="11" fontFamily="monospace" fontWeight="bold">IDLE</text>
-                                            </g>
+                                        {/* CENTER: ORBIT SYSTEM */}
+                                        <g className="orbit-system" transform="translate(350, 200)">
+                                            <circle className="orbit-inner" cx="50" cy="80" r="50" fill="#0f172a" stroke={COLORS.orbit} strokeWidth="3" />
+                                            <Globe x="26" y="56" size={48} color={COLORS.orbit} />
+                                            <text x="50" y="-20" textAnchor="middle" fill={COLORS.orbit} fontWeight="bold" fontSize="16">ORBIT SYSTEM</text>
+                                            <text x="50" y="0" textAnchor="middle" fill="#94a3b8" fontSize="10">O(1) ROUTING ENGINE</text>
                                         </g>
-                                    ))}
-                                </g>
 
-                                {/* 4. RUST CORE (Bottom Layer) */}
-                                <g className="rust-core-layer" transform="translate(500, 500)" opacity="0">
-                                    <rect width="350" height="60" rx="12" fill="#1e1e20" stroke={COLORS.rust} strokeWidth="1" strokeDasharray="4 4" />
-                                    <text x="175" y="35" textAnchor="middle" fill={COLORS.rust} fontSize="12" fontWeight="bold" fontFamily="monospace">TITAN ASYNC RUNTIME (RUST)</text>
-                                </g>
+                                        {/* RIGHT: WORKER POOL */}
+                                        <g transform="translate(600, 100)">
+                                            <text x="0" y="-30" fill={COLORS.gravity} fontWeight="bold" fontSize="16">WORKER POOL</text>
+                                            <text x="0" y="-10" fill="#94a3b8" fontSize="10">GRAVITY RUNTIME THREADS</text>
 
-                                {/* PARTICLES */}
-                                {[0, 1, 2, 3].map(i => (
-                                    <g key={i} className="user-req">
-                                        {/* REQ = Ball */}
-                                        <circle className="req-dot" r="8" fill="white" />
-                                        {/* RES = Square */}
-                                        <rect className="req-square" x="-8" y="-8" width="16" height="16" rx="3" fill="white" />
+                                            {[0, 1, 2].map(i => (
+                                                <g key={i} className="worker-box" transform={`translate(0, ${i * 120})`}>
+                                                    <rect width="200" height="100" rx="10" fill="#1e293b" stroke={COLORS.gravity} strokeWidth="2" />
+                                                    <g transform="translate(15, 15)">
+                                                        <Cpu color={COLORS.gravity} size={24} />
+                                                        <text x="35" y="18" fill="white" fontWeight="bold" fontSize="14">Worker #{i + 1}</text>
+                                                        <rect y="35" width="80" height="20" rx="4" fill={COLORS.js} fillOpacity="0.2" />
+                                                        <text x="10" y="48" fill={COLORS.js} fontSize="10" fontWeight="bold">V8 ISOLATE</text>
+                                                        <text x="120" y="80" fill="#64748b" fontSize="10" fontFamily="monospace">IDLE</text>
+                                                    </g>
+                                                </g>
+                                            ))}
+                                        </g>
+
+                                        {/* CONNECTION RAYS */}
+                                        <g transform="translate(410, 280)">
+                                            {[0, 1, 2].map(i => (
+                                                <path
+                                                    key={i}
+                                                    className="orbit-connection"
+                                                    d={`M 0 0 L 190 ${-130 + (i * 120)}`}
+                                                    stroke={COLORS.orbit}
+                                                    strokeWidth="2"
+                                                    strokeDasharray="5 5"
+                                                    opacity="0.3"
+                                                />
+                                            ))}
+                                        </g>
                                     </g>
-                                ))}
+                                )}
 
-                            </g>
-                        )}
-                    </svg>
+                                {/* ==================== TAB 3: LIVE TRAFFIC ==================== */}
+                                {activeTab === 'traffic' && (
+                                    <g>
+                                        {/* 1. USERS */}
+                                        <g transform="translate(50, 300)">
+                                            <text x="0" y="-40" fill="white" fontWeight="bold" fontSize="14">USERS</text>
+                                            <g transform="translate(0, 0)"> <Users size={32} color="white" /> </g>
+                                            <g transform="translate(-15, 25)" opacity="0.6"> <Users size={24} color="white" /> </g>
+                                            <g transform="translate(20, 25)" opacity="0.6"> <Users size={24} color="white" /> </g>
 
-                    {/* Footer Legend */}
-                    <div className="absolute bottom-4 right-6 flex gap-4 text-xs font-mono text-slate-500">
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full ring-2 ring-white/20 bg-white" />
-                            Req
-                            <div className="w-2 h-2 rounded-sm ring-2 ring-emerald-500/20 bg-emerald-500 ml-1" />
-                            Res
+                                            {/* Incoming Requests Label */}
+                                            <text x="0" y="70" fill="#94a3b8" fontSize="10">INCOMING TRAFFIC</text>
+                                        </g>
+
+                                        {/* 2. ORBIT */}
+                                        <g transform="translate(250, 250)">
+                                            <rect width="150" height="100" rx="20" fill="#064e3b" stroke={COLORS.orbit} strokeWidth="2" />
+                                            <text x="75" y="40" textAnchor="middle" fill="white" fontWeight="bold">ORBIT</text>
+                                            <text x="75" y="60" textAnchor="middle" fill="#6ee7b7" fontSize="10">ROUTER</text>
+                                        </g>
+
+                                        {/* 3. WORKERS (Rows) */}
+                                        <g transform="translate(550, 50)">
+                                            {[0, 1, 2].map(i => (
+                                                <g key={i} id={`worker-${i}`} transform={`translate(0, ${i * 150})`}>
+                                                    {/* Worker Box */}
+                                                    <rect className="worker-bg" width="200" height="100" rx="10" fill="#1e293b" stroke={COLORS.gravity} strokeWidth="2" />
+                                                    <g transform="translate(15, 15)">
+                                                        <text x="0" y="20" fill="white" fontSize="14" fontWeight="bold">Worker {i + 1}</text>
+                                                        <rect y="35" width="80" height="20" rx="4" fill={COLORS.js} fillOpacity="0.1" />
+                                                        <text x="10" y="48" fill={COLORS.js} fontSize="10" fontWeight="bold">V8 ISOLATE</text>
+
+                                                        {/* Dynamic Status Text */}
+                                                        <text className="worker-status-text" x="180" y="80" textAnchor="end" fill="#94a3b8" fontSize="11" fontFamily="monospace" fontWeight="bold">IDLE</text>
+                                                    </g>
+                                                </g>
+                                            ))}
+                                        </g>
+
+                                        {/* 4. RUST CORE (Bottom Layer) */}
+                                        <g className="rust-core-layer" transform="translate(500, 500)" opacity="0">
+                                            <rect width="350" height="60" rx="12" fill="#1e1e20" stroke={COLORS.rust} strokeWidth="1" strokeDasharray="4 4" />
+                                            <text x="175" y="35" textAnchor="middle" fill={COLORS.rust} fontSize="12" fontWeight="bold" fontFamily="monospace">TITAN ASYNC RUNTIME (RUST)</text>
+                                        </g>
+
+                                        {/* PARTICLES */}
+                                        {[0, 1, 2, 3].map(i => (
+                                            <g key={i} className="user-req">
+                                                {/* REQ = Ball */}
+                                                <circle className="req-dot" r="8" fill="white" />
+                                                {/* RES = Square */}
+                                                <rect className="req-square" x="-8" y="-8" width="16" height="16" rx="3" fill="white" />
+                                            </g>
+                                        ))}
+
+                                    </g>
+                                )}
+                            </svg>
                         </div>
-                        <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-emerald-500" />Orbit</div>
-                        <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500" />Gravity</div>
-                        <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-pink-500" />Drift</div>
-                        <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-orange-500" />Rust</div>
+
+                        {/* LAYER 2: UI Overlays (Unclipped, Top Z-Index) */}
+                        <div className="absolute inset-0 z-50 pointer-events-none">
+
+                            {/* Footer Legend */}
+                            <div className="hidden md:flex absolute bottom-4 right-6 gap-4 text-xs font-mono text-slate-400">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full ring-2 ring-white/20 bg-white" />
+                                    Req
+                                    <div className="w-2 h-2 rounded-sm ring-2 ring-emerald-500/20 bg-emerald-500 ml-1" />
+                                    Res
+                                </div>
+                                <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-emerald-500" />Orbit</div>
+                                <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500" />Gravity</div>
+                                <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-pink-500" />Drift</div>
+                                <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-orange-500" />Rust</div>
+                            </div>
+                        </div>
+
+                        {/* DESKTOP ONLY: Step Summary Overlay (Moved to Root of Relative Container) */}
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={activeTab}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                transition={{ duration: 0.2 }}
+                                className="hidden md:block absolute bottom-6 left-6 z-50 max-w-sm text-left pointer-events-auto p-5 rounded-xl bg-slate-900/95 backdrop-blur border border-white/10 shadow-2xl"
+                            >
+                                <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
+                                    <Info size={18} className="text-blue-400" />
+                                    <span className="uppercase tracking-wider text-xs text-blue-200/80">
+                                        {STEP_INFO[activeTab as keyof typeof STEP_INFO].title}
+                                    </span>
+                                </h3>
+                                <p className="text-sm text-slate-200 leading-relaxed font-medium">
+                                    {STEP_INFO[activeTab as keyof typeof STEP_INFO].description}
+                                </p>
+                            </motion.div>
+                        </AnimatePresence>
+
+                    </div>
+
+                    {/* MOBILE ONLY: Step Summary Overlay (Below Animation) */}
+                    <div
+                        key={activeTab}
+                        className="w-full text-left p-4 rounded-xl bg-slate-900/95 backdrop-blur border border-white/10 shadow-lg transition-all duration-300"
+                    >
+                        <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
+                            <Info size={16} className="text-blue-400" />
+                            {STEP_INFO[activeTab as keyof typeof STEP_INFO].mobileTitle}
+                        </h3>
+                        <p className="text-sm text-slate-300 leading-relaxed">
+                            {STEP_INFO[activeTab as keyof typeof STEP_INFO].description}
+                        </p>
+
+                        {/* Mobile Legend (Simplied) */}
+                        <div className="mt-4 pt-4 border-t border-white/10 flex flex-wrap gap-x-4 gap-y-2 text-[10px] font-mono text-slate-500">
+                            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-emerald-500" />Orbit</div>
+                            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-blue-500" />Gravity</div>
+                            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-pink-500" />Drift</div>
+                            <div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded bg-emerald-500" />Response</div>
+                            <div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded bg-white" />Request</div>
+                        </div>
                     </div>
                 </div>
+
             </div>
         </div>
     )
