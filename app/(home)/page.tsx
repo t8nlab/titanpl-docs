@@ -13,6 +13,7 @@ import { Feature } from "@/app/components/Feature"
 import { FeedbackCard } from "@/app/components/FeedbackCard"
 import { feedbacks } from "@/app/data/feedbacks"
 
+
 export default function HomePage() {
   const videoContainerRef = useRef<HTMLDivElement>(null)
 
@@ -144,198 +145,240 @@ export default function HomePage() {
         </div>
 
         {/* Ecosystem Section */}
-        <div className="mt-32 w-full max-w-5xl space-y-16 px-6">
+        <div className="mt-32 w-full max-w-6xl px-6">
+          <div className="mb-12 text-center">
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Discover the powerful ecosystem of tools and features that make Titan Planet the ultimate high-performance JavaScript framework.
+            </p>
+          </div>
 
-          {/* Observatory Section (Primary Feature) */}
-          <div className="group relative grid gap-8 overflow-hidden rounded-[2.5rem] border bg-background/40 p-6 backdrop-blur-sm transition-all hover:bg-background/60 md:grid-cols-2 md:items-center md:gap-12 md:p-10 shadow-2xl">
-            <div className="order-last md:order-first text-left">
-              <div className="flex flex-wrap items-center gap-3 mb-6">
-                <div className="inline-flex items-center rounded-full border bg-blue-500/10 border-blue-500/20 px-3 py-1 text-xs font-bold text-blue-500 uppercase tracking-widest">
+          {/* Card Grid */}
+          <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 isolate">
+            {/* Background Glow Effect */}
+            <div className="absolute inset-0 -z-10 bg-radial-[circle_at_center_center] from-primary/5 via-transparent to-transparent opacity-50 blur-3xl" />
+
+            {/* Observatory Card */}
+            <div className="group relative z-10 flex flex-col overflow-hidden rounded-3xl border border-border bg-white dark:bg-zinc-900/40 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-1 duration-300 p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="relative w-16 h-16 rounded-2xl overflow-hidden">
+                  <Image
+                    src="/observatory_preview_active.png"
+                    alt="Observatory"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                <div className="inline-flex items-center rounded-full border bg-blue-500/10 border-blue-500/20 px-2.5 py-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
                   Native Dashboard
                 </div>
                 <StatusBadge status="STABLE" />
-                <div className="inline-flex items-center gap-1 rounded-full border bg-zinc-900/10 dark:bg-white/10 px-3 py-1 text-xs font-medium">
-                  Windows Native
+                <div className="inline-flex items-center gap-1 rounded-full border bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 px-2.5 py-0.5 text-[10px] font-medium text-zinc-700 dark:text-zinc-300">
+                  Windows
                 </div>
               </div>
-              <h2 className="text-4xl font-black tracking-tight leading-tight">TitanPl Observatory</h2>
-              <p className="mt-4 text-lg leading-relaxed text-muted-foreground text-black/70 dark:text-white/70">
-                Monitor your TitanPl orbits with zero-latency desktop integration. Auto-scan local processes, inspect logs, and debug orbits through a high-performance native interface.
+
+              <h3 className="text-xl font-bold tracking-tight mb-2 text-foreground">TitanPl Observatory</h3>
+              <p className="text-sm leading-relaxed text-muted-foreground mb-6 flex-1">
+                Monitor your TitanPl orbits with zero-latency desktop integration. Auto-scan local processes and debug orbits.
               </p>
-              <div className="mt-8 flex gap-4">
-                <Link
-                  href="/observatory/download"
-                  className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-500 hover:scale-105 active:scale-95 shadow-lg shadow-blue-500/20"
-                >
-                  <Monitor size={16} />
-                  Get Observatory Desktop
-                </Link>
-                <Link
-                  href="/observatory"
-                  className="inline-flex items-center rounded-xl border bg-background px-6 py-3 text-sm font-semibold transition hover:bg-muted"
-                >
-                  Web Preview
-                </Link>
+
+              <Link
+                href="/observatory/download"
+                className="inline-flex items-center text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+              >
+                Learn more →
+              </Link>
+            </div>
+
+            {/* SDK Card */}
+            <div className="group relative z-10 flex flex-col overflow-hidden rounded-3xl border border-border bg-white dark:bg-zinc-900/40 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-1 duration-300 p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="relative w-16 h-16 rounded-2xl overflow-hidden">
+                  <Image
+                    src="/images/titanpl-sdk.png"
+                    alt="SDK"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
               </div>
-            </div>
-            <div className="relative aspect-video w-full overflow-hidden rounded-2xl border shadow-2xl group-hover:border-blue-500/30 transition-colors">
-              <Image
-                src="/observatory_preview_active.png"
-                alt="TitanPl Observatory Real-time Preview"
-                fill
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-            </div>
-          </div>
-          <div className="group relative grid gap-8 overflow-hidden rounded-2xl border bg-background/40 p-6 backdrop-blur-sm transition-all hover:bg-background/60 md:grid-cols-2 md:items-center md:gap-12 md:p-10">
-            <div className="relative aspect-square w-full overflow-hidden rounded-xl border shadow-2xl">
-              <Image
-                src="/images/titanpl-sdk.png"
-                alt="TitanPL SDK Visualization"
-                fill
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-            </div>
-            <div className="text-left">
-              <div className="flex flex-wrap items-center gap-3 mb-6">
-                <div className="inline-flex items-center rounded-full border bg-blue-500/10 border-blue-500/20 px-3 py-1 text-xs font-medium text-blue-500">
+
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                <div className="inline-flex items-center rounded-full border bg-emerald-500/10 border-emerald-500/20 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
                   Core Toolkit
                 </div>
                 <StatusBadge status="STABLE" />
-                <div className="inline-flex items-center gap-1 rounded-full border bg-yellow-400/10 border-yellow-400/20 px-3 py-1 text-xs font-medium text-yellow-500">
-                  <RiJavascriptFill className="h-3.5 w-3.5" /> JS
+                <div className="inline-flex items-center gap-1 rounded-full border bg-yellow-400/10 border-yellow-400/20 px-2.5 py-0.5 text-[10px] font-medium text-yellow-600 dark:text-yellow-500">
+                  <RiJavascriptFill className="h-3 w-3" /> JS
                 </div>
               </div>
-              <h2 className="text-3xl font-bold tracking-tight">TitanPL SDK</h2>
-              <p className="mt-4 text-lg leading-relaxed text-muted-foreground text-black/70 dark:text-white/70">
-                The TitanPL SDK lets you scaffold, test, and publish extensions with a single workflow. Generate new modules, run a local Titan-like environment, and ship npm packages that auto-load in the runtime.
-              </p>
-              <div className="mt-8 flex gap-4">
-                <Link
-                  href="https://github.com/ezet-galaxy/titanpl/tree/main/titanpl-sdk"
-                  target="_blank"
-                  className="inline-flex items-center rounded-lg border bg-background px-5 py-2.5 text-sm font-semibold transition hover:bg-muted"
-                >
-                  View SDK on GitHub
-                </Link>
-              </div>
-            </div>
-          </div>
 
-          {/* Extensions Section */}
-          <div className="group relative grid gap-8 overflow-hidden rounded-2xl border bg-background/40 p-6 backdrop-blur-sm transition-all hover:bg-background/60 md:grid-cols-2 md:items-center md:gap-12 md:p-10">
-            <div className="order-last md:order-first text-left">
-              <div className="flex flex-wrap items-center gap-3 mb-6">
-                <div className="inline-flex items-center rounded-full border bg-purple-500/10 border-purple-500/20 px-3 py-1 text-xs font-medium text-purple-500">
-                  Modular Architecture
+              <h3 className="text-xl font-bold tracking-tight mb-2 text-foreground">TitanPL SDK</h3>
+              <p className="text-sm leading-relaxed text-muted-foreground mb-6 flex-1">
+                Scaffold, test, and publish extensions with a single workflow. Generate modules and ship npm packages.
+              </p>
+
+              <Link
+                href="/docs/12-sdk"
+                className="inline-flex items-center text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
+              >
+                Learn more →
+              </Link>
+            </div>
+
+            {/* Extensions Card */}
+            <div className="group relative z-10 flex flex-col overflow-hidden rounded-3xl border border-border bg-white dark:bg-zinc-900/40 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-1 duration-300 p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="relative w-16 h-16 rounded-2xl overflow-hidden">
+                  <Image
+                    src="/images/titanpl-ext.png"
+                    alt="Extensions"
+                    fill
+                    className="object-cover"
+                  />
                 </div>
-                <div className="inline-flex items-center gap-1 rounded-full border bg-yellow-400/10 border-yellow-400/20 px-3 py-1 text-xs font-medium text-yellow-500">
-                  <RiJavascriptFill className="h-3.5 w-3.5" /> JS
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                <div className="inline-flex items-center rounded-full border bg-purple-500/10 border-purple-500/20 px-2.5 py-0.5 text-[10px] font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider">
+                  Modular
                 </div>
-                <div className="inline-flex items-center gap-1 rounded-full border bg-blue-500/10 border-blue-500/20 px-3 py-1 text-xs font-medium text-blue-500">
+                <StatusBadge status="STABLE" />
+                <div className="inline-flex items-center gap-1 rounded-full border bg-yellow-400/10 border-yellow-400/20 px-2.5 py-0.5 text-[10px] font-medium text-yellow-600 dark:text-yellow-500">
+                  <RiJavascriptFill className="h-3 w-3" /> JS
+                </div>
+                <div className="inline-flex items-center gap-1 rounded-full border bg-blue-500/10 border-blue-500/20 px-2.5 py-0.5 text-[10px] font-medium text-blue-600 dark:text-blue-400">
                   TS
                 </div>
               </div>
-              <h2 className="text-3xl font-bold tracking-tight">TitanPL Extensions</h2>
-              <p className="mt-4 text-lg leading-relaxed text-muted-foreground text-black/70 dark:text-white/70">
-                Titan Planet Extensions let you add modular features to any Titan project. Build reusable plugins, integrate external services, or ship custom logic, and the runtime auto-loads them instantly via t.extensionName.
-              </p>
-              <div className="mt-8 flex gap-4">
-                <Link
-                  href="https://github.com/topics/titanpl-ext"
-                  target="_blank"
-                  className="inline-flex items-center rounded-lg border bg-background px-5 py-2.5 text-sm font-semibold transition hover:bg-muted"
-                >
-                  Explore Extensions
-                </Link>
-              </div>
-            </div>
-            <div className="relative aspect-square w-full overflow-hidden rounded-xl border shadow-2xl">
-              <Image
-                src="/images/titanpl-ext.png"
-                alt="TitanPL Extensions Visualization"
-                fill
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-            </div>
-          </div>
 
-          {/* Rust Actions Section */}
-          <div className="group relative grid gap-8 overflow-hidden rounded-2xl border bg-background/40 p-6 backdrop-blur-sm transition-all hover:bg-background/60 md:grid-cols-2 md:items-center md:gap-12 md:p-10">
-            <div className="relative aspect-square w-full overflow-hidden rounded-xl border shadow-2xl">
-              <Image
-                src="/images/rust-actions.png"
-                alt="Rust Actions Visualization"
-                fill
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-              />
+              <h3 className="text-xl font-bold tracking-tight mb-2 text-foreground">TitanPL Extensions</h3>
+              <p className="text-sm leading-relaxed text-muted-foreground mb-6 flex-1">
+                Add modular features to any Titan project. Build reusable plugins and integrate external services.
+              </p>
+
+              <Link
+                href="/docs/10-extensions"
+                className="inline-flex items-center text-sm font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors"
+              >
+                Learn more →
+              </Link>
             </div>
-            <div className="text-left">
-              <div className="flex flex-wrap items-center gap-3 mb-6">
-                <div className="inline-flex items-center rounded-full border bg-orange-500/10 border-orange-500/20 px-3 py-1 text-xs font-medium text-orange-500">
+
+            {/* Rust Actions Card */}
+            <div className="group relative z-10 flex flex-col overflow-hidden rounded-3xl border border-border bg-white dark:bg-zinc-900/40 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-1 duration-300 p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="relative w-16 h-16 rounded-2xl overflow-hidden">
+                  <Image
+                    src="/images/rust-actions.png"
+                    alt="Rust Actions"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                <div className="inline-flex items-center rounded-full border bg-orange-500/10 border-orange-500/20 px-2.5 py-0.5 text-[10px] font-semibold text-orange-600 dark:text-orange-400 uppercase tracking-wider">
                   High Performance
                 </div>
                 <StatusBadge status="BETA" />
-                <div className="inline-flex items-center gap-1 rounded-full border bg-yellow-400/10 border-yellow-400/20 px-3 py-1 text-xs font-medium text-yellow-500">
-                  <RiJavascriptFill className="h-3.5 w-3.5" /> JS
+                <div className="inline-flex items-center gap-1 rounded-full border bg-yellow-400/10 border-yellow-400/20 px-2.5 py-0.5 text-[10px] font-medium text-yellow-600 dark:text-yellow-500">
+                  <RiJavascriptFill className="h-3 w-3" /> JS
                 </div>
-                <div className="inline-flex items-center gap-1 rounded-full border bg-blue-500/10 border-blue-500/20 px-3 py-1 text-xs font-medium text-blue-500">
-                  TS
+                <div className="inline-flex items-center gap-1 rounded-full border bg-orange-500/10 border-orange-500/20 px-2.5 py-0.5 text-[10px] font-medium text-orange-600 dark:text-orange-400">
+                  <Binary size={10} strokeWidth={2.5} /> Rust
                 </div>
               </div>
-              <h2 className="text-3xl font-bold tracking-tight">Hybrid Rust Actions</h2>
-              <p className="mt-4 text-lg leading-relaxed text-muted-foreground text-black/70 dark:text-white/70">
-                Need raw power? Write your performance-critical logic in Native Rust. Titan compiles your Rust actions directly into the server binary, giving you low-level access and maximum execution speed alongside JavaScript.
+
+              <h3 className="text-xl font-bold tracking-tight mb-2 text-foreground">Hybrid Rust Actions</h3>
+              <p className="text-sm leading-relaxed text-muted-foreground mb-6 flex-1">
+                Write performance-critical logic in Native Rust. Compiled directly into the server binary for maximum speed.
               </p>
-              <div className="mt-8 flex gap-4">
-                <Link
-                  href="/docs/03-actions#-rust-actions-beta"
-                  className="inline-flex items-center rounded-lg border bg-background px-5 py-2.5 text-sm font-semibold transition hover:bg-muted"
-                >
-                  Learn about Rust Actions
-                </Link>
-              </div>
+
+              <Link
+                href="/docs/03-actions#-rust-actions-beta"
+                className="inline-flex items-center text-sm font-semibold text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 transition-colors"
+              >
+                Learn more →
+              </Link>
             </div>
-          </div>
 
-          {/* Gravity Runtime Section - Replaced with Interactive Workflow */}
+            {/* Orbit System Card */}
+            <div className="group relative z-10 flex flex-col overflow-hidden rounded-3xl border border-border bg-white dark:bg-zinc-900/40 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-1 duration-300 p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="relative w-16 h-16 rounded-2xl overflow-hidden">
+                  <Image
+                    src="/images/orbit-system.png"
+                    alt="Orbit System"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              </div>
 
-          {/* Orbit System Section */}
-          <div className="group relative grid gap-8 overflow-hidden rounded-2xl border bg-background/40 p-6 backdrop-blur-sm transition-all hover:bg-background/60 md:grid-cols-2 md:items-center md:gap-12 md:p-10">
-            <div className="order-last md:order-first text-left">
-              <div className="flex flex-wrap items-center gap-3 mb-6">
-                <div className="inline-flex items-center rounded-full border bg-emerald-500/10 border-emerald-500/20 px-3 py-1 text-xs font-medium text-emerald-500">
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                <div className="inline-flex items-center rounded-full border bg-cyan-500/10 border-cyan-500/20 px-2.5 py-0.5 text-[10px] font-semibold text-cyan-600 dark:text-cyan-400 uppercase tracking-wider">
                   Core Architecture
                 </div>
                 <StatusBadge status="STABLE" />
-                <div className="inline-flex items-center gap-1 rounded-full border bg-orange-500/10 border-orange-500/20 px-3 py-1 text-xs font-medium text-orange-500">
-                  <Binary size={12} strokeWidth={2.5} /> Rust
+                <div className="inline-flex items-center gap-1 rounded-full border bg-orange-500/10 border-orange-500/20 px-2.5 py-0.5 text-[10px] font-medium text-orange-600 dark:text-orange-400">
+                  <Binary size={10} strokeWidth={2.5} /> Rust
                 </div>
               </div>
-              <h2 className="text-3xl font-bold tracking-tight">TitanPl Orbit System</h2>
-              <p className="mt-4 text-lg leading-relaxed text-muted-foreground text-black/70 dark:text-white/70">
-                A high-performance routing engine built for predictable speed at any scale. Constant-time resolution (O(1)) and zero degradation regardless of route count.
+
+              <h3 className="text-xl font-bold tracking-tight mb-2 text-foreground">TitanPl Orbit System</h3>
+              <p className="text-sm leading-relaxed text-muted-foreground mb-6 flex-1">
+                High-performance routing engine with constant-time resolution (O(1)) and zero degradation at scale.
               </p>
-              <div className="mt-8 flex gap-4">
-                <Link
-                  href="/docs/orbit-system"
-                  className="inline-flex items-center rounded-lg border bg-background px-5 py-2.5 text-sm font-semibold transition hover:bg-muted"
-                >
-                  Learn about Orbit
-                </Link>
-              </div>
+
+              <Link
+                href="/docs/orbit-system"
+                className="inline-flex items-center text-sm font-semibold text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors"
+              >
+                Learn more →
+              </Link>
             </div>
-            <div className="relative aspect-square w-full overflow-hidden rounded-xl border shadow-2xl">
-              <Image
-                src="/images/orbit-system.png"
-                alt="Titan Orbit System Visualization"
-                fill
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-              />
+
+            {/* Gravity Runtime Card */}
+            <div className="group relative z-10 flex flex-col overflow-hidden rounded-3xl border border-border bg-white dark:bg-zinc-900/40 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-1 duration-300 p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="relative w-16 h-16 rounded-2xl overflow-hidden">
+                  <Image
+                    src="/images/gravity-runtime.png"
+                    alt="Gravity Runtime"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                <div className="inline-flex items-center rounded-full border bg-indigo-500/10 border-indigo-500/20 px-2.5 py-0.5 text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
+                  Runtime Engine
+                </div>
+                <StatusBadge status="STABLE" />
+                <div className="inline-flex items-center gap-1 rounded-full border bg-yellow-400/10 border-yellow-400/20 px-2.5 py-0.5 text-[10px] font-medium text-yellow-600 dark:text-yellow-500">
+                  <RiJavascriptFill className="h-3 w-3" /> V8
+                </div>
+              </div>
+
+              <h3 className="text-xl font-bold tracking-tight mb-2 text-foreground">Gravity Runtime</h3>
+              <p className="text-sm leading-relaxed text-muted-foreground mb-6 flex-1">
+                Powerful JavaScript runtime built on V8. Execute your code with blazing-fast performance and native bindings.
+              </p>
+
+              <Link
+                href="/docs/runtime-architecture"
+                className="inline-flex items-center text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+              >
+                Learn more →
+              </Link>
             </div>
           </div>
-
-
         </div>
 
         {/* Community Feedback Section */}
@@ -380,9 +423,7 @@ export default function HomePage() {
           </div>
 
         </div>
-      </main>
+      </main >
     </>
   )
 }
-
-

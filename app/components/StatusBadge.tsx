@@ -62,7 +62,7 @@ export default function StatusBadge({ status, className = "" }: StatusBadgeProps
                 onClick={() => setIsOpen(!isOpen)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className={`cursor-pointer inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold transition-colors ${config.bg} ${config.border} ${config.text} ${config.shadow} ${className}`}
+                className={`cursor-pointer inline-flex items-center rounded-full border px-3 py-0.5 text-xs transition-colors ${config.bg} ${config.border} ${config.text} ${config.shadow} ${className}`}
             >
                 <span className="mr-1.5 flex h-1.5 w-1.5 relative">
                     <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${config.dot} opacity-75`}></span>

@@ -181,6 +181,11 @@ export default function Footer() {
                                             eslint-plugin-titanpl
                                         </Link>
                                     </li>
+                                    <li>
+                                        <Link href="https://www.npmjs.com/package/@tgrv/microgravity" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
+                                            @tgrv/microgravity
+                                        </Link>
+                                    </li>
                                 </ul>
                             </div>
                         </div>

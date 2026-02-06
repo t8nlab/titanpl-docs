@@ -24,3 +24,64 @@ a[href="/community"]:not([target="_blank"]) {
 a[href="/community"]:hover {
     background-color: transparent !important;
 }
+
+/* Electric Line Animations */
+@keyframes electric-flow {
+    0% {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: translateX(200%);
+        opacity: 0;
+    }
+}
+
+@keyframes electric-flow-vertical {
+    0% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: translateY(200%);
+        opacity: 0;
+    }
+}
+
+@keyframes pulse-glow {
+
+    0%,
+    100% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    50% {
+        opacity: 0.6;
+        transform: scale(1.2);
+    }
+}
+
+.animate-electric-flow {
+    animation: electric-flow 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px currentColor);
+}
+
+.animate-electric-flow-vertical {
+    animation: electric-flow-vertical 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px currentColor);
+}
+
+.animate-pulse-glow {
+    animation: pulse-glow 4s ease-in-out infinite;
+}

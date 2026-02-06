@@ -42,7 +42,7 @@ export const feedbacks: FeedbackItem[] = [
     },
     {
         author: "Tawfeeq Amro",
-        handle: "Technical Manager | Solution Architect",
+        handle: "Technical Manager",
         platform: "LinkedIn",
         quote: "From developer experience perspective this is great, but i didn't understand how we can control Rust features like ownership browning",
         link: "https://www.linkedin.com/feed/update/urn:li:share:7407352530193592321",
@@ -66,7 +66,7 @@ export const feedbacks: FeedbackItem[] = [
     },
     {
         author: "Andre Fontenele.",
-        handle: "Data Engineer | Professional Rustacean",
+        handle: "Data Engineer",
         platform: "LinkedIn",
         quote: "At this point why are we not compile JavaScript. The whole advantage of Rust is that it adds semantics for describing memory flow in your programs.",
         link: "https://www.linkedin.com/feed/update/urn:li:share:7407352530193592321",
