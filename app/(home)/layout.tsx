@@ -9,8 +9,8 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   return (
     <HomeLayout {...baseOptions()}>
-      <Notice title='Titan v26.14.0 is Live' variant='success'>
-        <p>The stable version, ready to use in production!</p>
+      <Notice title='Titan v26.14.1 is Live' variant='success'>
+        <p>⚡ Fast Path: Static Action Bypass</p>
       </Notice>
       {children}
     </HomeLayout>
