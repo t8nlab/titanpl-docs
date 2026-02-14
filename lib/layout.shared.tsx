@@ -8,7 +8,7 @@ export function baseOptions(): BaseLayoutProps {
   return {
     nav: {
       title: (
-        <Image src={"/favicon.ico"} alt='titan planet' height={38} width={38} className='rounded-full' />
+        <Image src={"/favicon.ico"} alt='Titan Planet Logo' height={32} width={32} className='object-cover' />
       ),
     },
     links: [

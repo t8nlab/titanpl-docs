@@ -32,12 +32,12 @@ export default function Footer() {
                     <div className="flex flex-col justify-between">
                         <div className="space-y-6">
                             <div className="flex items-center gap-2">
-                                <div className="h-8 w-8 overflow-hidden rounded-lg bg-black">
+                                <div className="h-8 w-8 overflow-hidden">
                                     <Image
-                                        alt="titan-logo"
+                                        alt="Titan Planet Logo"
                                         src="/favicon.ico"
-                                        width={200}
-                                        height={200}
+                                        width={32}
+                                        height={32}
                                         className="h-full w-full object-cover"
                                     />
                                 </div>
@@ -103,6 +103,9 @@ export default function Footer() {
                             </Link>
                             <Link href="https://github.com/topics/titanpl-ext" className="text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
                                 Extensions
+                            </Link>
+                            <Link href="/playground" className="text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
+                                Project Titan
                             </Link>
                         </div>
 

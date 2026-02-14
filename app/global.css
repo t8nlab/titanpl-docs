@@ -85,3 +85,7 @@ a[href="/community"]:hover {
 .animate-pulse-glow {
     animation: pulse-glow 4s ease-in-out infinite;
 }
+
+.text-stroke-white {
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.1);
+}

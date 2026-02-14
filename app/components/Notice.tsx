@@ -31,7 +31,7 @@ const VARIANT_STYLES: Record<
   warning: {
     icon: <AlertTriangle size={14} />,
     container:
-      "border border-amber-300 bg-amber-50 text-amber-900 " +
+      "border border-amber-300 bg-amber-700 text-amber-900 " +
       "dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-zinc-100",
     iconWrap:
       "bg-amber-200 dark:bg-amber-500/10",
