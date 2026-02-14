@@ -10,7 +10,7 @@ interface VersionContextType {
 const VersionContext = createContext<VersionContextType | undefined>(undefined);
 
 export const VersionProvider = ({ children }: { children: React.ReactNode }) => {
-    const titanVersion = 'v26.14.1';
+    const titanVersion = 'v26.15.0';
     const expressVersion = 'v5.2.1';
 
     return (
