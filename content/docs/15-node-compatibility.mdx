@@ -1,0 +1,249 @@
+---
+title: "@titanpl/node (Node.js Compatibility)"
+description: "Enable Node.js core APIs and npm library support in TitanPL applications."
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# `@titanpl/node`
+
+Node.js compatibility layer for the **TitanPL Gravity Runtime**.
+
+This package enables selected Node.js core APIs to work inside TitanPL applications by mapping them to Titan’s native Rust-powered runtime. It allows many existing npm libraries (sync-based) to run inside TitanPL without modification.
+
+---
+
+## Why This Exists
+
+TitanPL runs on:
+
+* **V8 isolates**
+* **Rust core Gravity runtime**
+* **No Node.js process**
+* **No libuv**
+* **No Node event loop**
+
+Because of this, Node built-ins like `fs`, `crypto`, or `process` do not exist by default. `@titanpl/node` provides compatibility shims that redirect Node imports to Titan-native implementations.
+
+---
+
+## 🚀 Quick Start (Important)
+
+To enable Node compatibility in an action, **import the globals shim first**:
+
+```javascript
+import "@titanpl/node/globals";
+```
+
+This sets up:
+* `process`
+* `Buffer`
+* global compatibility utilities
+
+Then you can use Node-style imports normally:
+
+```javascript
+import fs from "fs";
+import path from "path";
+```
+
+---
+
+## Supported Core Modules (Sync APIs)
+
+The following modules are mapped to Titan's native implementations:
+
+| Node API | Titan Core Mapping |
+| -------- | ------------------ |
+| `fs`     | `t.fs`             |
+| `path`   | `t.path`           |
+| `crypto` | `t.crypto`         |
+| `process`| `t.proc`           |
+| `os`     | `t.os`             |
+| `Buffer` | Native V8 + Shims  |
+| `util`   | Pure JS Shims      |
+| `events` | basic EventEmitter |
+
+<Callout title="Sync Only" type="warn">
+  Only **synchronous** APIs are supported. Async Node APIs (callbacks/promises) are not supported because Titan uses `drift()` for async orchestration.
+</Callout>
+
+---
+
+## Example — Basic File Usage
+
+```javascript
+import "@titanpl/node/globals";
+import fs from "fs";
+import path from "path";
+
+export const hello = defineAction(() => {
+  const file = path.join("data", "hello.txt");
+
+  fs.writeFileSync(file, "Hello Titan");
+  const content = fs.readFileSync(file, "utf-8");
+
+  return { content };
+});
+```
+
+---
+
+## 📦 Supported npm Libraries
+
+Many popular utility libraries work out-of-the-box because they rely on synchronous logic or the core modules listed above.
+
+### 1. Environment Variables (`dotenv`)
+Since `dotenv` uses `fs.readFileSync` and `process.env`, it works perfectly.
+
+```javascript
+import "@titanpl/node/globals";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+export const config = defineAction(() => {
+  return { apiKey: process.env.API_KEY };
+});
+```
+
+### 2. Password Hashing (`bcryptjs`)
+`bcryptjs` is a pure JavaScript implementation of bcrypt that works with Titan's random number generators.
+
+```javascript
+import "@titanpl/node/globals";
+import bcrypt from "bcryptjs";
+
+export const hash = defineAction(() => {
+  const salt = bcrypt.genSaltSync(10);
+  const hash = bcrypt.hashSync("secret-password", salt);
+  
+  return { 
+    hash,
+    isValid: bcrypt.compareSync("secret-password", hash)
+  };
+});
+```
+
+### 3. Querying with GraphQL
+You can use `graphql` to parse schemas and execute queries synchronously against local data or in-memory resolvers.
+
+```javascript
+import "@titanpl/node/globals";
+import { graphql, buildSchema } from "graphql";
+
+const schema = buildSchema(`
+  type Query {
+    hello: String
+  }
+`);
+
+const rootValue = { hello: () => "Hello from Titan GraphQL!" };
+
+export const runQuery = defineAction(() => {
+  // Note: We use the sync execution pattern
+  const response = graphql({
+    schema,
+    source: "{ hello }",
+    rootValue
+  });
+
+  return response;
+});
+```
+
+### 4. Schema Validation (`zod` or `joi`)
+These libraries are pure JavaScript and work seamlessly for validating inputs in your Titan Actions.
+
+```javascript
+import "@titanpl/node/globals";
+import { z } from "zod";
+
+const UserSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(3)
+});
+
+export const validate = defineAction((input) => {
+  const result = UserSchema.safeParse(input);
+  return result;
+});
+```
+
+---
+
+## More Examples
+
+### Day.js
+```javascript
+import "@titanpl/node/globals";
+import dayjs from "dayjs";
+
+export const now = defineAction(() => {
+  return { time: dayjs().format() };
+});
+```
+
+### Lodash
+```javascript
+import "@titanpl/node/globals";
+import _ from "lodash";
+
+export const shuffle = defineAction(() => {
+  return { arr: _.shuffle([1,2,3,4,5]) };
+});
+```
+
+### UUID
+```javascript
+import "@titanpl/node/globals";
+import { v4 as uuid } from "uuid";
+
+export const id = defineAction(() => {
+  return { id: uuid() };
+});
+```
+
+---
+
+## How It Works
+
+During bundling, Titan rewrites imports like:
+```javascript
+import fs from "fs";
+```
+into:
+```javascript
+import fs from "@titanpl/node/fs";
+```
+
+This ensures zero overhead at runtime while preserving the developer experience you're used to in Node.js.
+
+---
+
+## 🚫 What Will NOT Work
+
+Titan is **not Node.js** — it is a native Rust server running V8. The following will NOT work:
+
+* `child_process` (Titan handles processes via native extensions if needed)
+* `cluster` (Titan is multi-threaded via Rust, not JS clusters)
+* Native `.node` addons (Use Titan Rust Extensions instead)
+* Streams requiring real Node internals (libuv based)
+* Async Node APIs (Use `drift()` for async)
+* Libraries that depend heavily on the Node event loop
+
+---
+
+## Installation
+
+```bash
+npm install @titanpl/node
+```
+
+## Recommended Pattern
+
+Always place the globals import at the **very top** of your action file:
+
+```javascript
+import "@titanpl/node/globals";
+```

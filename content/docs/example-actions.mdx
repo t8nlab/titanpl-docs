@@ -10,104 +10,117 @@ import { Callout } from 'fumadocs-ui/components/callout';
 Build powerful backends with these practical examples. Titan makes it easy to combine speed and simplicity.
 
 <Steps>
-### Authentication Flow
-Implement robust user authentication using `t.password` and `t.jwt`.
+### Authentication & Database Flow
+This example demonstrates a complete authentication system: routing, database connection pooling, SQL-based login, and JWT session verification.
 
-<Tabs items={['Login', 'Register', 'Get User']}>
-  <Tab value="Login">
+<Tabs items={['App Routes', 'DB Connection', 'Login Logic', 'Me (Auth Check)', 'SQL Query']}>
+  <Tab value="App Routes">
+    ```js title="app/app.js"
+    import t from "@titan/route";
+
+    // Define routes and map them to actions
+    t.post("/lg").action("login") // Payload: { "username": "titan", "password": "..." }
+    t.post("/me").action("me")     // Payload: { "tk": "..." }
+
+    t.start(5100, "Titan Running!");
+    ```
+  </Tab>
+  <Tab value="DB Connection">
+    ```js title="app/db/db.js"
+    export const db = () => {
+        // Connect with a connection pool (max 10 connections)
+        return t.db.connect(process.env.DB_URI, {
+            max: 10
+        })
+    }
+    ```
+  </Tab>
+  <Tab value="Login Logic">
     ```js title="app/actions/login.js"
-    export function login(req) {
-        const { email, password } = req.body || {}
-      
-        if (!email || !password) {
-          return {
-            status: 400,
-            json: { error: "Email and password required" }
-          }
+    /* eslint-disable titanpl/drift-only-titan-async */
+    import "@titanpl/node/globals";
+    import { fs, response } from "@titan/native";
+    import { db } from "db/db";
+
+    export const login = (req) => {
+        // Read external SQL file
+        const sql = fs.readFile("../app/db/login.sql");
+        const { username, password } = req.body;
+
+        if (!username || !password) {
+            return response.json(
+                { error: "Username and password required" },
+                { status: 400 }
+            );
         }
-      
-        // ⚠️ Mock DB Interaction
-        const user = {
-          id: 1,
-          email: "admin@ez.app",
-          passwordHash: "$2b$12$MJwttSgptEQJCkPJ.J8mce1xxtmxlJPCsISvc1WEzR6mqdD/ZJyOC"
+
+        const conn = db();
+
+        // Execute query inside drift()
+        const rows = drift(
+            conn.query(sql, [username])
+        );
+
+        if (!rows || rows.length === 0) {
+            return response.json(
+                { error: "Invalid credentials" },
+                { status: 401 }
+            );
         }
-      
-        if (email !== user.email) {
-          return {
-            status: 401,
-            json: { error: "Invalid credentials" }
-          }
+
+        const user = rows[0];
+
+        // Verify password using Rust-native crypto
+        const valid = t.password.verify(password, user.password);
+
+        if (!valid) {
+            return response.json(
+                { error: "Invalid credentials" },
+                { status: 401 }
+            );
         }
-      
-        const ok = t.password.verify(password, user.passwordHash)
-      
-        if (!ok) {
-          return {
-            status: 401,
-            json: { error: "Invalid credentials" }
-          }
-        }
-      
+
+        delete user.password;
+
+        // Sign JWT for session management
         const token = t.jwt.sign(
-          { userId: user.id, email: user.email },
-          process.env.JWT_SECRET,
-          { expiresIn: "1h" }
-        )
-      
-        return {
-          status: 200,
-          json: {
+            {
+                id: user.id,
+                username: user.username,
+                email: user.email
+            },
+            process.env.JWT_SECRET, // Protected secret
+            { expiresIn: "1m" }
+        );
+
+        return response.json({
+            success: true,
             token,
-            expiresIn: "1 hour"
-          }
-        }
-      }
+            user
+        });
+    };
     ```
   </Tab>
-  <Tab value="Register">
-    ```js title="app/actions/register.js"
-    export function register(req) {
-        const { email, password } = req.body || {}
-      
-        if (!email || !password) {
-          return {
-            status: 400,
-            json: { error: "Email and password are required" }
-          }
-        }
-      
-        // Hash password securely in Rust
-        const passwordHash = t.password.hash(password)
-      
-        // Save user to your database here
-        const user = { id: 1, email, passwordHash }
-      
-        return {
-          status: 201,
-          json: {
-            message: "Account created",
-            user: { id: user.id, email: user.email }
-          }
-        }
-      }
+  <Tab value="Me (Auth Check)">
+    ```js title="app/actions/me.js"
+    import { jwt } from "@titan/native"
+
+    export const me = (req) => {
+        const { tk } = req.body;
+
+        // Verify token and return user identity
+        const user = jwt.verify(tk, process.env.JWT_SECRET);
+
+        return user;
+    }
     ```
   </Tab>
-  <Tab value="Get User">
-    ```js title="app/actions/getUser.js"
-    export function getUser(req) {
-        const { token } = req.body || {}
-      
-        try {
-          const payload = t.jwt.verify(token, process.env.JWT_SECRET)
-          return {
-            status: 200,
-            json: { user: payload }
-          }
-        } catch (e) {
-          return { status: 401, json: { error: "Invalid token" } }
-        }
-      }
+  <Tab value="SQL Query">
+    ```sql title="app/db/login.sql"
+    SELECT id, username, email, password
+    FROM users
+    WHERE username = $1
+    LIMIT 1;
     ```
   </Tab>
 </Tabs>

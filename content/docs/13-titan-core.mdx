@@ -612,3 +612,7 @@ The `@titanpl/core` extension serves as the backbone of the Titan ecosystem, pro
 *   **Pre-installed & Ready**: `@titanpl/core` comes pre-installed with every new Titan project, giving you immediate access to essential tools like file system operations, cryptography, and networking without any setup.
 *   **Modular & Optional**: While it is a core part of the experience, it is built as an extension. If your project has specific needs or you wish to maintain an ultra-lightweight runtime, you can uninstall it.
 *   **Foundation for Extensions**: This library exemplifies the power of Titan's extension system. Developers can use it as a reference or a foundation to build their own high-performance, JS-only or hybrid extensions, expanding the capabilities of Gravity.
+
+### Node.js Compatibility Layer
+
+If you are migrating an existing Node.js project or using libraries that depend on Node.js built-ins, we recommend using the [`@titanpl/node`](./15-node-compatibility) compatibility layer. It provides shims for `fs`, `path`, `crypto`, and more, mapping them directly to the native implementations found in `@titanpl/core`.

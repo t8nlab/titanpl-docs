@@ -144,6 +144,10 @@ const token = t.jwt.sign(
 )
 ```
 
+<Callout title="Production Security" type="warn">
+  Always use **`process.env.JWT_SECRET`** (or a similar environment variable) for your signing secret in production. Never hardcode secrets in your source code.
+</Callout>
+
 #### Parameters
 
 * **payload** — Object to encode into the token
@@ -263,7 +267,13 @@ Establishes a synchronous connection to the PostgreSQL database.
 
 - **Arguments**:
   - `connectionString` *(string)*: A standard PostgreSQL connection URI (e.g., `postgres://...`).
+  - `options` *(object, optional)*: Connection pool settings.
+    - `max` *(number)*: Maximum number of connections in the pool (e.g., `{ max: 10 }`).
 - **Returns**: A `DbConnection` object.
+
+```js
+const db = t.db.connect(process.env.DATABASE_URL, { max: 10 });
+```
 
 ### `db.query(sql, params)`
 
@@ -403,7 +413,11 @@ Titan’s runtime APIs are:
 * Rust-backed
 * Production-safe
 
-There is no hidden magic and no implicit globals beyond `t`
+There is no hidden magic and no implicit globals beyond `t` by default.
+
+<Callout title="Node.js Compatibility" type="info">
+  If you need to use standard Node.js APIs (like `fs`, `path`, or `process`) or existing npm libraries, you can enable them using the [**@titanpl/node** compatibility layer](./15-node-compatibility).
+</Callout>
 
 ---
 
@@ -415,3 +429,8 @@ There is no hidden magic and no implicit globals beyond `t`
 > Rust executes everything
 
 This keeps Titan applications predictable, fast, and maintainable.
+
+---
+
+### 🚀 Stay Up to Date
+To ensure full support for the latest features and security patches, please [**update your Titan CLI and project**](./05-updates) to the latest version.
