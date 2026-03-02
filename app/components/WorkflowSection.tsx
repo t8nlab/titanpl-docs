@@ -33,14 +33,14 @@ const TABS = [
 
 const STEP_INFO = {
     build: {
-        title: "Phase 1: Build",
+        title: "Phase 1: Build & Optimize",
         mobileTitle: "Build & Optimize",
-        description: "TitanPl bundles your application code and dependencies into a single, high-performance binary and copy other folders (eg. actions, static, public, etc) from your codebase, ready for deployment."
+        description: "TitanPl bundles your application code, tree-shakes dependencies, and prepares a highly optimized JavaScript bundle (in the dist/ folder) ready to be executed."
     },
     runtime: {
-        title: "Phase 2: Runtime",
-        mobileTitle: "Runtime Initialization",
-        description: "The system pre-loads route maps and warms up independent V8 worker threads to ensure zero-latency cold starts."
+        title: "Phase 2: Engine Initialization",
+        mobileTitle: "Engine Initialization",
+        description: "The pre-compiled Global Gravity Engine reads your static routes map and warms up independent V8 worker threads to ensure zero-latency cold starts."
     },
     traffic: {
         title: "Phase 3: Traffic",
@@ -354,52 +354,52 @@ export default function WorkflowSection() {
                                     <g>
                                         {/* INPUT FILES */}
                                         <g className="build-stage-inputs" transform="translate(100, 150)">
-                                            <text x="0" y="-30" fill={COLORS.js} fontSize="14" fontWeight="bold">SOURCE CODE</text>
+                                            <text x="0" y="-30" className="fill-yellow-500 dark:fill-yellow-400" fontSize="14" fontWeight="bold">SOURCE CODE</text>
                                             {[0, 1, 2].map(i => (
                                                 <g key={i} className="file-input" transform={`translate(${i * 10}, ${i * 30})`}>
-                                                    <rect width="140" height="40" rx="8" fill="#1e293b" stroke={COLORS.js} strokeWidth="1" />
-                                                    <text x="40" y="25" fill="white" fontSize="12" fontFamily="monospace">app/actions/{i === 0 ? 'user' : i === 1 ? 'auth' : 'post'}.js</text>
+                                                    <rect width="140" height="40" rx="8" className="fill-slate-100 dark:fill-slate-800 stroke-yellow-500" strokeWidth="1" />
+                                                    <text x="40" y="25" className="fill-slate-800 dark:fill-white" fontSize="12" fontFamily="monospace">app/actions/{i === 0 ? 'user' : i === 1 ? 'auth' : 'post'}.ts</text>
                                                     <FileCode x="10" y="10" size={20} color={COLORS.js} />
                                                 </g>
                                             ))}
                                         </g>
 
-                                        {/* CLI PROCESS */}
+                                        {/* PACKET PROCESS */}
                                         <g className="build-stage-cli" transform="translate(400, 200)">
-                                            <rect className="cli-box" width="120" height="120" rx="20" fill="#0f172a" stroke="white" strokeWidth="2" strokeDasharray="5 5" />
+                                            <rect className="cli-box fill-slate-100 dark:fill-slate-900 stroke-slate-400 dark:stroke-white max-w-full" width="120" height="120" rx="20" strokeWidth="2" strokeDasharray="5 5" />
                                             <g className="cli-inner" transform="translate(60, 60)">
-                                                <Cog size={50} color="white" x="-25" y="-25" />
+                                                <Cog size={50} className="text-slate-800 dark:text-white" x="-25" y="-25" />
                                             </g>
-                                            <text x="60" y="150" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">TITAN CLI</text>
-                                            <text x="60" y="170" textAnchor="middle" fill="#94a3b8" fontSize="10">Bundling & Compiling...</text>
+                                            <text x="60" y="150" textAnchor="middle" className="fill-slate-800 dark:fill-white" fontSize="14" fontWeight="bold">PACKET BUNDLER</text>
+                                            <text x="60" y="170" textAnchor="middle" className="fill-slate-500 dark:fill-slate-400" fontSize="10">Bundling & Optimizing...</text>
                                         </g>
 
                                         {/* ARROWS */}
-                                        <path d="M 260 200 L 380 250" stroke="white" strokeWidth="2" strokeDasharray="4 4" className="build-arrow opacity-30" />
-                                        <path d="M 540 250 L 640 200" stroke="white" strokeWidth="2" strokeDasharray="4 4" className="build-arrow opacity-30" />
+                                        <path d="M 260 200 L 380 250" strokeWidth="2" strokeDasharray="4 4" className="build-arrow opacity-50 stroke-slate-500 dark:stroke-white dark:opacity-30" />
+                                        <path d="M 540 250 L 640 200" strokeWidth="2" strokeDasharray="4 4" className="build-arrow opacity-50 stroke-slate-500 dark:stroke-white dark:opacity-30" />
 
 
                                         {/* OUTPUT ARTIFACTS */}
                                         <g className="artifact-group cursor-pointer" transform="translate(620, 100)">
-                                            {/* 1. Production Binary */}
+                                            {/* 1. Production dist */}
                                             <g transform="translate(0, 0)">
-                                                <rect width="240" height="320" rx="15" fill="#1e293b" stroke="#64748b" strokeWidth="1" />
-                                                <text x="20" y="30" fill="#94a3b8" fontSize="12" fontWeight="bold">APP</text>
+                                                <rect width="240" height="320" rx="15" className="fill-slate-100 dark:fill-slate-800 stroke-slate-300 dark:stroke-slate-600" strokeWidth="1" />
+                                                <text x="20" y="30" className="fill-slate-600 dark:fill-slate-400" fontSize="12" fontWeight="bold">OUTPUT</text>
 
-                                                {/* Main Binary */}
+                                                {/* Built actions */}
                                                 <g
                                                     transform="translate(20, 50)"
                                                     onMouseEnter={() => setHoveredFile("bin")}
                                                     onMouseLeave={() => setHoveredFile(null)}
                                                 >
                                                     <rect width="200" height="60" rx="8"
-                                                        fill={hoveredFile === "bin" ? COLORS.rust : "#f97316"}
+                                                        fill={hoveredFile === "bin" ? COLORS.js : COLORS.js}
                                                         fillOpacity={hoveredFile === "bin" ? 0.3 : 0.1}
-                                                        stroke={COLORS.rust} strokeWidth="2"
+                                                        stroke={COLORS.js} strokeWidth="2"
                                                         className="transition-all duration-300"
                                                     />
-                                                    <text x="50" y="35" fill="white" fontSize="14" fontWeight="bold">titan-server</text>
-                                                    <Binary x="15" y="18" size={24} color={COLORS.rust} />
+                                                    <text x="50" y="35" className="fill-slate-900 dark:fill-white" fontSize="14" fontWeight="bold">dist/ directory</text>
+                                                    <Box x="15" y="18" size={24} color={COLORS.js} />
                                                 </g>
                                             </g>
 
@@ -410,12 +410,12 @@ export default function WorkflowSection() {
                                                     onMouseEnter={() => setHoveredFile("routes")}
                                                     onMouseLeave={() => setHoveredFile(null)}
                                                 >
-                                                    <rect width="180" height="40" rx="6" fill="#0f172a"
+                                                    <rect width="180" height="40" rx="6"
                                                         stroke={COLORS.json}
                                                         fillOpacity={hoveredFile === "routes" ? 0.5 : 0}
-                                                        className="transition-all"
+                                                        className="transition-all fill-slate-200 dark:fill-slate-900"
                                                     />
-                                                    <text x="40" y="25" fill="white" fontSize="12" fontFamily="monospace">routes.json</text>
+                                                    <text x="40" y="25" className="fill-slate-800 dark:fill-white" fontSize="12" fontFamily="monospace">routes.json</text>
                                                     <FileJson x="10" y="10" size={18} color={COLORS.json} />
                                                 </g>
                                                 <g
@@ -423,12 +423,12 @@ export default function WorkflowSection() {
                                                     onMouseEnter={() => setHoveredFile("map")}
                                                     onMouseLeave={() => setHoveredFile(null)}
                                                 >
-                                                    <rect width="180" height="40" rx="6" fill="#0f172a"
+                                                    <rect width="180" height="40" rx="6"
                                                         stroke={COLORS.json}
                                                         fillOpacity={hoveredFile === "map" ? 0.5 : 0}
-                                                        className="transition-all"
+                                                        className="transition-all fill-slate-200 dark:fill-slate-900"
                                                     />
-                                                    <text x="40" y="25" fill="white" fontSize="12" fontFamily="monospace">actionmap.json</text>
+                                                    <text x="40" y="25" className="fill-slate-800 dark:fill-white" fontSize="12" fontFamily="monospace">actionmap.json</text>
                                                     <FileJson x="10" y="10" size={18} color={COLORS.json} />
                                                 </g>
                                             </g>
@@ -439,13 +439,13 @@ export default function WorkflowSection() {
                                                 onMouseEnter={() => setHoveredFile("bundle")}
                                                 onMouseLeave={() => setHoveredFile(null)}
                                             >
-                                                <rect width="90" height="60" rx="6" fill="#0f172a" stroke={COLORS.js} strokeDasharray="4 4"
+                                                <rect width="90" height="60" rx="6" stroke={COLORS.js} strokeDasharray="4 4"
                                                     fillOpacity={hoveredFile === "bundle" ? 0.5 : 0}
-                                                    className="transition-all"
+                                                    className="transition-all fill-slate-200 dark:fill-slate-900"
                                                 />
-                                                <text x="10" y="25" fill="#94a3b8" fontSize="10" fontWeight="bold">actions/</text>
+                                                <text x="10" y="25" className="fill-slate-600 dark:fill-slate-400" fontSize="10" fontWeight="bold">actions/</text>
                                                 <Box x="10" y="35" size={16} color={COLORS.js} />
-                                                <text x="32" y="48" fill="white" fontSize="10" fontFamily="monospace">.jsbundle</text>
+                                                <text x="32" y="48" className="fill-slate-800 dark:fill-white" fontSize="10" fontFamily="monospace">.js</text>
                                             </g>
 
                                             {/* 4. Ext Folder */}
@@ -454,11 +454,11 @@ export default function WorkflowSection() {
                                                 onMouseEnter={() => setHoveredFile("ext")}
                                                 onMouseLeave={() => setHoveredFile(null)}
                                             >
-                                                <rect width="80" height="60" rx="6" fill="#0f172a" stroke="#a855f7" strokeDasharray="4 4"
+                                                <rect width="80" height="60" rx="6" stroke="#a855f7" strokeDasharray="4 4"
                                                     fillOpacity={hoveredFile === "ext" ? 0.5 : 0}
-                                                    className="transition-all"
+                                                    className="transition-all fill-slate-200 dark:fill-slate-900"
                                                 />
-                                                <text x="10" y="25" fill="#94a3b8" fontSize="10" fontWeight="bold">.ext/</text>
+                                                <text x="10" y="25" className="fill-slate-600 dark:fill-slate-400" fontSize="10" fontWeight="bold">.ext/</text>
                                                 <Package x="10" y="35" size={16} color="#a855f7" />
                                             </g>
 
@@ -474,8 +474,8 @@ export default function WorkflowSection() {
                                                         >
                                                             {hoveredFile === "bin" && (
                                                                 <>
-                                                                    <h4 className="font-bold text-orange-400 mb-1">Single Binary</h4>
-                                                                    <p className="text-slate-300 leading-snug">Zero-dependency Rust executable. Contains the Gravity (V8) runtime, web server, and routing logics.</p>
+                                                                    <h4 className="font-bold text-yellow-500 mb-1">Production Bundle</h4>
+                                                                    <p className="text-slate-300 leading-snug">The bundled and completely tree-shaken version of your codebase, ready to be read by the Titan Engine.</p>
                                                                 </>
                                                             )}
                                                             {hoveredFile === "routes" && (
@@ -493,7 +493,7 @@ export default function WorkflowSection() {
                                                             {hoveredFile === "bundle" && (
                                                                 <>
                                                                     <h4 className="font-bold text-yellow-400 mb-1">Bytecode Bundles</h4>
-                                                                    <p className="text-slate-300 leading-snug">Pre-compiled JS Bytecode for instant isolate startup.</p>
+                                                                    <p className="text-slate-300 leading-snug">Optimized Action code bundled cleanly and safely. Fully decoupled from rust binaries.</p>
                                                                 </>
                                                             )}
                                                             {hoveredFile === "ext" && (
@@ -516,41 +516,41 @@ export default function WorkflowSection() {
                                     <g>
                                         {/* LEFT: METADATA */}
                                         <g transform="translate(100, 250)">
-                                            <text x="0" y="-80" fill="#94a3b8" fontSize="10" fontWeight="bold">LOADING CONFIG...</text>
+                                            <text x="0" y="-80" className="fill-slate-600 dark:fill-slate-400" fontSize="10" fontWeight="bold">LOADING CONFIG...</text>
                                             <g className="metadata-file">
-                                                <rect width="140" height="40" rx="6" fill="#0f172a" stroke={COLORS.json} />
-                                                <text x="40" y="25" fill="white" fontSize="12" fontFamily="monospace">routes.json</text>
+                                                <rect width="140" height="40" rx="6" className="fill-slate-200 dark:fill-slate-900" stroke={COLORS.json} />
+                                                <text x="40" y="25" className="fill-slate-800 dark:fill-white" fontSize="12" fontFamily="monospace">routes.json</text>
                                                 <FileJson x="10" y="10" size={20} color={COLORS.json} />
                                             </g>
                                             <g className="metadata-file" transform="translate(0, 50)">
-                                                <rect width="140" height="40" rx="6" fill="#0f172a" stroke={COLORS.json} />
-                                                <text x="40" y="25" fill="white" fontSize="12" fontFamily="monospace">actionmap.json</text>
+                                                <rect width="140" height="40" rx="6" className="fill-slate-200 dark:fill-slate-900" stroke={COLORS.json} />
+                                                <text x="40" y="25" className="fill-slate-800 dark:fill-white" fontSize="12" fontFamily="monospace">actionmap.json</text>
                                                 <FileJson x="10" y="10" size={20} color={COLORS.json} />
                                             </g>
                                         </g>
 
                                         {/* CENTER: ORBIT SYSTEM */}
                                         <g className="orbit-system" transform="translate(350, 200)">
-                                            <circle className="orbit-inner" cx="50" cy="80" r="50" fill="#0f172a" stroke={COLORS.orbit} strokeWidth="3" />
+                                            <circle className="orbit-inner fill-slate-200 dark:fill-slate-900" cx="50" cy="80" r="50" stroke={COLORS.orbit} strokeWidth="3" />
                                             <Globe x="26" y="56" size={48} color={COLORS.orbit} />
                                             <text x="50" y="-20" textAnchor="middle" fill={COLORS.orbit} fontWeight="bold" fontSize="16">ORBIT SYSTEM</text>
-                                            <text x="50" y="0" textAnchor="middle" fill="#94a3b8" fontSize="10">O(1) ROUTING ENGINE</text>
+                                            <text x="50" y="0" textAnchor="middle" className="fill-slate-600 dark:fill-slate-400" fontSize="10">O(1) ROUTING ENGINE</text>
                                         </g>
 
                                         {/* RIGHT: WORKER POOL */}
                                         <g transform="translate(600, 100)">
                                             <text x="0" y="-30" fill={COLORS.gravity} fontWeight="bold" fontSize="16">WORKER POOL</text>
-                                            <text x="0" y="-10" fill="#94a3b8" fontSize="10">GRAVITY RUNTIME THREADS</text>
+                                            <text x="0" y="-10" className="fill-slate-600 dark:fill-slate-400" fontSize="10">GRAVITY RUNTIME THREADS</text>
 
                                             {[0, 1, 2].map(i => (
                                                 <g key={i} className="worker-box" transform={`translate(0, ${i * 120})`}>
-                                                    <rect width="200" height="100" rx="10" fill="#1e293b" stroke={COLORS.gravity} strokeWidth="2" />
+                                                    <rect width="200" height="100" rx="10" className="fill-slate-200 dark:fill-slate-800" stroke={COLORS.gravity} strokeWidth="2" />
                                                     <g transform="translate(15, 15)">
                                                         <Cpu color={COLORS.gravity} size={24} />
-                                                        <text x="35" y="18" fill="white" fontWeight="bold" fontSize="14">Worker #{i + 1}</text>
+                                                        <text x="35" y="18" className="fill-slate-900 dark:fill-white" fontWeight="bold" fontSize="14">Worker #{i + 1}</text>
                                                         <rect y="35" width="80" height="20" rx="4" fill={COLORS.js} fillOpacity="0.2" />
                                                         <text x="10" y="48" fill={COLORS.js} fontSize="10" fontWeight="bold">V8 ISOLATE</text>
-                                                        <text x="120" y="80" fill="#64748b" fontSize="10" fontFamily="monospace">IDLE</text>
+                                                        <text x="120" y="80" className="fill-slate-500 dark:fill-slate-400" fontSize="10" fontFamily="monospace">IDLE</text>
                                                     </g>
                                                 </g>
                                             ))}
@@ -578,13 +578,13 @@ export default function WorkflowSection() {
                                     <g>
                                         {/* 1. USERS */}
                                         <g transform="translate(50, 300)">
-                                            <text x="0" y="-40" fill="white" fontWeight="bold" fontSize="14">USERS</text>
-                                            <g transform="translate(0, 0)"> <Users size={32} color="white" /> </g>
-                                            <g transform="translate(-15, 25)" opacity="0.6"> <Users size={24} color="white" /> </g>
-                                            <g transform="translate(20, 25)" opacity="0.6"> <Users size={24} color="white" /> </g>
+                                            <text x="0" y="-40" className="fill-slate-900 dark:fill-white" fontWeight="bold" fontSize="14">USERS</text>
+                                            <g transform="translate(0, 0)"> <Users size={32} className="text-slate-800 dark:text-white" /> </g>
+                                            <g transform="translate(-15, 25)" opacity="0.6"> <Users size={24} className="text-slate-800 dark:text-white" /> </g>
+                                            <g transform="translate(20, 25)" opacity="0.6"> <Users size={24} className="text-slate-800 dark:text-white" /> </g>
 
                                             {/* Incoming Requests Label */}
-                                            <text x="0" y="70" fill="#94a3b8" fontSize="10">INCOMING TRAFFIC</text>
+                                            <text x="0" y="70" className="fill-slate-600 dark:fill-slate-400" fontSize="10">INCOMING TRAFFIC</text>
                                         </g>
 
                                         {/* 2. ORBIT */}
@@ -599,14 +599,14 @@ export default function WorkflowSection() {
                                             {[0, 1, 2].map(i => (
                                                 <g key={i} id={`worker-${i}`} transform={`translate(0, ${i * 150})`}>
                                                     {/* Worker Box */}
-                                                    <rect className="worker-bg" width="200" height="100" rx="10" fill="#1e293b" stroke={COLORS.gravity} strokeWidth="2" />
+                                                    <rect className="worker-bg fill-slate-200 dark:fill-slate-800" width="200" height="100" rx="10" stroke={COLORS.gravity} strokeWidth="2" />
                                                     <g transform="translate(15, 15)">
-                                                        <text x="0" y="20" fill="white" fontSize="14" fontWeight="bold">Worker {i + 1}</text>
+                                                        <text x="0" y="20" className="fill-slate-900 dark:fill-white" fontSize="14" fontWeight="bold">Worker {i + 1}</text>
                                                         <rect y="35" width="80" height="20" rx="4" fill={COLORS.js} fillOpacity="0.1" />
                                                         <text x="10" y="48" fill={COLORS.js} fontSize="10" fontWeight="bold">V8 ISOLATE</text>
 
                                                         {/* Dynamic Status Text */}
-                                                        <text className="worker-status-text" x="180" y="80" textAnchor="end" fill="#94a3b8" fontSize="11" fontFamily="monospace" fontWeight="bold">IDLE</text>
+                                                        <text className="worker-status-text dark:fill-slate-400 fill-slate-600" x="180" y="80" textAnchor="end" fontSize="11" fontFamily="monospace" fontWeight="bold">IDLE</text>
                                                     </g>
                                                 </g>
                                             ))}
@@ -614,7 +614,7 @@ export default function WorkflowSection() {
 
                                         {/* 4. RUST CORE (Bottom Layer) */}
                                         <g className="rust-core-layer" transform="translate(500, 500)" opacity="0">
-                                            <rect width="350" height="60" rx="12" fill="#1e1e20" stroke={COLORS.rust} strokeWidth="1" strokeDasharray="4 4" />
+                                            <rect width="350" height="60" rx="12" className="fill-slate-200 dark:fill-[#1e1e20]" stroke={COLORS.rust} strokeWidth="1" strokeDasharray="4 4" />
                                             <text x="175" y="35" textAnchor="middle" fill={COLORS.rust} fontSize="12" fontWeight="bold" fontFamily="monospace">TITAN ASYNC RUNTIME (RUST)</text>
                                         </g>
 

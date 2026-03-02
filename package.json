@@ -15,7 +15,12 @@
     "electron:build": "next build && electron-builder --config electron-builder.yml"
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
     "@remixicon/react": "^4.8.0",
+    "@titanpl/core": "^26.17.1",
+    "@titanpl/native": "^2.0.1",
+    "@titanpl/packet": "^2.0.1",
+    "@titanpl/route": "^2.0.1",
     "@vercel/analytics": "^1.6.1",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",

@@ -50,31 +50,30 @@ export default function HomePage() {
             transition={{ duration: 0.8, delay: 2.2 }}
             className="flex flex-col items-center"
           >
-            {/* Premium Minimal Badge */}
             <div className="group relative inline-flex items-center gap-3 rounded-full border border-primary/20 bg-primary/5 pl-3 pr-4 py-1.5 text-xs font-medium text-primary backdrop-blur-md transition-colors hover:bg-primary/10 hover:border-primary/30">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-500 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
               </span>
-              <div className="flex items-center gap-2 tracking-wide uppercase text-[10px]">
-                <span className="flex items-center gap-1">
-                  JavaScript <RiJavascriptFill className="h-3.5 w-3.5" />
+              <div className="flex items-center gap-2 tracking-wide text-[10px] font-semibold uppercase">
+                <span className="font-medium bg-clip-text text-transparent bg-linear-to-r from-yellow-500 to-orange-200">
+                  JavaScript
                 </span>
                 <span className="text-primary/40">•</span>
-                <span className="flex items-center gap-1">
-                  Native Rust <Binary size={12} strokeWidth={2.5} />
+                <span className="flex items-center gap-1 font-medium bg-clip-text text-transparent bg-linear-to-r from-orange-600 to-red-600">
+                  Rust
                 </span>
               </div>
             </div>
 
-            <h1 className="mt-8 text-5xl font-bold tracking-tight sm:text-7xl">
+            <h1 className="text-black dark:text-white mt-8 text-4xl font-extrabold tracking-[-0.02em] sm:text-6xl lg:text-7xl bg-clip-text text-transparent bg-linear-to-b from-foreground via-foreground/90 to-foreground/50">
               Titan Planet
             </h1>
 
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+            <p className="mt-8 max-w-2xl mx-auto leading-relaxed text-muted-foreground/90 font-medium">
               The high-performance JavaScript framework for the modern backend.
               <br className="hidden sm:block" />
-              Write in JavaScript Ship Native Powered by V8.
+              Write pure JS/TS. Ship with a compiled native binary. Powered by V8.
             </p>
           </motion.div>
 

@@ -16,7 +16,7 @@ This example demonstrates a complete authentication system: routing, database co
 <Tabs items={['App Routes', 'DB Connection', 'Login Logic', 'Me (Auth Check)', 'SQL Query']}>
   <Tab value="App Routes">
     ```js title="app/app.js"
-    import t from "@titan/route";
+    import t from "@titanpl/route";
 
     // Define routes and map them to actions
     t.post("/lg").action("login") // Payload: { "username": "titan", "password": "..." }
@@ -39,12 +39,12 @@ This example demonstrates a complete authentication system: routing, database co
     ```js title="app/actions/login.js"
     /* eslint-disable titanpl/drift-only-titan-async */
     import "@titanpl/node/globals";
-    import { fs, response } from "@titan/native";
+    import { fs, response } from "@titanpl/native";
     import { db } from "db/db";
 
     export const login = (req) => {
         // Read external SQL file
-        const sql = fs.readFile("../app/db/login.sql");
+        const sql = fs.readFile("app/db/login.sql");
         const { username, password } = req.body;
 
         if (!username || !password) {
@@ -103,7 +103,7 @@ This example demonstrates a complete authentication system: routing, database co
   </Tab>
   <Tab value="Me (Auth Check)">
     ```js title="app/actions/me.js"
-    import { jwt } from "@titan/native"
+    import { jwt } from "@titanpl/native"
 
     export const me = (req) => {
         const { tk } = req.body;

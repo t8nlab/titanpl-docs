@@ -3,10 +3,10 @@ title: Quick Start
 description: Build a native Rust backend using pure JavaScript in minutes
 ---
 
-Welcome to **Titan** — a JavaScript-first backend framework that compiles your JavaScript routes and actions into a **native Rust + Axum server**.
+Welcome to **Titan Planet** — a JavaScript-first backend framework powered by the **Titan Engine Architecture**.
 
 You write **zero Rust**.
-Titan handles routing, bundling, runtime execution, hot reload, and deployment — all powered by Rust under the hood.
+Titan handles routing, bundling, runtime execution, hot reload, and deployment — executing your code inside a pre-compiled, highly optimized Rust binary.
 
 ---
 
@@ -19,14 +19,14 @@ Before installing Titan, make sure you have the following installed:
     title="Node.js v18+"
     href="https://nodejs.org/en/download"
   >
-    Required for the Titan CLI, bundler, and JavaScript compilation pipeline.
+    Required for the Titan CLI and JavaScript bundling pipeline.
   </Card>
 
   <Card
-    title="Rust (latest stable)"
+    title="Rust (Optional)"
     href="https://www.rust-lang.org/tools/install"
   >
-    Used to compile the native Rust + Axum server.
+    Only required if you are building Native Rust Extensions (Hybrid Architecture).
   </Card>
 
   <Card
@@ -54,19 +54,19 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 <Tabs defaultValue="npm" items={['npm', 'pnpm', 'yarn']}>
   <Tab value="npm">
     ```bash
-    npm install -g @ezetgalaxy/titan
+    npm install -g @titanpl/cli@latest
     ```
   </Tab>
 
   <Tab value="pnpm">
     ```bash
-    pnpm add -g @ezetgalaxy/titan
+    pnpm add -g @titanpl/cli@latest
     ```
   </Tab>
 
   <Tab value="yarn">
     ```bash
-    yarn global add @ezetgalaxy/titan
+    yarn global add @titanpl/cli@latest
     ```
   </Tab>
 </Tabs>
@@ -82,53 +82,46 @@ Create your fist titan server using ```titan init```
 
 ```bash
 titan init my-app
-# Follow the interactive prompt to choose:
-# - JavaScript (Standard)
-# - TypeScript (Beta)
-# - Rust + JavaScript (Beta)
-# - Rust + TypeScript (Beta)
+# Follow the interactive prompt to choose your architecture
 ```
 
 Inside your project:
 ```bash
 cd my-app
-titan dev
+npm install
+npm run dev
 ```
 
-You'll see the Titan Dev Server spin up:
+You'll see the Titan Engine spin up instantly:
 ```
-  Titan Planet   v26.12.1   [ Dev Mode ]
+  ⏣ Titan Planet   v1.0.0   [ Dev Mode ]
 
-  Type:        Rust + TS Actions
+  Type:        TS Actions
   Hot Reload:  Enabled
-  Strict Mode: Active 🛡️
+  Env:         Loaded
 
-  • Preparing runtime... Done
-  • A new orbit is ready for your app in 0.9s
-  • Your app is now orbiting Titan Planet
+🚀 Starting Titan Engine...
+[Titan] 1 reply route(s) pre-computed
+Titan server running at: http://localhost:5100  (Threads: 32, Stack: 8MB, Dev Mode)
 ```
 
 Titan will:
 
-* Build routes
-* Bundle actions
-* Start Rust dev server
-* Trigger instant reload
-
-
-> **Note:** Titan automatically generates a `.gitignore` during `titan init` with all the necessary exclusions (like `node_modules`, `.titan_test_run`, and your native build artifacts), so you don't need to add them manually.
+* Read your routes and actions
+* Bundle them instantly with `@titanpl/packet`
+* Start the pre-compiled embedded engine
+* Hot-swap isolates on file changes
 
 ---
 
 import { Callout } from 'fumadocs-ui/components/callout';
 
-<Callout title="Migrating to Hybrid Actions" type="warn">
-  To use **Rust Actions** in an existing project:
+<Callout title="Migrating from Legacy Architecture" type="info">
+  If you have an older Titan project (with a `server/` directory), you can seamlessly migrate to the new Titan Engine:
   
-  1. **Update CLI**: `npm install -g @ezetgalaxy/titan`
-  2. **Enable Template**: Add to `package.json`:
-     ```json
-     "titan": { "template": "rust" }
-     ```
-  3. **Sync Orbit**: Run `titan update` to scaffold the native core.
+  1. **Update CLI**: `npm install -g @titanpl/cli@latest`
+  2. **Migrate Project**: In your project root, run `titan migrate`.
+  3. **Install & Run**: `npm install` then `npm run dev`.
+
+  *Titan will automatically convert your project to use the embedded pre-compiled engine.*
 </Callout>

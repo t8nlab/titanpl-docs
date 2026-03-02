@@ -21,8 +21,6 @@ Titan scans your `app/` directory for action files:
 app/
 ├── actions/
 │   ├── user.js          → /actions/user
-│   └── auth/
-│       └── login.js     → /actions/auth/login
 ```
 
 ### 2. Bundling with esbuild
@@ -44,34 +42,22 @@ const validateEmail = (email) => { ... };
 export const getUser = defineAction((req) => { ... });
 ```
 
-### 3. Rust Code Generation
+### 3. Route Generation
 
-Titan generates Rust code that:
+Titan CLI generates a streamlined routing table locally:
 
-- Registers each action's route
-- Maps HTTP paths to action functions
-- Creates the routing table
+- Registers each action's route using `@titanpl/packet`
+- Maps HTTP paths to the compiled bundles
 
-```rust
-// Generated Rust (simplified)
-pub fn register_actions(router: Router) -> Router {
-    router
-        .route("/actions/user", post(execute_user_action))
-        .route("/actions/auth/login", post(execute_login_action))
-}
+### 4. Engine Launch
+
+The CLI locates the embedded `@titanpl/engine-<os>-<arch>` to run your processed code:
+
+```bash
+npm run build
 ```
 
-### 4. Compilation
-
-The Rust server is compiled into a native binary:
-
-```
-cargo build --release
-   Compiling titan-server v26.12.1
-   Finished release [optimized] target(s) in 12.3s
-```
-
-**Result:** A single binary executable with Gravity (embedded V8 runtime) and all actions.
+**Result:** A highly-optimized execution inside the pre-compiled Titan Engine.
 
 ---
 
@@ -178,7 +164,7 @@ Incoming Requests → │ Rust Dispatcher │
 
 ## 🔄 Development Mode
 
-In development (`titan dev`), Titan adds:
+In development (`npm run dev`), Titan adds:
 
 ### Hot Reload
 
@@ -226,23 +212,23 @@ Compare to:
        │
        ▼
 ┌─────────────┐
-│  esbuild    │ ← Bundle each action
+│@titanpl/packet│ ← Bundle each action
 └──────┬──────┘
        │
        ▼
 ┌─────────────┐
-│ Rust Codegen│ ← Generate routing table
+│ Route gen   │ ← Generate routing map
 └──────┬──────┘
        │
        ▼
 ┌─────────────┐
-│cargo build  │ ← Compile to native binary
+│ dist/       │ ← Compiled bundles
 └──────┬──────┘
        │
        ▼
 ┌─────────────────────────────────┐
-│   Native Binary (executable)    │
-│                                  │
+│   Titan Engine                  │
+│                                 │
 │  ┌────────────────────────────┐ │
 │  │  Axum HTTP Server (async)  │ │
 │  └───────────┬────────────────┘ │

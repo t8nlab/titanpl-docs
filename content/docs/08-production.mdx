@@ -7,10 +7,10 @@ import { Steps, Step } from "fumadocs-ui/components/steps";
 import { Callout } from "fumadocs-ui/components/callout";
 import { Files, Folder, File } from "fumadocs-ui/components/files";
 
-Titan production builds generate a **single native Rust binary**.  
-Node.js, npm, and the JavaScript toolchain are **not required at runtime**.
+Titan production builds generate highly-optimized bundles designed to run on the **Titan Engine**.  
+You do not need to compile any Rust code yourself.
 
-JavaScript is executed via an embedded runtime (Boa), while **all networking, concurrency, and async execution are handled by Rust**.
+JavaScript is executed via an embedded **V8 runtime** within the engine, while **all networking, concurrency, and async execution are handled by Rust**.
 
 ---
 
@@ -19,29 +19,28 @@ JavaScript is executed via an embedded runtime (Boa), while **all networking, co
 From your Titan project root, run:
 
 ```bash
-titan build
+npm run build
 ````
 
 <Steps>
-  <Step title="Generate metadata">
-    Titan executes <code>app/app.js --build</code> to generate routing metadata and action mappings.
+  <Step title="Action Discovery">
+    Titan locates your route definitions and actions in `app/`.
   </Step>
 
 <Step title="Bundle actions">
-All JavaScript actions are bundled into deterministic <code>.jsbundle</code> artifacts.
+All JavaScript/TypeScript actions are aggressively optimized, tree-shaken, and bundled by `@titanpl/packet`.
 </Step>
 
-<Step title="Compile native binary">
-A release-grade Rust binary is compiled using <code>cargo build --release</code>.
+<Step title="Emit to dist">
+The finalized artifacts are emitted to the `dist/` directory, ready to be consumed by the Engine.
 </Step> </Steps>
 
 On success, you will see output similar to:
 
 ```text
-Titan: Building production output...
-→ Building Titan metadata + bundling actions...
-→ Found action bundle: getUser.jsbundle
-→ Building Rust release binary...
+★ Titan Packet: Building production output...
+→ Bundling actions...
+→ Emitting to dist/...
 ✔ Titan production build complete!
 ```
 
@@ -52,77 +51,52 @@ Titan: Building production output...
 After the build completes, the final artifact is located at:
 
 <Files>
-  <Folder name="server" defaultOpen>
-    <Folder name="target" defaultOpen>
-      <Folder name="release" defaultOpen>
-        <File name="titan-server" />
-      </Folder>
-    </Folder>
+  <Folder name="dist" defaultOpen>
+    <File name="app.js" />
+    <File name="routes.json" />
   </Folder>
 </Files>
 
-On Windows:
+This directory contains your **entire backend logic**, ready to be loaded by the Engine.
 
-```
-titan-server.exe
-```
-
-This binary is your **entire backend**.
-
-No Node.js.
-No runtime dependencies.
-No JS process.
+No Rust compilation needed.
+No native build toolchains on your server.
 
 ---
 
-## 🚀 Deployment (Direct Binary)
+## 🚀 Deployment
 
 <Callout type="info">
-  Once built, you deploy Titan by <strong>uploading the binary</strong>.  
-  No extra Titan commands, no build steps, no tooling required on the server.
+  Deploying a Titan application is as simple as deploying your `dist/` folder and `package.json`.
 </Callout>
-
-You do **not** need to:
-
-* Run `titan build` again
-* Install Node.js or npm
-* Install Titan on the server
-* Use Docker (unless you want to)
-* Run any Titan-specific tooling
 
 ### Typical deployment flow
 
-1. Run `titan build` locally or in CI
-2. Upload `titan-server` to your server or platform
-3. Run the binary
+1. Run `npm run build` locally or in CI
+2. Upload the `dist/` folder and `package.json` to your server
+3. Run `npm install --omit=dev` (installs the engine binary natively)
+4. Start the server using `npm run start`
 
 That’s it.
 
 Works on:
 
-* Any VPS
+* Any Node.js-capable VPS
 * Bare metal
-* Systemd services
-* Cloud VMs
-* Any Rust-compatible platform
+* Docker / Cloud Containers
+* Any platform supporting native binaries
 
 ---
 
 ## ▶️ Running in Production
 
-Run the binary directly:
+Run the engine:
 
 ```bash
-./titan-server
+npm run start
 ```
 
-Windows:
-
-```powershell
-titan-server.exe
-```
-
-Titan starts immediately as a native server process.
+Titan instantly boots the pre-compiled Titan Engine pointing to your `dist/` folder, primed for maximum throughput.
 
 ---
 
@@ -151,20 +125,19 @@ Docker is **optional**, not required.
 
 ---
 
-## ⚡ JavaScript Runtime in Production (Boa)
+## ⚡ JavaScript Runtime in Production (V8)
 
 <Callout type="info">
-  Boa does <strong>not</strong> reduce Titan’s production performance.
+  Gravity does <strong>not</strong> limit your backend performance.
 </Callout>
 
 Facts:
 
-* JavaScript runs via **Boa**, embedded in the Rust server
+* JavaScript runs via **V8**, embedded securely in the Rust Engine
 * **HTTP, async I/O, threading, and scheduling are fully Rust-owned**
-* There is **no JavaScript event loop**
-* Actions execute synchronously from Rust’s perspective
+* Actions execute synchronously across a multi-threaded isolate pool
 
-Boa is used **only for business logic**.
+V8 is used **only for business logic**.
 Rust owns the performance-critical hot path.
 
 Result:
@@ -196,24 +169,19 @@ That’s it.
 
 The platform will:
 
-- Run `titan build` inside Docker
-- Compile the native Rust binary
-- Start the server using the final binary
-- Expose the service publicly
+- Run `npm run build`
+- Start the server using `npm run start`
 
 You do **not** need to:
 
-- Install Titan on the platform
-- Install Node.js manually
-- Configure Rust
-- Write a custom build command
-- Manage runtime processes
+- Hand-configure Rust
+- Write a custom build pipeline
+- Manage complex process watchers
 
 ### What gets deployed
 
-- Your JavaScript routes and actions
-- The compiled Rust server
-- A single production-ready container
+- Your bundled `dist/` output
+- The pre-compiled `@titanpl/engine-<os>-<arch>` natively matched to the host container.
 
 The provided Dockerfile handles **everything** required for production.
 
@@ -221,9 +189,8 @@ The provided Dockerfile handles **everything** required for production.
 
 - **Service type:** Docker
 - **Build source:** GitHub repository
-- **Port:** Whatever your Titan server exposes (default documented)
 
-Railway and Render both work out of the box with Titan’s default setup.
+Railway and Render both work out of the box.
 
 ---
 
@@ -233,23 +200,6 @@ Railway and Render both work out of the box with Titan’s default setup.
 - Connect repo to Railway or Render
 - Dockerfile builds and runs Titan automatically
 - Zero manual production configuration
-
-
-## 🔄 Updating a Production Project
-
-To update Titan internals:
-
-```bash
-titan update
-```
-
-This updates:
-
-* Embedded Titan runtime
-* Server templates
-* Build infrastructure
-
-Your application code and bundled actions are untouched.
 
 ---
 
@@ -268,10 +218,8 @@ Titan does **not** replace these tools.
 
 ## Summary
 
-* Production output is a **single native Rust binary**
-* Deploy by **uploading and running the binary**
-* No Node.js or JS runtime in production
-* Boa does **not** slow production
-* Rust controls concurrency, async execution, and networking
-* Docker is optional — and already handled for you
+* Production relies on the pre-compiled **Titan Engine**
+* Deploy by uploading `dist/` and starting the engine
+* V8 powered business logic, Rust controls the concurrency and networking
+* No native build toolchain required on the final server
 
