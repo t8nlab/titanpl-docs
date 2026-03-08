@@ -180,7 +180,7 @@ export default function ExtensionDetailPage() {
                 <div className="ext-container py-8">
                     <div className="flex items-start gap-5">
                         <div className="w-16 h-16 shrink-0 rounded-2xl bg-linear-to-br from-white/6 to-white/2 border border-white/8 flex items-center justify-center">
-                            <Image src="/images/titanpl-ext.png" alt={ext.name} width={44} height={44} className="object-contain" />
+                            <Image src="/images/titanpl-ext.png" alt={ext.name} width={44} height={44} className="object-contain rounded-xl" />
                         </div>
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3 flex-wrap mb-1">
@@ -192,8 +192,8 @@ export default function ExtensionDetailPage() {
                                     </span>
                                 )}
                             </div>
-                            <div className="flex items-center gap-3 mb-3">
-                                <code className="text-[13px] text-gray-500 font-mono">{ext.npmPackage}</code>
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-3">
+                                <code className="text-[13px] text-gray-500 font-mono truncate max-w-[160px] sm:max-w-none">{ext.npmPackage}</code>
                                 {ext.npm.latestVersion && (
                                     <span className="text-[12px] px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded-md font-mono font-bold">
                                         v{ext.npm.latestVersion}
@@ -204,17 +204,17 @@ export default function ExtensionDetailPage() {
                                         {ext.npm.license}
                                     </span>
                                 )}
-                                <div className="flex items-center gap-2">
-                                    <Link href={npmUrl} target="_blank" className="p-2 py-0.5 text-gray-400 flex gap-1 rounded-lg bg-white/5 transition-colors" title="npm">
-                                        <RiNpmjsFill size={18} className="text-[#CB3837]" />
-                                        <span className="text-[12px] font-semibold">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <Link href={npmUrl} target="_blank" className="p-2 py-0.5 text-gray-400 flex items-center gap-1 rounded-lg bg-white/5 transition-colors" title="npm">
+                                        <RiNpmjsFill size={18} className="text-[#CB3837] shrink-0" />
+                                        <span className="text-[12px] font-semibold hidden sm:inline">
                                             {ext.npmPackage}
                                         </span>
                                     </Link>
                                     {ghUrl && (
-                                        <Link href={ghUrl} target="_blank" className="p-2 py-0.5 text-gray-400 flex gap-1 rounded-lg bg-white/5 transition-colors" title="GitHub">
-                                            <RiGithubFill size={18} className="text-gray-400" />
-                                            <span className="text-[12px] font-semibold">
+                                        <Link href={ghUrl} target="_blank" className="p-2 py-0.5 text-gray-400 flex items-center gap-1 rounded-lg bg-white/5 transition-colors" title="GitHub">
+                                            <RiGithubFill size={18} className="text-gray-400 shrink-0" />
+                                            <span className="text-[12px] font-semibold hidden sm:inline">
                                                 {ext.githubRepo}
                                             </span>
                                         </Link>

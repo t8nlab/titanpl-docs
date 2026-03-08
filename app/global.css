@@ -158,14 +158,25 @@ a[href="/community"]:hover {
 }
 
 /* ── Main column ── */
+/* On small screens: sidebar first, readme second */
 .ext-main {
     min-width: 0;
+    order: 2;
+}
+
+.ext-sidebar {
     order: 1;
 }
 
-/* ── Sidebar always after README ── */
-.ext-sidebar {
-    order: 2;
+/* On desktop: readme left (order 1), sidebar right (order 2) */
+@media (min-width: 1024px) {
+    .ext-main {
+        order: 1;
+    }
+
+    .ext-sidebar {
+        order: 2;
+    }
 }
 
 /* ── README card ── */

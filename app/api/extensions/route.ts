@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { extensions, users } from "@/db/schema";
 import { getSession } from "@/lib/auth";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, lt } from "drizzle-orm";
 
 const OFFICIAL_PREFIXES = ["@t8n/", "@tgrv/", "@titanpl/"];
 
@@ -10,10 +10,16 @@ function isOfficialPackage(npmPackage: string) {
     return OFFICIAL_PREFIXES.some(prefix => npmPackage.startsWith(prefix));
 }
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
+        const { searchParams } = new URL(req.url);
+        const limit = Math.min(Math.max(parseInt(searchParams.get("limit") || "12"), 1), 50);
+        const cursor = searchParams.get("cursor"); // ISO timestamp
+
         const allExtensions = await db.query.extensions.findMany({
-            orderBy: [desc(extensions.createdAt)],
+            ...(cursor ? { where: lt(extensions.createdAt, new Date(cursor)) } : {}),
+            orderBy: [desc(extensions.isOfficial), desc(extensions.createdAt)],
+            limit: limit + 1, // fetch one extra to determine if there's more
             with: {
                 publisher: {
                     columns: {
@@ -23,7 +29,12 @@ export async function GET() {
                 }
             }
         });
-        return NextResponse.json(allExtensions);
+
+        const hasMore = allExtensions.length > limit;
+        const data = hasMore ? allExtensions.slice(0, limit) : allExtensions;
+        const nextCursor = hasMore ? data[data.length - 1].createdAt : null;
+
+        return NextResponse.json({ data, nextCursor });
     } catch (e) {
         console.error("Fetch Extensions Error:", e);
         return NextResponse.json({ error: "Failed to fetch extensions" }, { status: 500 });

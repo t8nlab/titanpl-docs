@@ -1,17 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
-    Search, Boxes, ShieldCheck, Github, ExternalLink,
-    PlusCircle, Info, ChevronRight, Package, Loader2,
-    ShieldAlert, Globe, ArrowRight, Lock, Rocket,
-    CheckCircle2, AlertCircle, Download, User
+    Search, Boxes, ShieldCheck,
+    PlusCircle, Package, Loader2,
+    Globe, ArrowRight, Rocket,
+    Download, 
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { showToast } from "@/lib/toast";
 import AuthModal from "@/app/components/AuthModal";
+import { RiVerifiedBadgeFill } from "@remixicon/react";
 
 interface Extension {
     id: string;
@@ -29,10 +30,14 @@ interface Extension {
     };
 }
 
+const PAGE_SIZE = 12;
+
 export default function ExtensionsMarket() {
     const { user } = useAuth();
     const [extensions, setExtensions] = useState<Extension[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [nextCursor, setNextCursor] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
     const [filter, setFilter] = useState<"all" | "official" | "community">("all");
     const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
@@ -47,40 +52,79 @@ export default function ExtensionsMarket() {
     const [submitting, setSubmitting] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
 
+    const sentinelRef = useRef<HTMLDivElement>(null);
+
     useEffect(() => {
         setIsMounted(true);
     }, []);
 
-    const fetchExtensions = async () => {
-        setLoading(true);
+    const fetchExtensions = useCallback(async (cursor?: string | null) => {
+        if (cursor) {
+            setLoadingMore(true);
+        } else {
+            setLoading(true);
+        }
         try {
-            const res = await fetch("/api/extensions");
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Failed to fetch extensions");
-            setExtensions(data);
+            const params = new URLSearchParams({ limit: String(PAGE_SIZE) });
+            if (cursor) params.set("cursor", cursor);
+            const res = await fetch(`/api/extensions?${params}`);
+            const json = await res.json();
+            if (!res.ok) throw new Error(json.error || "Failed to fetch extensions");
+
+            if (cursor) {
+                setExtensions(prev => [...prev, ...json.data]);
+            } else {
+                setExtensions(json.data);
+            }
+            setNextCursor(json.nextCursor);
         } catch (err: any) {
             console.error(err);
-            setExtensions([]);
+            if (!cursor) setExtensions([]);
         } finally {
             setLoading(false);
+            setLoadingMore(false);
         }
-    };
-
-    useEffect(() => {
-        fetchExtensions();
     }, []);
 
-    const filteredExtensions = extensions.filter(ext => {
-        const query = searchQuery.toLowerCase();
-        const matchesSearch = ext.name.toLowerCase().includes(query) ||
-            ext.npmPackage.toLowerCase().includes(query) ||
-            ext.description.toLowerCase().includes(query);
+    // Initial fetch
+    useEffect(() => {
+        fetchExtensions();
+    }, [fetchExtensions]);
 
-        const matchesFilter = filter === "all" ? true :
-            filter === "official" ? ext.isOfficial :
-                !ext.isOfficial;
-        return matchesSearch && matchesFilter;
-    });
+    // Infinite scroll observer
+    useEffect(() => {
+        if (!sentinelRef.current) return;
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting && nextCursor && !loadingMore && !loading) {
+                    fetchExtensions(nextCursor);
+                }
+            },
+            { rootMargin: "200px" }
+        );
+        observer.observe(sentinelRef.current);
+        return () => observer.disconnect();
+    }, [nextCursor, loadingMore, loading, fetchExtensions]);
+
+    // Filter + search (client-side on loaded data, official always first)
+    const filteredExtensions = extensions
+        .filter(ext => {
+            const query = searchQuery.toLowerCase();
+            const matchesSearch = ext.name.toLowerCase().includes(query) ||
+                ext.npmPackage.toLowerCase().includes(query) ||
+                ext.description.toLowerCase().includes(query);
+
+            const matchesFilter = filter === "all" ? true :
+                filter === "official" ? ext.isOfficial :
+                    !ext.isOfficial;
+            return matchesSearch && matchesFilter;
+        })
+        .sort((a, b) => {
+            // Official always on top
+            if (a.isOfficial && !b.isOfficial) return -1;
+            if (!a.isOfficial && b.isOfficial) return 1;
+            return 0;
+        });
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -102,7 +146,6 @@ export default function ExtensionsMarket() {
             showToast.success("Extension Registered", `${name} is now available in the market.`);
             setIsRegisterModalOpen(false);
             fetchExtensions();
-            // Reset form
             setName("");
             setNpmPackage("");
             setGithubRepo("");
@@ -190,23 +233,38 @@ export default function ExtensionsMarket() {
                         <span className="text-gray-500 font-bold tracking-widest text-[10px] animate-pulse">SYNCHRONIZING ORBIT...</span>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {filteredExtensions.map((ext) => (
-                            <ExtensionCard key={ext.id} ext={ext} />
-                        ))}
+                    <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            {filteredExtensions.map((ext) => (
+                                <ExtensionCard key={ext.id} ext={ext} />
+                            ))}
 
-                        {filteredExtensions.length === 0 && (
-                            <div className="col-span-full py-32 bg-white/3 border border-dashed border-white/10 rounded-[40px] flex flex-col items-center gap-6">
-                                <div className="p-6 bg-white/5 rounded-3xl">
-                                    <Search size={40} className="text-gray-600" />
+                            {filteredExtensions.length === 0 && (
+                                <div className="col-span-full py-32 bg-white/3 border border-dashed border-white/10 rounded-3xl flex flex-col items-center gap-6">
+                                    <div className="p-6 bg-white/5 rounded-3xl">
+                                        <Search size={40} className="text-gray-600" />
+                                    </div>
+                                    <div className="text-center space-y-2">
+                                        <h3 className="text-2xl font-black">No matches found</h3>
+                                        <p className="text-gray-500 max-w-sm">We couldn&apos;t find any extensions matching your current search parameters.</p>
+                                    </div>
                                 </div>
-                                <div className="text-center space-y-2">
-                                    <h3 className="text-2xl font-black">No matches found</h3>
-                                    <p className="text-gray-500 max-w-sm">We couldn't find any extensions matching your current search parameters.</p>
+                            )}
+                        </div>
+
+                        {/* Infinite Scroll Sentinel */}
+                        <div ref={sentinelRef} className="py-8 flex justify-center">
+                            {loadingMore && (
+                                <div className="flex items-center gap-3">
+                                    <Loader2 size={20} className="animate-spin text-blue-500" />
+                                    <span className="text-[11px] font-bold text-gray-600 tracking-widest uppercase">Loading more…</span>
                                 </div>
-                            </div>
-                        )}
-                    </div>
+                            )}
+                            {!nextCursor && extensions.length > 0 && !loading && (
+                                <span className="text-[11px] font-bold text-gray-700 tracking-widest uppercase">All extensions loaded</span>
+                            )}
+                        </div>
+                    </>
                 )}
             </div>
 
@@ -306,6 +364,7 @@ export default function ExtensionsMarket() {
     );
 }
 
+/* ── Compact Extension Card ── */
 function ExtensionCard({ ext }: { ext: Extension }) {
     const [downloads, setDownloads] = useState<number | null>(null);
 
@@ -317,90 +376,65 @@ function ExtensionCard({ ext }: { ext: Extension }) {
     }, [ext.npmPackage]);
 
     return (
-        <div className="group relative flex flex-col bg-white/2 border border-white/5 rounded-[2.5rem] overflow-hidden hover:bg-white/4 hover:border-white/15 transition-all duration-500 transform hover:-translate-y-2 shadow-2xl">
-            {/* Visual Header */}
-            <div className="h-32 bg-linear-to-br from-white/5 to-transparent relative overflow-hidden">
-                <div className={`absolute inset-0 opacity-10 blur-3xl ${ext.isOfficial ? 'bg-blue-600' : 'bg-emerald-600'}`} />
-                <div className="absolute top-0 right-0 p-8 opacity-5">
-                    {ext.isOfficial ? <Boxes size={80} /> : <Package size={80} />}
-                </div>
+        <Link
+            href={`/extensions/${ext.npmPackage.replace('@', '')}`}
+            className="group relative flex flex-col bg-white/2 border border-white/6 rounded-2xl overflow-hidden hover:bg-white/5 hover:border-white/14 transition-all duration-300 hover:-translate-y-0.5"
+        >
+            {/* Top accent bar */}
+            <div className={`h-[2px] w-full ${ext.isOfficial ? 'bg-linear-to-r from-blue-500 via-blue-400 to-cyan-400' : 'bg-linear-to-r from-white/10 to-transparent'}`} />
 
-                {/* Icon Circle */}
-                <div className="absolute -bottom-6 left-8">
-                    <div className="w-16 h-16 rounded-2xl bg-[#0A0A0C] border border-white/10 flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-500 overflow-hidden">
+            <div className="p-5 flex flex-col gap-3.5 flex-1">
+                {/* Icon + Name Row */}
+                <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 shrink-0 rounded-xl bg-white/4 border border-white/8 flex items-center justify-center group-hover:scale-105 transition-transform overflow-hidden">
                         <Image
                             src="/images/titanpl-ext.png"
                             alt={ext.name}
-                            width={48}
-                            height={48}
-                            className="object-contain p-2"
+                            width={28}
+                            height={28}
+                            className="object-contain rounded-lg"
                         />
                     </div>
-                </div>
-            </div>
-
-            <div className="p-8 pt-10 flex-1 flex flex-col">
-                <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2 opacity-5 pointer-events-none absolute top-4 right-4">
-                        {ext.isOfficial ? <Boxes size={40} /> : <Package size={40} />}
-                    </div>
-                    {ext.isOfficial && (
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full text-[10px] font-black text-blue-400 tracking-widest">
-                            <ShieldCheck size={12} />
-                            VERIFIED
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                            <h3 className="text-[15px] font-extrabold truncate group-hover:text-blue-400 transition-colors">{ext.name}</h3>
+                            {ext.isOfficial && (
+                                <RiVerifiedBadgeFill size={13} className="text-blue-400 shrink-0" />
+                            )}
                         </div>
-                    )}
+                        <code className="text-[11px] text-gray-600 font-mono truncate block">{ext.npmPackage}</code>
+                    </div>
                 </div>
 
-                <Link href={`/extensions/${ext.npmPackage.replace('@', '')}`} className="block group/title">
-                    <h3 className="text-2xl font-black mb-1 group-hover/title:text-blue-400 transition-colors tracking-tight">{ext.name}</h3>
-                </Link>
-                <code className="block text-[10px] text-gray-600 font-mono mb-6 tracking-tighter opacity-80">
-                    {ext.npmPackage}
-                </code>
+                {/* Description */}
+                <p className="text-[12.5px] text-gray-500 leading-relaxed line-clamp-2 flex-1">{ext.description}</p>
 
-                <p className="text-sm text-gray-500 leading-relaxed line-clamp-2 mb-8 flex-1">
-                    {ext.description}
-                </p>
-
-                <div className="flex items-center justify-between pt-6 border-t border-white/5">
-                    <div className="flex flex-col gap-0.5">
-                        <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Downloads</span>
-                        <div className="flex items-center gap-1.5 text-white font-black text-sm">
-                            <Download size={12} className="text-blue-500" />
-                            {downloads !== null ? downloads.toLocaleString() : '---'}
+                {/* Footer */}
+                <div className="flex items-center justify-between pt-3 border-t border-white/4">
+                    <div className="flex items-center gap-3">
+                        {/* Publisher */}
+                        <div className="flex items-center gap-1.5">
+                            <div className="w-5 h-5 rounded-full bg-white/8 flex items-center justify-center text-[9px] font-bold text-gray-600 overflow-hidden">
+                                {ext.publisher?.avatarUrl ? (
+                                    <Image src={ext.publisher.avatarUrl} alt={ext.publisher.username} width={20} height={20} />
+                                ) : (
+                                    ext.publisher?.username?.charAt(0)?.toUpperCase() || 'T'
+                                )}
+                            </div>
+                            <span className="text-[11px] font-semibold text-gray-600">{ext.publisher?.username || 'Titan'}</span>
                         </div>
                     </div>
-
-                    <Link
-                        href={`/extensions/${ext.npmPackage.replace('@', '')}`}
-                        className="p-3 bg-white/5 rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-all group/arrow"
-                    >
-                        <ArrowRight size={18} className="group-hover/arrow:translate-x-1 transition-transform" />
-                    </Link>
-                </div>
-            </div>
-
-            {/* Publisher Badge */}
-            <div className="px-8 py-5 bg-white/3 flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                    <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold text-gray-500 overflow-hidden">
-                        {ext.publisher?.avatarUrl ? (
-                            <Image src={ext.publisher.avatarUrl} alt={ext.publisher.username} width={24} height={24} />
-                        ) : (
-                            ext.publisher?.username?.charAt(0) || 'T'
-                        )}
+                    <div className="flex items-center gap-3">
+                        {/* Downloads */}
+                        <div className="flex items-center gap-1 text-[11px] text-gray-600">
+                            <Download size={11} className="text-gray-600" />
+                            <span className="font-bold">{downloads !== null ? downloads.toLocaleString() : '—'}</span>
+                        </div>
+                        {/* Arrow */}
+                        <ArrowRight size={14} className="text-gray-700 group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all" />
                     </div>
-                    <span className="text-[11px] font-bold text-gray-500 uppercase tracking-widest">{ext.publisher?.username || 'Titan'}</span>
-                </div>
-                <div className="flex gap-3">
-                    {ext.githubRepo && (
-                        <Link href={ext.githubRepo} target="_blank" className="text-gray-600 hover:text-white transition-colors">
-                            <Github size={14} />
-                        </Link>
-                    )}
                 </div>
             </div>
-        </div>
+        </Link>
     );
 }
