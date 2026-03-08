@@ -27,6 +27,7 @@ import {
     RiBookOpenLine,
     RiGlobalLine,
     RiLoader4Line,
+    RiBookOpenFill,
 } from "@remixicon/react";
 
 /* ─── Types ─── */
@@ -402,6 +403,7 @@ export default function ExtensionDetailPage() {
                                 <SidebarLink icon={<RiNpmjsFill size={14} className="text-[#CB3837]" />} label="npm" href={npmUrl} />
                                 {ghUrl && <SidebarLink icon={<RiGithubFill size={14} className="text-white" />} label="Repository" href={ghUrl} />}
                                 {ext.npm.homepage && <SidebarLink icon={<RiGlobalLine size={14} className="text-blue-400" />} label="Homepage" href={ext.npm.homepage} />}
+                                {ext.docsLink && <SidebarLink icon={<RiBookOpenLine size={14} className="text-green-600" />} label="Docs" href={ext.docsLink} />}
                             </div>
                         </SidebarSection>
 
@@ -413,17 +415,6 @@ export default function ExtensionDetailPage() {
                                         <span key={i} className="px-2.5 py-1 bg-white/3 border border-white/6 rounded-md text-[11px] text-gray-400 font-medium hover:bg-white/6 hover:text-white transition-all cursor-default">
                                             {kw}
                                         </span>
-                                    ))}
-                                </div>
-                            </SidebarSection>
-                        )}
-
-                        {/* Engines */}
-                        {ext.npm.engines && Object.keys(ext.npm.engines).length > 0 && (
-                            <SidebarSection title="Engines">
-                                <div className="space-y-0">
-                                    {Object.entries(ext.npm.engines).map(([k, v]) => (
-                                        <MetaRow key={k} icon={<RiTerminalBoxLine size={14} className="text-yellow-400" />} label={k} value={v as string} />
                                     ))}
                                 </div>
                             </SidebarSection>
