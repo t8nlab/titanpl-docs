@@ -1,5 +1,5 @@
 ---
-title: Environment Variables
+title: 6. Environment Variables
 description: Configure secrets and environment-specific values using environment variables.
 ---
 
@@ -7,7 +7,7 @@ description: Configure secrets and environment-specific values using environment
 
 Titan supports **environment variables** through a standard `.env` file located at the **project root**.
 
-Environment variables are loaded by the native runtime and made available inside **actions** via `process.env`
+Environment variables are loaded by the native runtime and made available inside **actions** via `t.env`
 
 This allows you to configure secrets, API keys, and environment-specific values without hardcoding them into your application.
 
@@ -23,17 +23,20 @@ DATABASE_URL=postgres://user:pass@localhost:5432/app
 NODE_ENV=development
 ````
 
-> The `.env` file should **not** be committed to version control.
-> Add it to `.gitignore`
+import { Callout } from 'fumadocs-ui/components/callout';
+
+<Callout type="warn">
+  The `.env` file should **not** be committed to version control. Add it to `.gitignore`.
+</Callout>
 
 ---
 
 ## Accessing environment variables
 
-Environment variables are accessed using `process.env`
+Environment variables are accessed using `t.env`
 
 ```js
-const secret = process.env.JWT_SECRET
+const secret = t.env.JWT_SECRET
 ```
 
 They are available inside **actions only**.
@@ -46,7 +49,7 @@ They are available inside **actions only**.
 export function login(req) {
   const token = t.jwt.sign(
     { userId: 1 },
-    process.env.JWT_SECRET,
+    t.env.JWT_SECRET,
     { expiresIn: "1h" }
   )
 
@@ -90,7 +93,7 @@ You control how variables are defined and used.
 Example validation:
 
 ```js
-if (!process.env.JWT_SECRET) {
+if (!t.env.JWT_SECRET) {
   throw new Error("JWT_SECRET is not configured")
 }
 ```
@@ -120,9 +123,11 @@ Environment variables are read **at runtime**, not during build.
 
 ## Mental model
 
-> Configuration lives outside code
-> Secrets live in environment variables
-> Actions read configuration at runtime
-> Rust executes everything safely
+<Callout type="info">
+  Configuration lives outside code  
+  Secrets live in environment variables  
+  Actions read configuration at runtime  
+  Rust executes everything safely
+</Callout>
 
 This keeps Titan applications secure, flexible, and production-ready.

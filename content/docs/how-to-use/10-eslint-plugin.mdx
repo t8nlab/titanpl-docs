@@ -1,5 +1,5 @@
 ---
-title: "@titanpl/eslint-plugin-titanpl"
+title: 10. ESLint Plugin
 description: "ESLint plugin for Titan Planet projects. Enforces Titan Planet-specific rules including blocking Node.js built-in modules that are not available in the Gravity runtime."
 ---
 
@@ -85,7 +85,7 @@ export { join } from 'path';
 const content = t.core.fs.readFile('config.json');
 const fullPath = t.core.path.join('dir', 'file.txt');
 const hash = t.core.crypto.hash('sha256', 'data');
-const response = await t.fetch('https://api.example.com');
+const response = drift(t.fetch('https://api.example.com'));
 
 // External packages are allowed
 import { something } from 'lodash';

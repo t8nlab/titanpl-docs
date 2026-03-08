@@ -1,5 +1,5 @@
 ---
-title: Updates
+title: 11. Engine Updates
 description: How to update the Titan CLI and your project to the latest version.
 ---
 
@@ -14,7 +14,7 @@ import { Step, Steps } from 'fumadocs-ui/components/steps';
     Update the global Titan CLI to the latest version:
 
     ```bash
-    npm install -g @ezetgalaxy/titan@latest
+    npm install -g @titanpl/cli@latest
     ```
 
     This ensures you are using the newest commands, bundlers, and tooling.
@@ -46,5 +46,27 @@ import { Step, Steps } from 'fumadocs-ui/components/steps';
 - When new framework features are released
 - If the docs mention an update step
 
-> **Tip**  
-> Always update the CLI first, then run `titan update` inside your project.
+import { Callout } from 'fumadocs-ui/components/callout';
+
+<Callout type="info">
+  **Tip:** Always update the CLI first, then run `titan update` inside your project.
+</Callout>
+
+---
+
+## Manual Engine Updates
+
+If required, you can manually download and lock your system-specific Titan Engine. This is especially useful for ensuring production stability across different environments.
+
+Add the following to your `package.json` to lock specific engine versions:
+
+```json
+"optionalDependencies": {
+  "@titanpl/engine-linux-x64": "2.0.5",
+  "@titanpl/engine-win32-x64": "2.0.3"
+}
+```
+
+<Callout type="info">
+  **Note:** This manual configuration will be automatically resolved and handled by the CLI in the next stable update.
+</Callout>

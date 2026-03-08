@@ -1,5 +1,5 @@
 ---
-title: Gravity Logs
+title: 7. Real-time Logs
 description: Understand Titan’s structured terminal logs during development and runtime.
 ---
 
@@ -33,7 +33,7 @@ This confirms that:
 During development, Titan automatically bundles actions and regenerates metadata when files change.
 
 ```bash
-  ⏣ Titan Planet   v26.14.1  [ Dev Mode ]
+  ⏣ Titan Planet   v3.0.0  [ Dev Mode ]
 
   Type:        Rust + JS Actions
   Hot Reload:  Enabled
@@ -211,8 +211,11 @@ Manual restart is required sometimes for error.
 
 ---
 
-> Errors are part of execution, not framework failure.
-> Titan logs them clearly so you can fix them quickly.
+import { Callout } from 'fumadocs-ui/components/callout';
+
+<Callout type="info">
+  Errors are part of execution, not framework failure. Titan logs them clearly so you can fix them quickly.
+</Callout>
 
 
 ## What Titan logs by default
@@ -243,7 +246,8 @@ This keeps terminal output readable even at scale.
 
 ## Mental model
 
-> Titan logs reflect **real execution**, not framework abstraction.
-> If you see it in the terminal, it happened in the Rust server.
+<Callout type="info">
+  Titan logs reflect **real execution**, not framework abstraction. If you see it in the terminal, it happened in the Rust server.
+</Callout>
 
 These logs are safe to rely on for development, debugging, and early production observability.

@@ -55,7 +55,7 @@ export default function Footer() {
                             >
                                 <span className="relative z-10">Join the Community</span>
                                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 relative z-10" />
-                                <div className="absolute inset-0 -z-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-100 transition-opacity group-hover:opacity-90" />
+                                <div className="absolute inset-0 z-0 bg-linear-to-r from-blue-600 to-indigo-600 opacity-100 transition-opacity group-hover:opacity-90" />
                             </Link>
                             <div className="mt-6 flex flex-wrap gap-4">
                                 <Link
@@ -67,7 +67,7 @@ export default function Footer() {
                                     <RiTwitterXLine className="h-5 w-5 text-zinc-700 dark:text-zinc-300 transition-colors group-hover:text-black dark:group-hover:text-white" />
                                 </Link>
                                 <Link
-                                    href="https://github.com/ezet-galaxy"
+                                    href="https://github.com/t8nlab"
                                     target="_blank"
                                     className="group flex h-10 w-10 items-center justify-center rounded-full bg-black/5 dark:bg-white/10 transition-colors hover:bg-black/10 dark:hover:bg-white/20"
                                     aria-label="GitHub"
@@ -95,14 +95,14 @@ export default function Footer() {
                                 <Activity size={14} />
                                 Benchmark
                             </Link>
-                            <Link href="/docs/how-titan-works" className="text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
+                            <Link href="/docs/knowledge/01-how-it-works" className="text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
                                 How Titan Works
                             </Link>
-                            <Link href="/docs/runtime-architecture" className="text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
+                            <Link href="/docs/knowledge/02-runtime-architecture" className="text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
                                 Gravity Runtime
                             </Link>
-                            <Link href="https://github.com/topics/titanpl-ext" className="text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
-                                Extensions
+                            <Link href="/extensions" className="text-sm text-zinc-500 dark:text-zinc-400 font-bold transition-colors hover:text-blue-500 dark:hover:text-blue-400">
+                                Extension Market
                             </Link>
                             <Link href="/playground" className="text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
                                 Project Titan
@@ -120,12 +120,12 @@ export default function Footer() {
                                 </div>
                                 <ul className="space-y-2 pl-3 border-l border-black/10 dark:border-white/10 border-dashed">
                                     <li>
-                                        <Link href="https://github.com/ezet-galaxy/titanpl" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
+                                        <Link href="https://github.com/t8nlab/titanpl" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
                                             titanpl
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link href="https://github.com/ezet-galaxy/titanpl/tree/main/titanpl-sdk" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
+                                        <Link href="https://github.com/t8nlab/titanpl/tree/main/titanpl-sdk" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
                                             titanpl-sdk
                                         </Link>
                                     </li>
@@ -145,7 +145,7 @@ export default function Footer() {
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link href="https://github.com/ezet-galaxy/titanpl/tree/main/templates/extension" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
+                                        <Link href="https://github.com/t8nlab/titanpl/tree/main/templates/extension" target="_blank" className="block text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white">
                                             titanpl-ext-template
                                         </Link>
                                     </li>

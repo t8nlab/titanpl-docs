@@ -1,5 +1,5 @@
 ---
-title: Routes
+title: 1. Routes
 description: Define HTTP routes in clean, declarative JavaScript that Titan compiles into a high-performance native Rust router.
 ---
 
@@ -27,8 +27,11 @@ t.get("/health").reply({
 * Returns JSON automatically
 * Objects passed to `reply()` are serialized at build time
 
-> `reply()` is intentionally static.
-> Use **actions** when request data or logic is required.
+import { Callout } from 'fumadocs-ui/components/callout';
+
+<Callout type="info">
+  `reply()` is intentionally static. Use **actions** when request data or logic is required.
+</Callout>
 
 ---
 

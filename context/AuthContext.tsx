@@ -4,8 +4,9 @@ import { createContext, useContext, useEffect, useState } from 'react';
 interface User {
     uid: string;
     username: string;
-    email?: string;
-    avatarUrl?: string; // Add this
+    email: string;
+    isAdmin: boolean;
+    avatarUrl?: string;
 }
 
 interface AuthContextType {

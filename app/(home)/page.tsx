@@ -8,7 +8,7 @@ import { Terminal, Zap, Cpu, Rocket, Binary, MessageSquareQuote, Monitor } from 
 import VideoLoader from "@/app/components/VideoLoader"
 import StatusBadge from "@/app/components/StatusBadge"
 import WorkflowSection from "@/app/components/WorkflowSection"
-import { RiJavascriptFill, RiTwitterXFill, RiLinkedinFill, RiGithubFill } from "@remixicon/react"
+import { RiJavascriptFill } from "@remixicon/react"
 import { Feature } from "@/app/components/Feature"
 import { FeedbackCard } from "@/app/components/FeedbackCard"
 import { feedbacks } from "@/app/data/feedbacks"
@@ -66,7 +66,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <h1 className="text-black dark:text-white mt-8 text-4xl font-extrabold tracking-[-0.02em] sm:text-6xl lg:text-7xl bg-clip-text text-transparent bg-linear-to-b from-foreground via-foreground/90 to-foreground/50">
+            <h1 className="text-black dark:text-white mt-8 text-4xl font-extrabold tracking-[-0.02em] sm:text-6xl lg:text-7xl bg-clip-text bg-linear-to-b from-foreground via-foreground/90 to-foreground/50">
               Titan Planet
             </h1>
 
@@ -221,7 +221,7 @@ export default function HomePage() {
               </p>
 
               <Link
-                href="/docs/12-sdk"
+                href="/docs/how-to-use/12-package-ecosystem"
                 className="inline-flex items-center text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
               >
                 Learn more →
@@ -260,7 +260,7 @@ export default function HomePage() {
               </p>
 
               <Link
-                href="/docs/10-extensions"
+                href="/docs/knowledge/07-extensions"
                 className="inline-flex items-center text-sm font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors"
               >
                 Learn more →
@@ -299,7 +299,7 @@ export default function HomePage() {
               </p>
 
               <Link
-                href="/docs/03-actions#-rust-actions-beta"
+                href="/docs/how-to-use/02-actions#%EF%B8%8F-rust-actions-rs"
                 className="inline-flex items-center text-sm font-semibold text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 transition-colors"
               >
                 Learn more →
@@ -335,7 +335,7 @@ export default function HomePage() {
               </p>
 
               <Link
-                href="/docs/orbit-system"
+                href="/docs/knowledge/03-orbit-system"
                 className="inline-flex items-center text-sm font-semibold text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors"
               >
                 Learn more →
@@ -371,7 +371,7 @@ export default function HomePage() {
               </p>
 
               <Link
-                href="/docs/runtime-architecture"
+                href="/docs/knowledge/02-runtime-architecture"
                 className="inline-flex items-center text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
               >
                 Learn more →

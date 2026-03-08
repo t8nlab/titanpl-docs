@@ -1,5 +1,5 @@
 ---
-title: Actions
+title: 2. Actions
 description: Execute request-aware business logic in JavaScript, TypeScript (Beta), or Rust, compiled and embedded into TitanPl’s native server.
 ---
 
@@ -73,7 +73,9 @@ export function run(req) {
 
 Perfect for heavy computation, encryption, image processing, or low-level system access.
 
-> **Note:** The Native Rust Action API is currently in **Beta**.
+<Callout type="info">
+  **Note:** The Native Rust Action API is currently in **Beta**.
+</Callout>
 
 ```rust title="app/actions/compute.rs"
 use axum::{response::{IntoResponse, Json}, http::Request, body::Body};
@@ -305,8 +307,10 @@ This separation keeps applications clean, testable, and maintainable.
 
 ## Mental model
 
-> Routes describe **structure**
-> Actions handle **behavior**
-> Titan compiles both into **Rust**
+<Callout type="info">
+Routes describe **structure**  
+Actions handle **behavior**  
+Titan compiles both into **Rust**
+</Callout>
 
 This model scales cleanly from small APIs to large production systems.

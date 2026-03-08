@@ -1,5 +1,5 @@
 ---
-title: Production
+title: 9. Production Deployment
 description: Build and deploy Titan as a single native Rust binary without Node.js in production.
 ---
 
@@ -79,6 +79,17 @@ No native build toolchains on your server.
 
 That’s it.
 
+<Callout type="info">
+  **Production Tip:** To ensure cross-platform stability, you can manually add the engine packages to your `optionalDependencies` in `package.json`. This ensures the correct binary is available for your production environment.
+  
+  ```json
+  "optionalDependencies": {
+    "@titanpl/engine-linux-x64": "2.0.5",
+    "@titanpl/engine-win32-x64": "2.0.3"
+  }
+  ```
+</Callout>
+
 Works on:
 
 * Any Node.js-capable VPS
@@ -153,7 +164,7 @@ Result:
 <Callout type="info">
   For Railway and Render, you do <strong>not</strong> deploy the binary manually.  
   Just push your Titan project to GitHub and connect the repository.
-  Don't forget to add the [.gitignore](/docs/09-gitignore)
+  Don't forget to add the `.gitignore` file (refer to [Environment Variables](/docs/how-to-use/06-env) for details).
 </Callout>
 
 Titan projects ship with a **fully production-ready Dockerfile**.  

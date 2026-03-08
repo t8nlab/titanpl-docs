@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   uid: text("id").primaryKey(),
@@ -6,5 +6,6 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
   avatarUrl: text("avatar_url"),
+  isAdmin: boolean("is_admin").default(false), // Field for official extension management
   createdAt: timestamp("created_at").defaultNow(),
 });

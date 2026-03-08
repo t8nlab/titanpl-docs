@@ -1,5 +1,5 @@
 ---
-title: "Gravity Runtime: Multi Threaded, Strictly Synchronous V8"
+title: "2. Gravity: Multi Threaded"
 description: "Understanding Gravity - Titan Planet's strictly synchronous V8 runtime with multi-threaded execution."
 ---
 
@@ -178,7 +178,9 @@ t.start(3000, "Titan Running!", 12);
 
 If the **Thread Count** argument is omitted, Gravity automatically calculates the thread count based on your hardware:
 
-> **Default Threads = CPU Core Count * 4**
+<Callout type="info">
+  **Default Threads = CPU Core Count * 4**
+</Callout>
 
 **Example:**
 If you have **16 CPU cores** and do not specify a thread count, Gravity will spawn **64 worker threads**.

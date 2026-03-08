@@ -1,0 +1,151 @@
+---
+title: 5. Titan Core
+description: "The official Core Standard Library for Titan Planet - a high-performance JavaScript extension for Gravity Runtime."
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+# `@titanpl/core`
+
+**The official Core Standard Library for Titan Planet.**
+
+A high-performance JavaScript extension for Gravity Runtime, providing essential utilities including file system operations, cryptography, session management, URL parsing, and more — all built with native Rust for maximum speed.
+
+## Overview
+
+`@titanpl/core` is a **comprehensive extension** for TitanPL that brings a suite of essential utilities directly to your V8 runtime. It provides file system access, cryptographic functions, session handling, and much more, all optimized at the native Rust level.
+
+Unlike traditional Node.js modules, these APIs are **compiled directly into Gravity**, ensuring zero dependency overhead and instant availability without any `require()` or `import` statements.
+
+### Auto-Loading
+
+The extension automatically attaches to Gravity. You can access it via `t.core` or the `t` global object alias.
+
+```javascript
+// Access via t.core (Recommended)
+const { fs, crypto, os } = t.core;
+
+// Read a file (Project root as base)
+const content = fs.readFile("config.json");
+
+// Generate UUID
+const id = crypto.uuid();
+```
+
+---
+
+## API Reference
+
+### `fs` (File System)
+Synchronous file system operations.
+
+<Callout type="info">
+  **Tip:** Titan uses your **project root** as the base for all file system operations. There is no need for `../app` or complex path arithmetic — paths resolve directly relative to where your `package.json` lives.
+</Callout>
+
+#### `fs.readFile(path: string): string`
+Read file content as UTF-8 string.
+
+#### `fs.writeFile(path: string, content: string): void`
+Write string content to file.
+
+#### `fs.exists(path: string): boolean`
+Check if a path exists.
+
+#### `fs.mkdir(path: string): void`
+Create a directory (recursive).
+
+#### `fs.remove(path: string): void`
+Remove file or directory.
+
+#### `fs.readdir(path: string): string[]`
+List directory contents.
+
+#### `fs.stat(path: string): object`
+Get file statistics: `{ isFile: boolean, isDir: boolean, size: number, modified: number }`.
+
+### `path` (Path Manipulation)
+Utilities for handling file paths.
+
+- `path.join(...parts: string[]): string` — Join path segments.
+- `path.resolve(...parts: string[]): string` — Resolve path to an absolute path.
+- `path.dirname(path: string): string` — Get the directory name.
+- `path.basename(path: string): string` — Get the base name.
+- `path.extname(path: string): string` — Get the extension.
+
+### `crypto` (Cryptography)
+Secure cryptographic utilities.
+
+- `crypto.hash(algo: string, data: string): string` — Hash data (e.g., `sha256`, `sha512`).
+- `crypto.randomBytes(size: number): string` — Generate random bytes as a hex string.
+- `crypto.uuid(): string` — Generate a UUID v4.
+- `crypto.encrypt(algorithm: string, key: string, plaintext: string): string` — Encrypt text.
+- `crypto.decrypt(algorithm: string, key: string, ciphertext: string): string` — Decrypt text.
+- `crypto.hashKeyed(algo: string, key: string, message: string): string` — Keyed-hash (HMAC).
+- `crypto.compare(hash: string, target: string): boolean` — Constant-time comparison.
+
+### `buffer` (Buffer Utilities)
+Utilities for binary and data encoding.
+
+- `buffer.fromBase64(str: string): Uint8Array` — Decode Base64 string to bytes.
+- `buffer.toBase64(bytes: Uint8Array | string): string` — Encode bytes or string to Base64.
+- `buffer.serialize(value: any): Uint8Array` — Native V8 serialization.
+- `buffer.deserialize(bytes: Uint8Array): any` — Native V8 deserialization.
+
+### `os` (Operating System)
+Retrieve system-level information.
+
+- `os.platform(): string` — OS platform.
+- `os.cpus(): number` — Number of logical CPU cores.
+- `os.totalMemory(): number` — Total system memory.
+- `os.freeMemory(): number` — Free system memory.
+- `os.tmpdir(): string` — Path to temporary directory.
+
+### `net` (Network)
+Basic network utilities.
+
+- `net.resolveDNS(hostname: string): string[]` — Resolve a hostname.
+- `net.ip(): string` — Get the local system IP address.
+
+### `proc` (Process Management)
+Manage and query system processes.
+
+- `proc.pid(): number` — Get current PID.
+- `proc.info(): object` — Get process info.
+- `proc.run(command: string, args?: string[], cwd?: string): object` — Spawn background process.
+- `proc.kill(pid: number): boolean` — Terminate process.
+- `proc.list(): object[]` — List all system processes.
+
+### `time` (Time Utilities)
+- `time.sleep(ms: number): void` — Block execution for `ms` milliseconds.
+- `time.now(): number` — Get current timestamp.
+
+### `ls` (Persistent Local Storage)
+High-performance key-value storage persisted to disk.
+
+- `ls.get(key: string): string|null`
+- `ls.set(key: string, value: string): void`
+- `ls.remove(key: string): void`
+- `ls.clear(): void`
+- `ls.keys(): string[]`
+- `ls.setObject(key: string, value: any): void`
+- `ls.getObject(key: string): any`
+
+---
+
+## Technical Design
+
+`@titanpl/core` serves as the backbone of the Titan ecosystem, providing a robust set of standard library modules that mirror Node.js APIs. It leverages high-performance Rust native bindings to ensure optimal speed and efficiency for system-level operations.
+
+### Key Features
+
+*   **Pre-installed & Ready**: `@titanpl/core` comes pre-installed with every new Titan project.
+*   **Modular & Optional**: While core to the experience, it is an extension that can be customized.
+*   **Native Bindings**: All logic is executed in Rust, with minimal overhead in the V8 layer.
+
+---
+
+<Callout type="warn">
+  Support for **Windows** is complete. **Linux** support is in active development.
+</Callout>

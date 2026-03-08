@@ -1,0 +1,101 @@
+---
+title: 12. Package Ecosystem
+description: Explore the internal packages that power Titan Planet's runtime and tooling.
+---
+
+## Overview
+
+Titan Planet is composed of several specialized packages. While many of these are handled automatically behind the scenes, understanding their roles can help you better understand the architecture of your application.
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+<Callout type="warn">
+  Currently, Titan Planet and its entire package ecosystem are fully supported on **Windows**. Support for **Linux** is currently in development (dev only) and will be launched officially soon.
+</Callout>
+
+---
+
+### `@titanpl/native`
+**The native utility extension module for Titan Planet.**
+
+#### What it does
+It acts as the low-level communication bridge offering type definitions and utility wrappers out-of-the-box. Rather than being dependent on heavy JavaScript libraries, this package bridges Node-style features gracefully to the Titan runtime environment.
+
+#### How it works
+You can import tools and primitives from this package into your server-side actions alongside `@titanpl/core` when you want direct low-level interaction or need access to platform operations that interact directly with the C/Rust engine.
+
+---
+
+### `@titanpl/packet`
+**The internal bundler and module packer for Titan Planet.**
+
+#### What it does
+This library parses all your app routes, components, middleware, and logic paths, then packages them into a static build output layer consisting of metadata files and JavaScript assets.
+
+#### How it works
+This package is triggered whenever you run `titan init` or `titan build` from the `@titanpl/cli`. It hooks into tools like `esbuild` to optimize your scripts efficiently. It strips unnecessary pieces out so that only explicit route actions make their way aggressively over to the Titan runtime engine.
+
+---
+
+### `@titanpl/route`
+**The declarative Routing DSL for Titan Planet.**
+
+#### What it does
+This is a zero-runtime-overhead DSL used to define your backend API routes. It captures routing metadata that the Titan engine uses to static-map requests directly to your actions.
+
+#### How it works
+Import `t` and use it to define your endpoints.
+
+```javascript
+import t from "@titanpl/route";
+
+// Define an action-based route
+t.post("/hello").action("hello"); // pass a json payload { "name": "titan" }
+
+// Define a direct reply route
+t.get("/").reply("Ready to land on Titan Planet 🚀");
+
+// Configure the server
+t.start(5100, "Titan Running!");
+```
+
+---
+
+### `@titanpl/cli`
+**The command-line interface (CLI) for Titan Planet.**
+
+#### What it does
+The CLI is responsible for bridging your JavaScript codebase with the underlying Rust/Axum engine. It handles scaffolding, compiling JS actions, generating metadata, and running the server. It provides the `titan` and `tit` commands.
+
+#### How it works
+You can install this package globally or use it via your package runner (e.g., `npx`). Alternatively, you can install it as a dev dependency in your project.
+
+```bash
+npx titan help
+```
+It parses your application source code, coordinates with `@titanpl/packet` to build the required JS endpoints, and then spins up the pre-compiled native core engine for your OS.
+
+---
+
+### Engine Binaries
+Titan provides pre-compiled native engines that bundle the Rust server and Boá runtime.
+
+#### `@titanpl/engine-win32-x64`
+- **Purpose**: Provides the highly concurrent Rust-based server binary (`titan.exe`).
+- **How it works**: When the CLI is installed on Windows, it fetches this runtime. The CLI then maps your built assets and JS routes into the binary for deployment.
+
+#### `@titanpl/engine-linux-x64`
+- **Purpose**: Core Rust + Axum high-performance web server natively for Linux x64 environments.
+- **How it works**: Acts as an optional dependency resolved by the CLI. If running on a compatible machine, the native binary is automatically downloaded to run your application.
+
+<Callout type="info">
+  **Production Hint:** For predictable deployments (e.g., when building in CI/CD or for production), you can manually lock your system-specific engine version in your `package.json` under `optionalDependencies`. 
+  
+  ```json
+  "optionalDependencies": {
+    "@titanpl/engine-linux-x64": "2.0.5",
+    "@titanpl/engine-win32-x64": "2.0.3"
+  }
+  ```
+  This ensures and allows you to download the specific binary for your host OS. This manual configuration will be auto-resolved in the next stable CLI update.
+</Callout>

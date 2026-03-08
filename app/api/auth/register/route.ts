@@ -30,7 +30,7 @@ export async function POST(req: Request) {
             password: hashedPassword,
         });
 
-        return NextResponse.json({ success: true, uid });
+        return NextResponse.json({ success: true, user: { uid, username, email, isAdmin: false } });
     } catch (e) {
         console.error("Register Error:", e);
         return NextResponse.json({ error: "Register failed" }, { status: 500 });
