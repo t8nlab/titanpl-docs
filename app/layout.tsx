@@ -54,7 +54,7 @@ export const metadata: Metadata = {
       'JavaScript simplicity. Rust power. Native backends powered by the V8 engine.',
   },
   verification: {
-    google: "hMltFPqeOSHo-jwT47ISZC7XQWiYOWQE6pcUepmxeFk",
+    google: "_X5hMue4qdjjmB8Izg31ODqKG62J5mhQX0OfP_7RBYg",
   },
 };
 
