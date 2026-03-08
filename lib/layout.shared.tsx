@@ -2,7 +2,7 @@ import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import Image from "next/image"
 import { GithubStars } from '@/app/components/github-stars';
 
-import { RiDiscussFill } from "@remixicon/react";
+import { RiDiscordFill } from "@remixicon/react";
 
 export function baseOptions(): BaseLayoutProps {
   return {
@@ -45,12 +45,12 @@ export function baseOptions(): BaseLayoutProps {
       },
       {
         text: (
-          <div className="group flex gap-2 items-center justify-center bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 hover:border-blue-500/40 rounded-lg px-3 py-1 transition-all duration-300 w-full">
-            <RiDiscussFill className="w-4 h-4 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" />
-            <span className="text-sm font-medium text-blue-600 dark:text-blue-400">Join Community</span>
+          <div className="group flex gap-2 items-center justify-center bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 hover:border-indigo-500/40 rounded-lg px-3 py-1 transition-all duration-300 w-full">
+            <RiDiscordFill className="w-4 h-4 text-indigo-500 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
+            <span className="text-sm font-medium text-indigo-500 dark:text-indigo-400">Join Discord</span>
           </div>
         ),
-        url: "/community",
+        url: "https://discord.gg/cYpB9bSY",
         active: "nested-url"
       },
     ]

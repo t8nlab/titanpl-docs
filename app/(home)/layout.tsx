@@ -10,7 +10,7 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   return (
     <HomeLayout {...baseOptions()}>
-      <Notice title='Titan v2.0.1 is Live — The Titan Engine' variant='success'>
+      <Notice title='Titan v3.0.0 is Live — The Titan Engine' variant='success'>
         <p className='opacity-90'>
           ⚡ <strong>Major Architecture Update:</strong> Pre-compiled Native Engine and instant cold starts and more.
           <Link href='/docs/how-titan-works' className='ml-2 font-semibold text-emerald-400 hover:text-emerald-300 transition-colors underline decoration-emerald-400/30 underline-offset-4'>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Activity, ArrowRight } from "lucide-react";
-import { RiGithubFill, RiNpmjsFill, RiTwitterXLine } from "@remixicon/react";
+import { RiGithubFill, RiNpmjsFill, RiTwitterXLine, RiDiscordFill } from "@remixicon/react";
 import Image from "next/image";
 import { useStatus } from "@/context/StatusContext";
 
@@ -49,13 +49,14 @@ export default function Footer() {
                             </p>
 
                             <Link
-                                href="/community"
+                                href="https://discord.gg/cYpB9bSY"
                                 target="_blank"
-                                className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-blue-600 px-8 py-2 text-sm font-bold text-white transition-all hover:bg-blue-500 hover:ring-4 hover:ring-blue-500/20 active:scale-95 shadow-lg shadow-blue-500/20"
+                                className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-indigo-600 px-8 py-2 text-sm font-bold text-white transition-all hover:bg-indigo-500 hover:ring-4 hover:ring-indigo-500/20 active:scale-95 shadow-lg shadow-indigo-500/20"
                             >
-                                <span className="relative z-10">Join the Community</span>
+                                <RiDiscordFill className="h-4 w-4 relative z-10" />
+                                <span className="relative z-10">Join our Discord</span>
                                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 relative z-10" />
-                                <div className="absolute inset-0 z-0 bg-linear-to-r from-blue-600 to-indigo-600 opacity-100 transition-opacity group-hover:opacity-90" />
+                                <div className="absolute inset-0 z-0 bg-linear-to-r from-indigo-600 to-violet-600 opacity-100 transition-opacity group-hover:opacity-90" />
                             </Link>
                             <div className="mt-6 flex flex-wrap gap-4">
                                 <Link
@@ -65,6 +66,14 @@ export default function Footer() {
                                     aria-label="Twitter"
                                 >
                                     <RiTwitterXLine className="h-5 w-5 text-zinc-700 dark:text-zinc-300 transition-colors group-hover:text-black dark:group-hover:text-white" />
+                                </Link>
+                                <Link
+                                    href="https://discord.gg/cYpB9bSY"
+                                    target="_blank"
+                                    className="group flex h-10 w-10 items-center justify-center rounded-full bg-indigo-500/10 dark:bg-indigo-500/10 transition-colors hover:bg-indigo-500/20 dark:hover:bg-indigo-500/20"
+                                    aria-label="Discord"
+                                >
+                                    <RiDiscordFill className="h-5 w-5 text-indigo-500 dark:text-indigo-400 transition-colors group-hover:text-indigo-600 dark:group-hover:text-indigo-300" />
                                 </Link>
                                 <Link
                                     href="https://github.com/t8nlab"

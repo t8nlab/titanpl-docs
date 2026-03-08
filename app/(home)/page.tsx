@@ -5,6 +5,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { Terminal, Zap, Cpu, Rocket, Binary, MessageSquareQuote, Monitor } from "lucide-react"
+import { RiDiscordFill } from "@remixicon/react"
 import VideoLoader from "@/app/components/VideoLoader"
 import StatusBadge from "@/app/components/StatusBadge"
 import WorkflowSection from "@/app/components/WorkflowSection"
@@ -115,12 +116,13 @@ export default function HomePage() {
             </Link>
 
             <Link
-              href="/community"
+              href="https://discord.gg/cYpB9bSY"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-dashed border-blue-500/30 bg-background px-8 text-sm font-medium text-blue-600 shadow-sm transition-colors hover:bg-blue-500/5 hover:border-blue-500/60 hover:text-blue-700 dark:text-blue-400 dark:hover:bg-blue-500/10 dark:hover:text-blue-300"
+              className="group inline-flex h-10 items-center justify-center gap-2 rounded-md border border-dashed border-indigo-500/30 bg-background px-8 text-sm font-medium text-indigo-600 shadow-sm transition-colors hover:bg-indigo-500/5 hover:border-indigo-500/60 hover:text-indigo-700 dark:text-indigo-400 dark:hover:bg-indigo-500/10 dark:hover:text-indigo-300"
             >
-              Community
+              <RiDiscordFill className="h-4 w-4" />
+              Join Discord
             </Link>
           </motion.div>
         </div>
@@ -410,8 +412,9 @@ export default function HomePage() {
                 </p>
               </div>
               <div className="mt-8 pt-6 border-t border-border/50">
-                <Link href="/community" className="text-sm font-semibold text-green-500 hover:underline">
-                  Join the Discussion →
+                <Link href="https://discord.gg/cYpB9bSY" target="_blank" className="group inline-flex items-center gap-2 text-sm font-semibold text-indigo-500 hover:text-indigo-400 transition-colors">
+                  <RiDiscordFill className="h-4 w-4" />
+                  Join the Discord →
                 </Link>
               </div>
             </div>

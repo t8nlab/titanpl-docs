@@ -26,6 +26,33 @@ a[href="/community"]:hover {
     background-color: transparent !important;
 }
 
+/* ── Remove underline from heading anchors in docs ── */
+.prose h1 a,
+.prose h2 a,
+.prose h3 a,
+.prose h4 a,
+.prose h5 a,
+.prose h6 a,
+h1>a,
+h2>a,
+h3>a,
+h4>a,
+h5>a,
+h6>a {
+    text-decoration: none !important;
+}
+
+/* ── Remove extra backtick characters from inline code ── */
+/* Tailwind Typography adds content:'`' to code::before and code::after */
+code::before,
+code::after,
+.prose code::before,
+.prose code::after,
+:where(.prose) :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *))::before,
+:where(.prose) :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *))::after {
+    content: "" !important;
+}
+
 /* Electric Line Animations */
 @keyframes electric-flow {
     0% {
