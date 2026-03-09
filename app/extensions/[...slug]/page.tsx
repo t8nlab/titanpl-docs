@@ -41,7 +41,7 @@ interface ExtensionDetail {
     publisherId: string | null;
     isOfficial: boolean;
     createdAt: string;
-    publisher?: { username: string; avatarUrl: string | null };
+    publisher?: { username: string; avatarUrl: string | null; isAdmin?: boolean };
     npm: {
         readme: string | null;
         latestVersion: string | null;
@@ -59,7 +59,8 @@ interface ExtensionDetail {
 }
 
 /* ─── Helpers ─── */
-function fmtNum(n: number): string {
+function fmtNum(n?: number | null): string {
+    if (n == null) return "—";
     if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
     if (n >= 1_000) return (n / 1_000).toFixed(1) + "K";
     return n.toLocaleString();
@@ -376,7 +377,7 @@ export default function ExtensionDetailPage() {
                                 <div className="min-w-0">
                                     <div className="flex items-center gap-1.5">
                                         <span className="text-[13px] font-bold truncate">{ext.publisher?.username || "Titan"}</span>
-                                        {ext.isOfficial && <RiVerifiedBadgeFill size={13} className="text-blue-400 shrink-0" />}
+                                        {(ext.isOfficial || ext.publisher?.isAdmin) && <RiVerifiedBadgeFill size={13} className="text-blue-400 shrink-0" />}
                                     </div>
                                     <span className="text-[11px] text-gray-600">{ext.isOfficial ? "Official" : "Community"}</span>
                                 </div>

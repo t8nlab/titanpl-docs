@@ -7,7 +7,7 @@ import {
     Search, Boxes, ShieldCheck,
     PlusCircle, Package, Loader2,
     Globe, ArrowRight, Rocket,
-    Download, 
+    Download,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { showToast } from "@/lib/toast";
@@ -27,6 +27,7 @@ interface Extension {
     publisher?: {
         username: string;
         avatarUrl: string | null;
+        isAdmin?: boolean;
     };
 }
 
@@ -370,8 +371,8 @@ function ExtensionCard({ ext }: { ext: Extension }) {
 
     useEffect(() => {
         fetch(`https://api.npmjs.org/downloads/point/last-month/${ext.npmPackage}`)
-            .then(res => res.json())
-            .then(data => setDownloads(data.downloads))
+            .then(res => res.ok ? res.json() : Promise.reject('Not found'))
+            .then(data => setDownloads(data.downloads ?? 0))
             .catch(() => setDownloads(0));
     }, [ext.npmPackage]);
 
@@ -421,14 +422,21 @@ function ExtensionCard({ ext }: { ext: Extension }) {
                                     ext.publisher?.username?.charAt(0)?.toUpperCase() || 'T'
                                 )}
                             </div>
-                            <span className="text-[11px] font-semibold text-gray-600">{ext.publisher?.username || 'Titan'}</span>
+                            <div className="flex flex-col">
+                                <span className="text-[11px] font-semibold text-gray-600 flex items-center gap-1">
+                                    {ext.publisher?.username || 'Titan'}
+                                    {ext.publisher?.isAdmin && (
+                                        <RiVerifiedBadgeFill size={11} className="text-blue-400 shrink-0" />
+                                    )}
+                                </span>
+                            </div>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
                         {/* Downloads */}
                         <div className="flex items-center gap-1 text-[11px] text-gray-600">
                             <Download size={11} className="text-gray-600" />
-                            <span className="font-bold">{downloads !== null ? downloads.toLocaleString() : '—'}</span>
+                            <span className="font-bold">{downloads != null ? downloads.toLocaleString() : '—'}</span>
                         </div>
                         {/* Arrow */}
                         <ArrowRight size={14} className="text-gray-700 group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all" />

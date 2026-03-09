@@ -11,7 +11,8 @@ export async function GET(
         const { slug } = await params;
         // slug is an array like ["titanpl", "core"] from URL "/api/extensions/titanpl/core"
         // Reconstruct the npm package name as "@titanpl/core"
-        const npmPackage = `@${slug.join("/")}`;
+        const cleanSlug = slug.map((s: string) => s.replace(/^@/, '')).join('/');
+        const npmPackage = `@${cleanSlug}`;
 
         const ext = await db.query.extensions.findFirst({
             where: eq(extensions.npmPackage, npmPackage),
@@ -20,6 +21,7 @@ export async function GET(
                     columns: {
                         username: true,
                         avatarUrl: true,
+                        isAdmin: true,
                     },
                 },
             },

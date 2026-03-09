@@ -24,7 +24,8 @@ export async function GET(req: Request) {
                 publisher: {
                     columns: {
                         username: true,
-                        avatarUrl: true
+                        avatarUrl: true,
+                        isAdmin: true
                     }
                 }
             }

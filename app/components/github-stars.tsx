@@ -32,7 +32,7 @@ export async function GithubStars() {
                 <span>titanpl</span>
             </div>
 
-            {stars !== null && (
+            {stars != null && (
                 <>
                     <div className="h-3 w-px bg-black/10 dark:bg-white/10" />
                     <div className="flex items-center gap-1 text-zinc-600 transition-colors group-hover:text-amber-500 dark:text-zinc-400 dark:group-hover:text-amber-400">

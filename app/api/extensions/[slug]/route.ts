@@ -9,9 +9,9 @@ export async function GET(
 ) {
     try {
         const { slug } = await params;
-        // The slug comes as "titanpl/core" from URL "/extensions/titanpl/core"
-        // We need to reconstruct the npm package name as "@titanpl/core"
-        const npmPackage = `@${slug}`;
+        // The slug comes as "orbit-http" from URL "/api/extensions/orbit-http"
+        // We need to reconstruct the npm package name as "orbit-http"
+        const npmPackage = slug;
 
         const ext = await db.query.extensions.findFirst({
             where: eq(extensions.npmPackage, npmPackage),
@@ -20,6 +20,7 @@ export async function GET(
                     columns: {
                         username: true,
                         avatarUrl: true,
+                        isAdmin: true,
                     },
                 },
             },
