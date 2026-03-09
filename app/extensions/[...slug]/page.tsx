@@ -390,8 +390,8 @@ export default function ExtensionDetailPage() {
                                 <div className="flex flex-wrap gap-2">
                                     {ext.npm.maintainers.map((m, i) => (
                                         <Link key={i} href={`https://www.npmjs.com/~${m.name}`} target="_blank" title={m.name}
-                                            className="px-2 h-8 rounded-lg bg-white/4 border border-white/8 flex items-center justify-center text-[11px] font-bold text-gray-500 hover:bg-white/8 hover:text-white transition-all">
-                                            {m.name}
+                                            className="px-2 h-8 rounded-lg bg-white/4 border border-white/8 flex items-center justify-center text-[11px] font-bold text-gray-500 hover:bg-white/8 hover:text-white transition-all max-w-full">
+                                            <span className="truncate">{m.name}</span>
                                         </Link>
                                     ))}
                                 </div>
@@ -413,7 +413,7 @@ export default function ExtensionDetailPage() {
                             <SidebarSection title="Keywords">
                                 <div className="flex flex-wrap gap-1.5">
                                     {ext.npm.keywords.map((kw, i) => (
-                                        <span key={i} className="px-2.5 py-1 bg-white/3 border border-white/6 rounded-md text-[11px] text-gray-400 font-medium hover:bg-white/6 hover:text-white transition-all cursor-default">
+                                        <span key={i} className="px-2.5 py-1 bg-white/3 border border-white/6 rounded-md text-[11px] text-gray-400 font-medium hover:bg-white/6 hover:text-white transition-all cursor-default max-w-full truncate">
                                             {kw}
                                         </span>
                                     ))}
@@ -440,19 +440,19 @@ function SidebarSection({ title, children }: { title: string; children: React.Re
 
 function MetaRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
     return (
-        <div className="flex items-center justify-between py-2 border-b border-white/4 last:border-0">
-            <span className="flex items-center gap-2 text-[12px] text-gray-500">{icon}{label}</span>
-            <span className="text-[12px] font-bold text-white font-mono">{value}</span>
+        <div className="flex items-center justify-between py-2 border-b border-white/4 last:border-0 gap-3 min-w-0">
+            <span className="flex items-center gap-2 text-[12px] text-gray-500 shrink-0">{icon}{label}</span>
+            <span className="text-[12px] font-bold text-white font-mono truncate text-right">{value}</span>
         </div>
     );
 }
 
 function SidebarLink({ icon, label, href }: { icon: React.ReactNode; label: string; href: string }) {
     return (
-        <Link href={href} target="_blank" className="flex items-center gap-2.5 px-2 py-1.5 -mx-2 rounded-lg hover:bg-white/4 transition-colors group">
-            {icon}
-            <span className="text-[12px] text-gray-400 group-hover:text-white transition-colors flex-1 font-medium">{label}</span>
-            <RiExternalLinkLine size={12} className="text-gray-700 group-hover:text-gray-400 transition-colors" />
+        <Link href={href} target="_blank" className="flex items-center gap-2.5 px-2 py-1.5 -mx-2 rounded-lg hover:bg-white/4 transition-colors group min-w-0">
+            <div className="shrink-0">{icon}</div>
+            <span className="text-[12px] text-gray-400 group-hover:text-white transition-colors flex-1 font-medium truncate">{label}</span>
+            <RiExternalLinkLine size={12} className="text-gray-700 group-hover:text-gray-400 transition-colors shrink-0" />
         </Link>
     );
 }

@@ -154,6 +154,7 @@ code::after,
     display: flex;
     flex-direction: column;
     gap: 0;
+    overflow-x: hidden;
 }
 
 @media (min-width: 1024px) {
