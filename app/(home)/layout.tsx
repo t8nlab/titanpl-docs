@@ -10,11 +10,11 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   return (
     <HomeLayout {...baseOptions()}>
-      <Notice title='Titan v3.0.0 is Live — The Titan Engine' variant='success'>
+      <Notice title='TitanPl v6.0.0 is Live — WebSockets Support Added' variant='success'>
         <p className='opacity-90'>
-          ⚡ <strong>Major Architecture Update:</strong> Pre-compiled Native Engine and instant cold starts and more.
-          <Link href='/docs/how-titan-works' className='ml-2 font-semibold text-emerald-400 hover:text-emerald-300 transition-colors underline decoration-emerald-400/30 underline-offset-4'>
-            View Architecture &rarr;
+          ⚡ <strong>WebSockets Support Added:</strong> Real-time communication between client and server.
+          <Link href='/docs/how-to-use/13-websockets' className='ml-2 font-semibold text-emerald-400 hover:text-emerald-300 transition-colors underline decoration-emerald-400/30 underline-offset-4'>
+            View Documentation &rarr;
           </Link>
         </p>
       </Notice>
