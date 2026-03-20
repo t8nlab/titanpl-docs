@@ -1,10 +1,10 @@
 # TitanPL Documentation
 
-Official documentation for **TitanPL** v26.12.1 — A strictly synchronous V8 runtime powered by Rust.
+Official documentation for **TitanPL** v6.0.0 — A native, high-performance backend framework powered by Rust.
 
 ## 🌐 Live Documentation
 
-Visit [titan-docs-ez.vercel.app](https://titan-docs-ez.vercel.app) (or your deployment URL) to view the full documentation.
+Visit [titanpl.vercel.app](https://titanpl.vercel.app) (or your deployment URL) to view the full documentation.
 
 ## 📚 What's Inside
 
@@ -91,10 +91,10 @@ The TitanPL documentation is open source.
 
 ## 🌟 Links
 
-- [TitanPL Repository](https://github.com/ezetgalaxy/titan)
-- [NPM Package](https://npmjs.com/package/@ezetgalaxy/titan)
-- [Report Issues](https://github.com/ezetgalaxy/titan/issues)
+- [TitanPL Repository](https://github.com/t8nlab/titanpl)
+- [NPM Package](https://npmjs.com/package/@titanpl/cli)
+- [Report Issues](https://github.com/t8nlab/titanpl/issues)
 
 ---
 
-**Built with ❤️ for the Titan community**
+**Built with ❤️ for the Titan Planet community**

@@ -12,7 +12,7 @@ Titan Planet provides a comprehensive set of **runtime APIs** exposed via the gl
 While `t` is always available globally, you can also import specific utilities for better type support and clarity:
 
 ```javascript
-import { fs, crypto, os, response } from "@titanpl/native";
+import { fs, ws, crypto, os, response } from "@titanpl/native";
 
 export const myAction = (req) => {
   const content = fs.readFile("config.json"); // Uses project root as base
@@ -81,6 +81,12 @@ Basic network utilities.
 
 - `net.resolveDNS(hostname: string): string[]` — Resolve a hostname to IP addresses.
 - `net.ip(): string` — Get the local system IP address.
+
+### `ws` (WebSockets)
+Real-time messaging utilities for TitanPl WebSocket actions.
+
+- `ws.send(socketId: string, message: string): void` — Send a message to a specific WebSocket connection.
+- `ws.broadcast(message: string): void` — Broadcast a message to all connected clients.
 
 ### `proc` (Process Management)
 Manage and query system processes.

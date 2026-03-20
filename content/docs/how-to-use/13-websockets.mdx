@@ -1,0 +1,198 @@
+---
+title: 13. WebSockets
+description: Real-time, action-driven WebSockets with Titan Planet.
+---
+
+## Overview
+
+Titan Planet introduces native, action-driven WebSockets in **v6.0.0**. This allows you to handle real-time communication directly within your standard TitanPl actions, leveraging the high-performance Gravity Engine for low-latency messaging.
+
+### Key Features
+- **Native WebSocket Support**: High-performance WebSocket routing via `t.ws()`.
+- **Action-Driven Events**: Handle `open`, `message`, and `close` events directly within your standard TitanPl actions.
+- **Real-time Messaging**: Send targeted messages using `ws.send(socketId, message)` or reach everyone with `ws.broadcast(message)`.
+- **Socket Identification**: Automatic `socketId` generation and lifecycle management for every connection.
+
+---
+
+## 🚀 Implementation Example
+
+Here is a complete example of a real-time chat application built with TitanPl WebSockets.
+
+### 1. Define the WebSocket Route
+In your `app/app.js`, use `t.ws()` to define a WebSocket endpoint and link it to an action.
+
+```javascript title="app/app.js"
+import t from "@titanpl/route";
+
+// Define the WebSocket route
+t.ws("/chat").action("chat");
+
+// Standard HTTP route
+t.get("/").action("home");
+
+t.start(5100, "Titan Running on port 5100!");
+```
+
+### 2. Handle Events in the Action
+Create the `chat` action in `app/actions/chat.js`. You can use `ws.send` and `ws.broadcast` from `@titanpl/native`.
+
+```javascript title="app/actions/chat.js"
+import { log, ws } from "@titanpl/native";
+
+export const chat = (req) => {
+    const { event, socketId, body } = req;
+  
+    if (event === "open") {
+      log(`[Server] New socket connected: ${socketId}`);
+  
+      ws.send(socketId, "Welcome to the Titan Starship!");
+      ws.broadcast(`User ${socketId} joined the orbit.`);
+    }
+  
+    if (event === "message") {
+      log(`[Server] Message from ${socketId}: ${body}`);
+      // Echo it back and broadcast to others
+      ws.broadcast(`${socketId}: ${body}`);
+    }
+  
+    if (event === "close") {
+      log(`[Server] Socket disconnected: ${socketId}`);
+      ws.broadcast(`User ${socketId} left the orbit.`);
+    }
+};
+```
+
+### 3. Frontend Implementation
+You can use the standard browser `WebSocket` API to connect to your Titan server.
+
+```html title="app/static/chat.html"
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Titan WS Test</title>
+</head>
+<body style="background: #111; color: #fff; font-family: sans-serif; padding: 2rem;">
+    <h1>🪐 Titan WebSocket Test</h1>
+    <div id="status" style="color: #666;">Connecting...</div>
+    <div id="messages"
+        style="margin-top: 1rem; border: 1px solid #333; padding: 1rem; height: 200px; overflow-y: auto; background: #000; font-family: monospace;">
+    </div>
+    <div style="margin-top: 1rem;">
+        <input id="input" style="background: #222; color: #fff; border: 1px solid #444; padding: 0.5rem; width: 300px;"
+            placeholder="Type a message...">
+        <button onclick="send()"
+            style="padding: 0.5rem 1rem; background: #3498db; color: #fff; border: none; cursor: pointer; border-radius: 4px;">Send</button>
+    </div>
+
+    <script>
+        const ws = new WebSocket('ws://' + location.host + '/chat');
+        const m = document.getElementById('messages');
+        const s = document.getElementById('status');
+
+        ws.onopen = () => { s.innerText = 'Connected'; s.style.color = '#2ecc71'; };
+        ws.onmessage = (e) => {
+            const d = document.createElement('div');
+            d.style.padding = '0.2rem 0';
+            d.style.borderBottom = '1px solid #111';
+            d.innerText = e.data;
+            m.appendChild(d);
+            m.scrollTop = m.scrollHeight;
+        };
+        ws.onclose = () => { s.innerText = 'Disconnected'; s.style.color = '#e74c3c'; };
+
+        function send() {
+            const i = document.getElementById('input');
+            if (i.value.trim()) {
+                ws.send(i.value);
+                i.value = '';
+            }
+        }
+
+        document.getElementById('input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') send();
+        });
+    </script>
+</body>
+</html>
+```
+
+### 4. Serve the UI from the Server
+To serve your `chat.html` from a TitanPl action, use the `@t8n/ui` extension.
+
+First, define the `home` action in your project. You can do this in a new file `app/actions/home.js` or within your existing actions.
+
+```javascript title="app/actions/home.js"
+import ui from "@t8n/ui";
+
+export const home = (req) => {
+  // Render the static HTML file from the server side
+  return ui.render("static/chat.html");
+};
+```
+
+This allows you to render HTML from the server side to any route dynamically, ensuring your frontend assets are served directly by the TitanPl engine.
+
+[Explore more extensions](/extensions) to enhance your TitanPl application.
+
+### 5. Manual HTML Rendering
+For complete control over the response, you can render HTML manually using a template string and the `response.html()` method. This is useful for dynamic content or when you want to bypass static file loading.
+
+```javascript title="app/actions/home.js"
+import { response } from "@titanpl/native";
+
+export const home = (req) => {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head><title>Titan WS Test</title></head>
+    <body style="background: #111; color: #fff; font-family: sans-serif; padding: 2rem;">
+      <h1>🪐 TitanPl WebSocket Test</h1>
+      <div id="status" style="color: #666;">Connecting...</div>
+      <div id="messages" style="margin-top: 1rem; border: 1px solid #333; padding: 1rem; height: 200px; overflow-y: auto; background: #000; font-family: monospace;"></div>
+      <div style="margin-top: 1rem;">
+        <input id="input" style="background: #222; color: #fff; border: 1px solid #444; padding: 0.5rem; width: 300px;" placeholder="Type a message...">
+        <button onclick="send()" style="padding: 0.5rem 1rem; background: #3498db; color: #fff; border: none; cursor: pointer; border-radius: 4px;">Send</button>
+      </div>
+
+      <script>
+        const ws = new WebSocket('ws://' + location.host + '/chat');
+        const m = document.getElementById('messages');
+        const s = document.getElementById('status');
+        
+        ws.onopen = () => { s.innerText = 'Connected'; s.style.color = '#2ecc71'; };
+        ws.onmessage = (e) => { 
+            const d = document.createElement('div');
+            d.style.padding = '0.2rem 0';
+            d.style.borderBottom = '1px solid #111';
+            d.innerText = e.data;
+            m.appendChild(d);
+            m.scrollTop = m.scrollHeight; 
+        };
+        ws.onclose = () => { s.innerText = 'Disconnected'; s.style.color = '#e74c3c'; };
+
+        function send() {
+          const i = document.getElementById('input');
+          if (i.value.trim()) {
+            ws.send(i.value);
+            i.value = '';
+          }
+        }
+        
+        document.getElementById('input').addEventListener('keypress', (e) => {
+           if (e.key === 'Enter') send();
+        });
+      </script>
+    </body>
+    </html>
+  `;
+
+  return response.html(html);
+};
+```
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+<Callout type="tip">
+  **Pro Tip:** For more complex manual operations or performance-critical logic, we recommend using **Extensions**. They allow you to easily extend the engine with custom functions and high-performance native bridges. Check out the [Extension Market](/extensions) for more powerful extensions.
+</Callout>

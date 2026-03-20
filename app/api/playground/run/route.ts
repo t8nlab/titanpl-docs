@@ -142,7 +142,7 @@ export async function POST(req: Request) {
         // Write package.json
         fs.writeFileSync(path.join(playgroundDir, 'package.json'), JSON.stringify({
             name: 'titan-playground',
-            version: '1.0.0',
+            version: '6.0.0',
             type: 'module',
             titan: { template: 'js' }
         }, null, 2));
